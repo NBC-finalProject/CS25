@@ -24,11 +24,12 @@ public class User extends BaseEntity {
 
     private SocialType socialType;
 
-    /**
-     * Constructs a new User with the specified email and name, initializing totalSolved to zero.
+    /****
+     * Constructs a new User with the specified email, name, and social type.
      *
      * @param email the user's email address
      * @param name the user's name
+     * @param socialType the user's social authentication type
      */
     @Builder
     public User(String email, String name, SocialType socialType){

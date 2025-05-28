@@ -25,7 +25,15 @@ public class Subscription extends BaseEntity {
 
     private boolean isActive = false;
 
-    private int subscriptionType; // "월화수목금토일" => "1111111" , "월수금" => "1010100"
+    private int subscriptionType; /**
+     * Constructs a Subscription instance with the specified subscriber email, subscription period, active status, and subscription type.
+     *
+     * @param email the subscriber's email address
+     * @param startDate the start date and time of the subscription
+     * @param endDate the end date and time of the subscription
+     * @param isActive true if the subscription is currently active; false otherwise
+     * @param subscriptionType an integer encoding the days of the week for the subscription (e.g., 1111111 for all days, 1010100 for Monday, Wednesday, Friday)
+     */
 
     @Builder
     public Subscription (String email, LocalDateTime startDate, LocalDateTime endDate, boolean isActive, int subscriptionType){

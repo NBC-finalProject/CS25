@@ -23,7 +23,13 @@ public class SubscriptionLog extends BaseEntity {
     @JoinColumn(name = "subscribtion_id", nullable = false)
     private Subscription subscription;
 
-    private int subscriptionType; // "월화수목금토일" => "1111111" , "월수금" => "1010100"
+    private int subscriptionType; /**
+     * Constructs a SubscriptionLog with the specified quiz category, subscription, and subscription type.
+     *
+     * @param category the quiz category associated with this log
+     * @param subscription the subscription linked to this log
+     * @param subscriptionType an integer encoding the days of subscription as a bit pattern (e.g., "월화수목금토일" as 1111111)
+     */
 
     @Builder
     public SubscriptionLog(QuizCategory category, Subscription subscription, int subscriptionType){
