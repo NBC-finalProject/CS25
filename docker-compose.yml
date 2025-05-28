@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  cs25-mysql:
+    image: mysql:8.0.35
+
+    platform: linux/amd64
+    volumes:
+      - cs25_mysql_volume:/data
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlpassword
+      MYSQL_DATABASE: cs25
+    command:
+      [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--lower_case_table_names=1' ]
+
+volumes:
+  cs25_mysql_volume:
+
+# mysql 만 일단 추가해놨고 나중에 배포에 피룡한 CI/CD 생기면 그때 추가하던지...

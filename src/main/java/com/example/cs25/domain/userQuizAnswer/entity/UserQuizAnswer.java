@@ -1,0 +1,44 @@
+package com.example.cs25.domain.userQuizAnswer.entity;
+
+import com.example.cs25.domain.quiz.entity.Quiz;
+import com.example.cs25.domain.users.entity.User;
+import com.example.cs25.global.entity.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Entity
+@Table(name = "userQuizAnswers")
+@NoArgsConstructor
+public class UserQuizAnswer extends BaseEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String userAnswer;
+    private String aiFeedback;
+    private String isCorrect;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Quiz quiz;
+
+    @Builder
+    public UserQuizAnswer(Long id, String userAnswer, String aiFeedback, String isCorrect, User user, Quiz quiz) {
+        this.id = id;
+        this.userAnswer = userAnswer;
+        this.aiFeedback = aiFeedback;
+        this.isCorrect = isCorrect;
+        this.user = user;
+        this.quiz = quiz;
+    }
+}
