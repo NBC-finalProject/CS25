@@ -25,6 +25,15 @@ public class Subscription extends BaseEntity {
 
     private Long categoryId;
 
+    /**
+     * Constructs a Subscription with the specified start and end dates, active status, subscription type, and category ID.
+     *
+     * @param startDate the start date and time of the subscription period
+     * @param endDate the end date and time of the subscription period
+     * @param isActive true if the subscription is currently active; false otherwise
+     * @param subscriptionType an integer encoding the days of the week the subscription applies to
+     * @param categoryId the identifier of the category associated with the subscription
+     */
     @Builder
     public Subscription(LocalDateTime startDate, LocalDateTime endDate,
         boolean isActive,
