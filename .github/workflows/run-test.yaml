@@ -1,0 +1,40 @@
+# Actions 이름 github 페이지에서 볼 수 있다.
+name: Run Test
+
+# Event Trigger 특정 액션 (Push, Pull_Request)등이 명시한 Branch에서 일어나면 동작을 수행한다.
+on: 
+    push:
+        # 배열로 여러 브랜치를 넣을 수 있다.
+        branches: [ develop, feature/* ]
+    # github pull request 생성시
+    pull_request:
+        branches: 
+            - develop # -로 여러 브랜치를 명시하는 것도 가능
+
+    # 실제 어떤 작업을 실행할지에 대한 명시
+jobs:
+  build:
+  # 스크립트 실행 환경 (OS)
+  # 배열로 선언시 개수 만큼 반복해서 실행한다. ( 예제 : 1번 실행)
+    runs-on: [ ubuntu-latest ] 
+
+    # 실제 실행 스크립트
+    steps: 
+      # uses는 github actions에서 제공하는 플러그인을 실행.(git checkout 실행)
+      - name: checkout
+        uses: actions/checkout@v4
+
+      # with은 plugin 파라미터 입니다. (java 17버전 셋업)
+      - name: java setup
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt' # See 'Supported distributions' for available options
+          java-version: '17'
+
+      - name: make executable gradlew
+        run: chmod +x ./gradlew
+
+      # run은 사용자 지정 스크립트 실행
+      - name: run unittest
+        run: |
+          ./gradlew clean test
