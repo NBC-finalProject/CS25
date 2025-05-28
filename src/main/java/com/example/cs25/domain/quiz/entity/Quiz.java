@@ -24,7 +24,7 @@ public class Quiz extends BaseEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private QuizType type;
+    private QuizFormatType type;
 
     private String question; // 문제
 
