@@ -38,6 +38,15 @@ public class MailLog {
 
     private MailStatus status;
 
+    /**
+     * Constructs a MailLog entity with the specified id, user, quiz, send date, and mail status.
+     *
+     * @param id the unique identifier for the mail log entry
+     * @param user the user associated with the mail log
+     * @param quiz the quiz associated with the mail log
+     * @param sendDate the date and time the mail was sent
+     * @param status the status of the mail
+     */
     @Builder
     public MailLog(Long id, User user, Quiz quiz, LocalDateTime sendDate, MailStatus status) {
         this.id = id;
@@ -47,6 +56,11 @@ public class MailLog {
         this.status = status;
     }
 
+    /**
+     * Updates the mail status for this log entry.
+     *
+     * @param status the new mail status to set
+     */
     public void updateMailStatus(MailStatus status) {
         this.status = status;
     }

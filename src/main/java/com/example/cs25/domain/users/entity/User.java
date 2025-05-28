@@ -32,6 +32,12 @@ public class User extends BaseEntity {
     @Embedded
     private Subscription subscription;
 
+    /**
+     * Constructs a new User with the specified email and name, initializing totalSolved to zero.
+     *
+     * @param email the user's email address
+     * @param name the user's name
+     */
     @Builder
     public User(String email, String name){
         this.email = email;
@@ -39,10 +45,20 @@ public class User extends BaseEntity {
         totalSolved = 0;
     }
 
+    /****
+     * Updates the user's email address.
+     *
+     * @param email the new email address to set
+     */
     public void updateEmail(String email){
         this.email = email;
     }
 
+    /****
+     * Updates the user's name.
+     *
+     * @param name the new name to set for the user
+     */
     public void updateName(String name){
         this.name = name;
     }
