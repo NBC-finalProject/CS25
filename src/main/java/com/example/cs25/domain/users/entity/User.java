@@ -1,11 +1,7 @@
 package com.example.cs25.domain.users.entity;
 
 import com.example.cs25.global.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +18,7 @@ public class User extends BaseEntity {
 
     private String name;
 
+    @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
     /**

@@ -20,7 +20,7 @@ public class SubscriptionLog extends BaseEntity {
     private QuizCategory category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscribtion_id", nullable = false)
+    @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
     private int subscriptionType; // "월화수목금토일" => "1111111" , "월수금" => "1010100"
