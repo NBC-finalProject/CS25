@@ -5,7 +5,7 @@ services:
 
     platform: linux/amd64
     volumes:
-      - cs25_mysql_volume:/data
+      - cs25_mysql_volume:/var/lib/mysql
     ports:
       - '3306:3306'
     environment:

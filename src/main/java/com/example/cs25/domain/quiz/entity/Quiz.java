@@ -38,6 +38,6 @@ public class Quiz extends BaseEntity {
     private String choice; // 객관식 보기 (ex. 1. OOO // 2. OOO // ...)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(columnDefinition = "quizcategory_id")
+    @JoinColumn(name = "quiz_category_id")
     private QuizCategory category;
 }
