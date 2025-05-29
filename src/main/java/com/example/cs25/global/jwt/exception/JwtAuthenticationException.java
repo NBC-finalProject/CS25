@@ -1,6 +1,5 @@
 package com.example.cs25.global.jwt.exception;
 
-import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
 import org.springframework.http.HttpStatus;
 
 public class JwtAuthenticationException extends Throwable {
