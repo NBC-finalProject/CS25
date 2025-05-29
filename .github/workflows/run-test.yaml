@@ -20,6 +20,13 @@ jobs:
 
     # 실제 실행 스크립트
     steps:
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          host port: 3306
+          container port: 3306
+          mysql database: 'cs25'
+          mysql root password: ${{ secrets.DB_PASSWORD }}
+
       # uses는 github actions에서 제공하는 플러그인을 실행.(git checkout 실행)
       - name: checkout
         uses: actions/checkout@v4
@@ -34,17 +41,7 @@ jobs:
       - name: make executable gradlew
         run: chmod +x ./gradlew
 
-      - name: build without tests
-        run: ./gradlew bootJar
-
-      # 선택: 실행이 되는지만 확인 (백그라운드 실행 후 종료)
-      - name: start app for test
+      # run은 사용자 지정 스크립트 실행
+      - name: run unittest
         run: |
-          nohup java -jar build/libs/*.jar &
-          sleep 10
-          ps aux | grep java
-
-#      # run은 사용자 지정 스크립트 실행
-#      - name: run unittest
-#        run: |
-#          ./gradlew clean test
+          ./gradlew clean test
