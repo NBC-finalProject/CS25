@@ -1,5 +1,7 @@
 package com.example.cs25.domain.users.entity;
 
+import com.example.cs25.domain.users.exception.UserException;
+import com.example.cs25.domain.users.exception.UserExceptionCode;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Arrays;
 
