@@ -50,6 +50,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new UserException(UserExceptionCode.UNSUPPORTED_SOCIAL_PROVIDER);
         }
 
-        return new AuthUser(loginUser.getId(), loginUser.getEmail(), loginUser.getName(), role);
+        return new AuthUser(loginUser.getId(), loginUser.getEmail(), loginUser.getName(), loginUser.getRole());
     }
 }
