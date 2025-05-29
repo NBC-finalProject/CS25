@@ -2,7 +2,6 @@ package com.example.cs25.domain.ai.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 
 @Service
