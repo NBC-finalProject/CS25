@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Embeddable
 public class Subscription extends BaseEntity {
 
