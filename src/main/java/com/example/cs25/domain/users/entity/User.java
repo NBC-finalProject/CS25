@@ -1,16 +1,7 @@
 package com.example.cs25.domain.users.entity;
 
-import com.example.cs25.domain.users.vo.Subscription;
 import com.example.cs25.global.entity.BaseEntity;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,10 +18,8 @@ public class User extends BaseEntity {
 
     private String name;
 
-    private int totalSolved;
-
-    @Embedded
-    private Subscription subscription;
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
 
     /**
      * Constructs a new User with the specified email and name, initializing totalSolved to zero.
@@ -39,10 +28,10 @@ public class User extends BaseEntity {
      * @param name the user's name
      */
     @Builder
-    public User(String email, String name){
+    public User(String email, String name, SocialType socialType){
         this.email = email;
         this.name = name;
-        totalSolved = 0;
+        this.socialType = socialType;
     }
 
     /****
