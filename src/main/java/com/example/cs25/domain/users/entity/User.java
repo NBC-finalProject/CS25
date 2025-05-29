@@ -21,6 +21,11 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    private boolean isActive = true;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     /**
      * Constructs a new User with the specified email and name, initializing totalSolved to zero.
      *
@@ -28,10 +33,11 @@ public class User extends BaseEntity {
      * @param name the user's name
      */
     @Builder
-    public User(String email, String name, SocialType socialType){
+    public User(String email, String name, SocialType socialType, Role role){
         this.email = email;
         this.name = name;
         this.socialType = socialType;
+        this.role = role;
     }
 
     /****
@@ -51,4 +57,9 @@ public class User extends BaseEntity {
     public void updateName(String name){
         this.name = name;
     }
+
+    public void updateActive(boolean isActive){
+        this.isActive = isActive;
+    }
+
 }
