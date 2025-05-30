@@ -1,7 +1,7 @@
 package com.example.cs25.domain.users.service;
 
 import com.example.cs25.domain.users.dto.KakaoUserInfoResponse;
-import com.example.cs25.domain.users.entity.AuthUser;
+import com.example.cs25.global.dto.AuthUser;
 import com.example.cs25.domain.users.entity.Role;
 import com.example.cs25.domain.users.entity.SocialType;
 import com.example.cs25.domain.users.entity.User;
