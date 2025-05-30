@@ -11,6 +11,7 @@ public enum SocialType {
     GITHUB(null, "id", "login");
 
     private final String attributeKey; //소셜로부터 전달받은 데이터를 Parsing하기 위해 필요한 key 값,
+                                        // kakao는 kakao_account안에 필요한 정보들이 담겨져있음.
     private final String providerCode; // 각 소셜은 판별하는 판별 코드,
     private final String identifier;   // 소셜로그인을 한 사용자의 정보를 불러올 때 필요한 Key 값
 

@@ -31,12 +31,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
+        SocialType socialType = SocialType.from(registrationId);
         User loginUser = new User();
 
-        if(registrationId.equals("kakao")){
+        if(socialType == SocialType.KAKAO){
             KakaoUserInfoResponse kakaoUser = objectMapper.convertValue(attributes, KakaoUserInfoResponse.class);
             String kakaoEmail = kakaoUser.getEmail();
             String kakaoNickname = kakaoUser.getNickname();
+
+            if (kakaoEmail == null || kakaoNickname == null) {
+                throw new UserException(UserExceptionCode.KAKAO_PROFILE_INCOMPLETE);
+            }
 
             //회원인지 확인
             userRepository.validateSocialJoinEmail(kakaoEmail, SocialType.KAKAO);
@@ -48,7 +53,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .socialType(SocialType.KAKAO)
                     .role(Role.USER)
                     .build()));
-        } else if(registrationId.equals("github")) {
+        } else if(socialType == SocialType.GITHUB) {
 
         } else{
             throw new UserException(UserExceptionCode.UNSUPPORTED_SOCIAL_PROVIDER);

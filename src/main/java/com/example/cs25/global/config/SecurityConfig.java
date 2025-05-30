@@ -44,7 +44,6 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
-                .requestMatchers("/home",  "/oauth2/**").permitAll()  // 추가
                 .anyRequest().hasAnyRole(PERMITTED_ROLES)
             )
 

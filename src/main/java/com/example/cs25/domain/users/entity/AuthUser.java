@@ -32,6 +32,6 @@ public class AuthUser implements OAuth2User {
 
     @Override
     public String getName() {
-        return email;
+        return name;
     }
 }

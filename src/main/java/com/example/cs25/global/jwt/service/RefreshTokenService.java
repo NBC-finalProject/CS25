@@ -14,6 +14,9 @@ public class RefreshTokenService {
 
     public void save(Long userId, String refreshToken, Duration ttl) {
         String key = PREFIX + userId;
+        if (ttl == null) {
+                throw new IllegalArgumentException("TTL must not be null");
+        }
         redisTemplate.opsForValue().set(key, refreshToken, ttl);
     }
 
