@@ -1,6 +1,5 @@
 package com.example.cs25.domain.quiz.entity;
 
-import com.example.cs25.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
