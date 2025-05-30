@@ -10,14 +10,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
 import java.io.IOException;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -41,10 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Role role = jwtTokenProvider.getRole(token);
 
                     AuthUser authUser = new AuthUser(userId, email,nickname , role);
-                    GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.name());
 
                     UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(authUser, null, List.of(authority));
+                        new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
