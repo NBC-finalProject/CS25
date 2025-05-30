@@ -5,9 +5,4 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UserController {
-
-    @GetMapping("/users")
-    public String test(){
-        return "test";
-    }
 }
