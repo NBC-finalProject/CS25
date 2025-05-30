@@ -1,6 +1,6 @@
 package com.example.cs25.global.jwt.service;
 
-import com.example.cs25.domain.users.entity.User;
+import com.example.cs25.domain.users.entity.AuthUser;
 import com.example.cs25.global.jwt.dto.TokenResponseDto;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,14 +17,14 @@ public class TokenService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
 
-    public TokenResponseDto generateAndSaveTokenPair(User user) {
+    public TokenResponseDto generateAndSaveTokenPair(AuthUser authUser) {
         String accessToken = jwtTokenProvider.generateAccessToken(
-            user.getId(), user.getEmail(), user.getName(), user.getRole()
+            authUser.getId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
         );
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-            user.getId(), user.getEmail(), user.getName(), user.getRole()
+            authUser.getId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
         );
-        refreshTokenService.save(user.getId(), refreshToken, jwtTokenProvider.getRefreshTokenDuration());
+        refreshTokenService.save(authUser.getId(), refreshToken, jwtTokenProvider.getRefreshTokenDuration());
 
         return new TokenResponseDto(accessToken, refreshToken);
     }
