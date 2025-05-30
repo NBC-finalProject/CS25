@@ -4,15 +4,17 @@ package com.example.cs25.domain.users.vo;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+
 
 @Getter
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Embeddable
+@Table(name = "subscription")
 public class Subscription extends BaseEntity {
 
     private LocalDateTime startDate;

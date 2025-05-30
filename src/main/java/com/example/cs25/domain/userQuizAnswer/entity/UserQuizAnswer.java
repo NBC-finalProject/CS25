@@ -53,4 +53,12 @@ public class UserQuizAnswer extends BaseEntity {
         this.user = user;
         this.quiz = quiz;
     }
+
+    public void updateIsCorrect(Boolean isCorrect) {
+        this.isCorrect = isCorrect;
+    }
+
+    public void updateAiFeedback(String aiFeedback) {
+        this.aiFeedback = aiFeedback;
+    }
 }
