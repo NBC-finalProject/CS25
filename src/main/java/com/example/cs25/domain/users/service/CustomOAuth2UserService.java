@@ -2,6 +2,7 @@ package com.example.cs25.domain.users.service;
 
 import com.example.cs25.domain.users.dto.KakaoUserInfoResponse;
 import com.example.cs25.domain.users.entity.AuthUser;
+import com.example.cs25.domain.users.entity.Role;
 import com.example.cs25.domain.users.entity.SocialType;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.domain.users.exception.UserException;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+    // 소셜로그인을 완료하고 나면, OAuth2UserService의 구현체가 실행
+
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
@@ -43,6 +46,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .email(kakaoEmail)
                     .name(kakaoNickname)
                     .socialType(SocialType.KAKAO)
+                    .role(Role.USER)
                     .build()));
         } else if(registrationId.equals("github")) {
 
