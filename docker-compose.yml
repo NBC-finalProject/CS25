@@ -13,6 +13,5 @@ services:
     image: redis:7.2
     ports:
       - "6379:6379"
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    # 비밀번호 설정 제거
+    command: [ "redis-server", "--appendonly", "yes" ]
