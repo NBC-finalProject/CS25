@@ -5,6 +5,8 @@ import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
+import com.example.cs25.domain.quiz.exception.QuizException;
+import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +32,7 @@ public class QuizService {
     public void uploadQuizJson(MultipartFile file, QuizCategoryType categoryType, QuizFormatType formatType){
         try {
             QuizCategory category = quizcategoryRepository.findByCategoryType(categoryType)
-                .orElseThrow(); //예외 설정 필요
+                .orElseThrow(() -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_EVENT));
 
             CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(), CreateQuizDto[].class);
 
