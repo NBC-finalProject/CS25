@@ -46,7 +46,8 @@ jobs:
           port: 22
           script_stop: true
           script: |
-            sudo yum update -y && sudo yum install -y java-21-amazon-corretto
+            sudo yum update -y && sudo yum install -y java-17-amazon-corretto
+
             for pid in $(pgrep java); do
               if ps -p $pid -o args= | grep -q 'java -jar'; then
                 echo "Java process with 'java -jar' found (PID: $pid). Terminating..."
