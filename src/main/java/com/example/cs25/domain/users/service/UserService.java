@@ -14,5 +14,6 @@ public class UserService {
 
     public UserProfileResponse getUserProfile(AuthUser authUser) {
 
+        return UserProfileResponse.builder().build();
     }
 }
