@@ -7,9 +7,9 @@ services:
     volumes:
       - cs25_mysql_volume:/var/lib/mysql
     ports:
-      - '3306:3306'
+      - '13306:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: mysqlpassword
+      MYSQL_ROOT_PASSWORD: k8722@2714
       MYSQL_DATABASE: cs25
     command:
       [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--lower_case_table_names=1' ]
