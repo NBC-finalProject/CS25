@@ -42,6 +42,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.setStatus(HttpServletResponse.SC_OK);
+
+            // JSON으로 accessToken, refreshToken 내려주기
             response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
 
         } catch (Exception e) {
