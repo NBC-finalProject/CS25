@@ -26,6 +26,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
     /**
      * Constructs a new User with the specified email and name, initializing totalSolved to zero.
      *
