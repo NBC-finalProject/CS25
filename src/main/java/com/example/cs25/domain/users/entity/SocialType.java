@@ -1,5 +1,6 @@
 package com.example.cs25.domain.users.entity;
 
+
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
