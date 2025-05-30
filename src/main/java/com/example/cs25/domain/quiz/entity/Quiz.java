@@ -1,5 +1,6 @@
 package com.example.cs25.domain.quiz.entity;
 
+import com.example.cs25.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,4 +42,14 @@ public class Quiz extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_category_id")
     private QuizCategory category;
+
+    @Builder
+    public Quiz(QuizFormatType type, String question, String answer, String commentary, String choice, QuizCategory category) {
+        this.type = type;
+        this.question = question;
+        this.choice = choice;
+        this.answer = answer;
+        this.commentary = commentary;
+        this.category = category;
+    }
 }
