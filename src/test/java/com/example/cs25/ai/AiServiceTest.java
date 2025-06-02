@@ -15,7 +15,7 @@ import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +66,8 @@ class AiServiceTest {
         // 회원 구독
         memberSubscription = Subscription.builder()
             .email("test@example.com")
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusDays(30))
+            .startDate(LocalDate.now())
+            .endDate(LocalDate.now().plusDays(30))
             .isActive(true)
             .subscriptionType(0b1111111)
             .build();
@@ -76,8 +76,8 @@ class AiServiceTest {
         // 비회원 구독
         guestSubscription = Subscription.builder()
             .email("guest@example.com")
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusDays(7))
+            .startDate(LocalDate.now())
+            .endDate(LocalDate.now().plusDays(7))
             .isActive(true)
             .subscriptionType(0b1111111)
             .build();
