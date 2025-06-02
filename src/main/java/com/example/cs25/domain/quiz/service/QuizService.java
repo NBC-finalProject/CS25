@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -27,11 +28,12 @@ public class QuizService {
     private final ObjectMapper objectMapper;
     private final Validator validator;
     private final QuizRepository quizRepository;
-    private final QuizCategoryRepository quizcategoryRepository;
+    private final QuizCategoryRepository quizCategoryRepository;
 
+    @Transactional
     public void uploadQuizJson(MultipartFile file, QuizCategoryType categoryType, QuizFormatType formatType){
         try {
-            QuizCategory category = quizcategoryRepository.findByCategoryType(categoryType)
+            QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)
                 .orElseThrow(() -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_EVENT));
 
             CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(), CreateQuizDto[].class);
@@ -57,9 +59,9 @@ public class QuizService {
 
             quizRepository.saveAll(quizzes);
         } catch (IOException e) {
-            throw new RuntimeException("JSON 파싱 실패", e);
+            throw new QuizException(QuizExceptionCode.JSON_PARSING_FAILED);
         } catch (ConstraintViolationException e) {
-            throw new RuntimeException(e);
+            throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED);
         }
     }
 }

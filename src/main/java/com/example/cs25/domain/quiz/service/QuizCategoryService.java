@@ -8,6 +8,7 @@ import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class QuizCategoryService {
 
     private final QuizCategoryRepository quizCategoryRepository;
 
+    @Transactional
     public void createQuizCategory(QuizCategoryType categoryType) {
         Optional<QuizCategory> existCategory = quizCategoryRepository.findByCategoryType(categoryType);
         if(existCategory.isPresent()){
