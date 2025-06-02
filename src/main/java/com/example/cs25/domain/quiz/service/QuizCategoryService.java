@@ -17,7 +17,7 @@ public class QuizCategoryService {
 
     public void createQuizCategory(QuizCategoryType categoryType) {
         Optional<QuizCategory> existCategory = quizCategoryRepository.findByCategoryType(categoryType);
-        if(!existCategory.isEmpty()){
+        if(existCategory.isPresent()){
             throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_EVENT);
         }
 
