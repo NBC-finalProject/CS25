@@ -37,6 +37,7 @@ public class SecurityConfig {
             // CSRF 보호 비활성화 (JWT 세션을 사용하지 않기 때문에 필요 없음)
             .csrf(AbstractHttpConfigurer::disable)
 
+            // OAuth 사용으로 인해 기본 로그인 비활성화
             .formLogin(FormLoginConfigurer::disable)
 
             // 세션 사용 안함 (STATELESS)
@@ -48,7 +49,7 @@ public class SecurityConfig {
             )
 
             .oauth2Login(oauth2 -> oauth2
-                // .loginPage("/login")
+                // TODO: .loginPage("/login")
                 .successHandler(oAuth2LoginSuccessHandler)
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                     .userService(customOAuth2UserService)
@@ -58,7 +59,6 @@ public class SecurityConfig {
 
             // JWT 인증 필터 등록
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-
 
             // 최종 SecurityFilterChain 반환
             .build();
