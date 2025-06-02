@@ -1,6 +1,7 @@
 package com.example.cs25.domain.userQuizAnswer.entity;
 
 import com.example.cs25.domain.quiz.entity.Quiz;
+import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Entity;
@@ -36,6 +37,10 @@ public class UserQuizAnswer extends BaseEntity {
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
+
     /**
      * Constructs a UserQuizAnswer entity with the specified properties.
      *
@@ -47,11 +52,20 @@ public class UserQuizAnswer extends BaseEntity {
      */
     @Builder
     public UserQuizAnswer(String userAnswer, String aiFeedback, Boolean isCorrect, User user,
-        Quiz quiz) {
+        Quiz quiz, Subscription subscription) {
         this.userAnswer = userAnswer;
         this.aiFeedback = aiFeedback;
         this.isCorrect = isCorrect;
         this.user = user;
         this.quiz = quiz;
+        this.subscription = subscription;
+    }
+
+    public void updateIsCorrect(Boolean isCorrect) {
+        this.isCorrect = isCorrect;
+    }
+
+    public void updateAiFeedback(String aiFeedback) {
+        this.aiFeedback = aiFeedback;
     }
 }
