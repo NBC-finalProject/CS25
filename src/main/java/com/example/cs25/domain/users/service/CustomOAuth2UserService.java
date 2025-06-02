@@ -4,7 +4,7 @@ import com.example.cs25.domain.oauth.dto.OAuth2GithubResponse;
 import com.example.cs25.domain.oauth.dto.OAuth2KakaoResponse;
 import com.example.cs25.domain.oauth.dto.OAuth2Response;
 import com.example.cs25.global.dto.AuthUser;
-import com.example.cs25.global.dto.Role;
+import com.example.cs25.domain.users.entity.Role;
 import com.example.cs25.domain.oauth.dto.SocialType;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.domain.users.exception.UserException;
@@ -65,11 +65,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * @return 유저 엔티티를 반환
      */
     private User getUser(OAuth2Response oAuth2Response) {
-        return userRepository.findByEmail(oAuth2Response.getEmail()).orElseGet(() ->
+        String email = oAuth2Response.getEmail();
+        String name = oAuth2Response.getName();
+        SocialType provider = oAuth2Response.getProvider();
+
+        if (email == null || name == null || provider == null) {
+            throw new UserException(UserExceptionCode.OAUTH2_PROFILE_INCOMPLETE);
+        }
+
+        return userRepository.findByEmail(email).orElseGet(() ->
             userRepository.save(User.builder()
-                .email(oAuth2Response.getEmail())
-                .name(oAuth2Response.getName())
-                .socialType(oAuth2Response.getProvider())
+                .email(email)
+                .name(name)
+                .socialType(provider)
                 .role(Role.USER)
                 .build()));
     }

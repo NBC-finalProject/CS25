@@ -15,12 +15,21 @@ public class OAuth2GithubResponse implements OAuth2Response{
 
 	@Override
 	public String getEmail() {
-		return (String) attributes.get("email");
+		try {
+			return (String) attributes.get("email");
+		} catch (Exception e){
+			throw new IllegalStateException("깃허브 계정정보에 이메일이 존재하지 않습니다.");
+		}
+
 	}
 
 	@Override
 	public String getName() {
-		String name = (String) attributes.get("name");
-		return name != null ? name : (String) attributes.get("login");
+		try {
+			String name = (String) attributes.get("name");
+			return name != null ? name : (String) attributes.get("login");
+		} catch (Exception e){
+			throw new IllegalStateException("깃허브 계정정보에 이름이 존재하지 않습니다.");
+		}
 	}
 }
