@@ -3,6 +3,7 @@ package com.example.cs25.domain.subscription.controller;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25.domain.subscription.service.SubscriptionService;
 import com.example.cs25.global.dto.ApiResponse;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,8 +17,10 @@ public class SubscriptionController {
 
     @GetMapping("/subscription/{subscriptionId}")
     public ApiResponse<SubscriptionInfoDto> getSubscription(
-        @PathVariable Long subscriptionId
+        @PathVariable @Positive Long subscriptionId
     ) {
-        return new ApiResponse<>(200, subscriptionService.getSubscription(subscriptionId));
+        SubscriptionInfoDto subscription = subscriptionService.getSubscription(subscriptionId);
+
+        return new ApiResponse<>(200, subscription);
     }
 }

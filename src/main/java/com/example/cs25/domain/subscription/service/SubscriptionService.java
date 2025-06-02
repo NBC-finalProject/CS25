@@ -7,8 +7,10 @@ import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,5 +33,23 @@ public class SubscriptionService {
             .subscriptionType(Subscription.decodeDays(subscription.getSubscriptionType()))
             .category(subscription.getCategory())
             .period(period).build();
+    }
+
+    public Subscription getSubscription(String email) {
+        Optional<Subscription> subscription = subscriptionRepository.findByEmail((email));
+
+        if (subscription.isEmpty()) {
+            throw new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR);
+        }
+        return subscription.get();
+    }
+
+    @Transactional
+    public void disableSubscription(Long subscriptionId) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+            .orElseThrow(() ->
+                new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
+
+        subscription.updateDisableSubscription();
     }
 }

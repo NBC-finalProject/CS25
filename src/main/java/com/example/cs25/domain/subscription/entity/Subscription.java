@@ -76,4 +76,11 @@ public class Subscription extends BaseEntity {
         return result;
     }
 
+    public void updateDisableSubscription() {
+        this.isActive = false;
+    }
+
+    public void updateEnableSubscription() {
+        this.isActive = true;
+    }
 }

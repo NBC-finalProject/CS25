@@ -7,8 +7,8 @@ import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.quiz.exception.QuizException;
 import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
-import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
+import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -25,18 +25,22 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class QuizService {
+
     private final ObjectMapper objectMapper;
     private final Validator validator;
     private final QuizRepository quizRepository;
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void uploadQuizJson(MultipartFile file, QuizCategoryType categoryType, QuizFormatType formatType){
+    public void uploadQuizJson(MultipartFile file, QuizCategoryType categoryType,
+        QuizFormatType formatType) {
         try {
             QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)
-                .orElseThrow(() -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_EVENT));
+                .orElseThrow(
+                    () -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_EVENT));
 
-            CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(), CreateQuizDto[].class);
+            CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(),
+                CreateQuizDto[].class);
 
             for (CreateQuizDto dto : quizArray) {
                 //유효성 검증에 실패한 데이터를 Set에 저장
@@ -63,5 +67,16 @@ public class QuizService {
         } catch (ConstraintViolationException e) {
             throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED);
         }
+    }
+
+
+    @Transactional
+    public int getTodayQuiz(Long subscriptionId) {
+        //해당 구독자의 문제 구독 카테고리 확인
+
+        //해당 구독자의 최근 문제 풀이 기록확인
+
+        //다음 문제 내주기
+        return 0;
     }
 }
