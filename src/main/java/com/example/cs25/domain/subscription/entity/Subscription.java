@@ -1,6 +1,8 @@
 package com.example.cs25.domain.subscription.entity;
 
 import com.example.cs25.domain.quiz.entity.QuizCategory;
+import com.example.cs25.domain.quiz.entity.QuizCategoryType;
+import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,15 +47,14 @@ public class Subscription extends BaseEntity {
     private int subscriptionType; // "월화수목금토일" => "1111111"
 
     @Builder
-    public Subscription(QuizCategory category, String email, LocalDate startDate,
-        LocalDate endDate,
-        boolean isActive, int subscriptionType) {
-        this.category = category;
+    public Subscription(QuizCategoryType category, String email, LocalDate startDate,
+        LocalDate endDate, boolean isActive, Set<DayOfWeek> subscriptionType) {
+        this.category = new QuizCategory(category);
         this.email = email;
         this.startDate = startDate;
         this.endDate = endDate;
         this.isActive = isActive;
-        this.subscriptionType = subscriptionType;
+        this.subscriptionType = encodeDays(subscriptionType);
     }
 
     // Set<DayOfWeek> → int
@@ -76,4 +77,15 @@ public class Subscription extends BaseEntity {
         return result;
     }
 
+    /**
+     * 사용자가 입력한 값으로 구독정보를 업데이트하는 메서드
+     * @param request 사용자를 통해 받은 구독 정보
+     * @param periodDays 구독연장일 수
+     */
+    public void update(SubscriptionRequest request, int periodDays) {
+        this.category = new QuizCategory(request.getCategory());
+        this.subscriptionType = encodeDays(request.getDays());
+        this.isActive = request.isActive();
+        this.endDate = endDate.plusDays(periodDays);
+    }
 }
