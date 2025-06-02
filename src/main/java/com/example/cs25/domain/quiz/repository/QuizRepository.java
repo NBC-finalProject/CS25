@@ -1,5 +1,8 @@
 package com.example.cs25.domain.quiz.repository;
 
-public interface QuizRepository {
+import com.example.cs25.domain.quiz.entity.Quiz;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
 }
