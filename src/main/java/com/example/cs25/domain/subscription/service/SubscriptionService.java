@@ -5,6 +5,8 @@ import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
+import java.time.Duration;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +23,15 @@ public class SubscriptionService {
                 new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
         //구독 시작, 구독 종료 날짜 기반으로 구독 기간 계산
+        LocalDate start = subscription.getStartDate();
+        LocalDate end = subscription.getEndDate();
+
+        Duration diff = Duration.between(start, end);
+        long period = diff.toDays();
 
         return SubscriptionInfoDto.builder()
             .subscriptionType(Subscription.decodeDays(subscription.getSubscriptionType()))
             .category(subscription.getCategory())
-            build();
+            .period(period).build();
     }
 }

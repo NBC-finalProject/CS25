@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Set;
 import lombok.Builder;
@@ -33,16 +33,16 @@ public class Subscription extends BaseEntity {
 
     private String email;
 
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     private boolean isActive = false;
 
     private int subscriptionType; // "월화수목금토일" => "1111111"
 
     @Builder
-    public Subscription(QuizCategory category, String email, LocalDateTime startDate,
-        LocalDateTime endDate,
+    public Subscription(QuizCategory category, String email, LocalDate startDate,
+        LocalDate endDate,
         boolean isActive, int subscriptionType) {
         this.category = category;
         this.email = email;

@@ -14,7 +14,7 @@ public class SubscriptionInfoDto {
 
     private final QuizCategory category;
 
-    private final String period;
+    private final Long period;
 
     private final Set<DayOfWeek> subscriptionType;
 }
