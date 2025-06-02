@@ -3,7 +3,6 @@ package com.example.cs25.domain.quiz.service;
 import com.example.cs25.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.quiz.exception.QuizException;
 import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
@@ -32,7 +31,7 @@ public class QuizService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void uploadQuizJson(MultipartFile file, QuizCategoryType categoryType,
+    public void uploadQuizJson(MultipartFile file, String categoryType,
         QuizFormatType formatType) {
         try {
             QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)

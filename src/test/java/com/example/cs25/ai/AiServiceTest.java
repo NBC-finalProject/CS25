@@ -6,7 +6,6 @@ import com.example.cs25.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25.domain.ai.service.AiService;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.example.cs25.domain.subscription.entity.Subscription;
@@ -49,7 +48,7 @@ class AiServiceTest {
 
     @BeforeEach
     void setUp() {
-        QuizCategory quizCategory = new QuizCategory(null, QuizCategoryType.BACKEND);
+        QuizCategory quizCategory = new QuizCategory(null, "BACKEND");
         em.persist(quizCategory);
 
         quiz = new Quiz(

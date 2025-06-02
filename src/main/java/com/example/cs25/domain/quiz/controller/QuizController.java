@@ -1,6 +1,5 @@
 package com.example.cs25.domain.quiz.controller;
 
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.quiz.service.QuizService;
 import com.example.cs25.global.dto.ApiResponse;
@@ -22,7 +21,7 @@ public class QuizController {
     @PostMapping("/upload")
     public ApiResponse<String> uploadQuizByJsonFile(
         @RequestParam("file") MultipartFile file,
-        @RequestParam("categoryType") QuizCategoryType categoryType,
+        @RequestParam("categoryType") String categoryType,
         @RequestParam("formatType") QuizFormatType formatType
     ) {
         if (file.isEmpty()) {
