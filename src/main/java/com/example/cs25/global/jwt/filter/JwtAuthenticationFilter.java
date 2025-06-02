@@ -1,20 +1,18 @@
 package com.example.cs25.global.jwt.filter;
 
-import com.example.cs25.global.dto.AuthUser;
 import com.example.cs25.domain.users.entity.Role;
+import com.example.cs25.global.dto.AuthUser;
 import com.example.cs25.global.jwt.exception.JwtAuthenticationException;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-
-import java.io.IOException;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -26,7 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
 
-
         String token = resolveToken(request);
 
         if (token != null) {
@@ -37,10 +34,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String nickname = jwtTokenProvider.getNickname(token);
                     Role role = jwtTokenProvider.getRole(token);
 
-                    AuthUser authUser = new AuthUser(userId, email,nickname , role);
+                    AuthUser authUser = new AuthUser(userId, email, nickname, role);
 
                     UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(authUser, null,
+                            authUser.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
