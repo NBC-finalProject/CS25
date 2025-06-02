@@ -1,5 +1,6 @@
 package com.example.cs25.domain.users.controller;
 
+import com.example.cs25.domain.users.dto.UserProfileResponse;
 import com.example.cs25.domain.users.service.UserService;
 import com.example.cs25.global.dto.ApiResponse;
 import com.example.cs25.global.dto.AuthUser;
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/users/profile")
-    public ApiResponse<?> getUserProfile(
+    public ApiResponse<UserProfileResponse> getUserProfile(
         @AuthenticationPrincipal AuthUser authUser
     ) {
         return new ApiResponse<>(200, userService.getUserProfile(authUser));
