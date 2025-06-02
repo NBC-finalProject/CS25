@@ -1,7 +1,9 @@
 package com.example.cs25.domain.ai.exception;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-public class AiException {
+@Getter
+public class AiException extends RuntimeException{
     private final AiExceptionCode errorCode;
     private final HttpStatus httpStatus;
     private final String message;
