@@ -2,6 +2,7 @@ package com.example.cs25.domain.subscription.entity;
 
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.global.entity.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -33,7 +34,10 @@ public class Subscription extends BaseEntity {
 
     private String email;
 
+    @Column(columnDefinition = "DATE")
     private LocalDate startDate;
+
+    @Column(columnDefinition = "DATE")
     private LocalDate endDate;
 
     private boolean isActive = false;
