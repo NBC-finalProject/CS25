@@ -27,7 +27,8 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+        CustomOAuth2UserService customOAuth2UserService) throws Exception {
         return http
 
             .httpBasic(HttpBasicConfigurer::disable)
@@ -41,24 +42,27 @@ public class SecurityConfig {
             .formLogin(FormLoginConfigurer::disable)
 
             // 세션 사용 안함 (STATELESS)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
+                .requestMatchers("/subscription/**").permitAll()
                 .anyRequest().hasAnyRole(PERMITTED_ROLES)
             )
 
             .oauth2Login(oauth2 -> oauth2
-                // TODO: .loginPage("/login")
-                .successHandler(oAuth2LoginSuccessHandler)
-                .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                    .userService(customOAuth2UserService)
-                )
+                    //.loginPage("/login")
+                    .successHandler(oAuth2LoginSuccessHandler)
+                    .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                        .userService(customOAuth2UserService)
+                    )
                 //.defaultSuccessUrl("/home", true) // 로그인 성공 후 이동할 URL
             )
 
             // JWT 인증 필터 등록
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                UsernamePasswordAuthenticationFilter.class)
 
             // 최종 SecurityFilterChain 반환
             .build();
