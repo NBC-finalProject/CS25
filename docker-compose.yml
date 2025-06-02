@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  cs25-mysql:
+    image: mysql:8.0.35
+
+    platform: linux/amd64
+    volumes:
+      - cs25_mysql_volume:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: cs25
+    command:
+      [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--lower_case_table_names=1' ]
+
+  cs25-redis:
+    image: redis:7.2
+    ports:
+      - '6379:6379'
+    volumes:
+      - cs25_redis_volume:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+
+volumes:
+  cs25_mysql_volume:
+  cs25_redis_volume:

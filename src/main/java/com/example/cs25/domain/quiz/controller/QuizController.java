@@ -15,15 +15,16 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/quizzes")
 public class QuizController {
+
     private final QuizService quizService;
 
     @PostMapping("/upload")
     public ApiResponse<String> uploadQuizByJsonFile(
-        @RequestParam("file")MultipartFile file,
+        @RequestParam("file") MultipartFile file,
         @RequestParam("categoryType") QuizCategoryType categoryType,
         @RequestParam("formatType") QuizFormatType formatType
-    ){
+    ) {
         quizService.uploadQuizJson(file, categoryType, formatType);
-        return new ApiResponse<>(200, "문제 등록 완료");
+        return new ApiResponse<>(200, "문제 등록 성공");
     }
 }

@@ -21,7 +21,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Quiz extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -43,7 +45,8 @@ public class Quiz extends BaseEntity {
     private QuizCategory category;
 
     @Builder
-    public Quiz(QuizFormatType type, String question, String answer, String commentary, String choice, QuizCategory category) {
+    public Quiz(QuizFormatType type, String question, String answer, String commentary,
+        String choice, QuizCategory category) {
         this.type = type;
         this.question = question;
         this.choice = choice;
