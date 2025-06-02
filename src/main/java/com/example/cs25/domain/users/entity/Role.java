@@ -1,4 +1,4 @@
-package com.example.cs25.global.dto;
+package com.example.cs25.domain.users.entity;
 
 import com.example.cs25.domain.users.exception.UserException;
 import com.example.cs25.domain.users.exception.UserExceptionCode;

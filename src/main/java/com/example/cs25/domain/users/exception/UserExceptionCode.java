@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum UserExceptionCode {
-    //예시임
+    OAUTH2_PROFILE_INCOMPLETE(false, HttpStatus.BAD_REQUEST, "소셜 로그인 정보가 누락되었습니다."),
     UNSUPPORTED_SOCIAL_PROVIDER(false, HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 기능입니다."),
     EMAIL_DUPLICATION(false, HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
     EVENT_CRUD_FAILED(false, HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 값을 레디스에 읽기/저장 실패했으요"),
