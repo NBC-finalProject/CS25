@@ -1,70 +1,54 @@
-name: Deploy
+name: Deploy to EC2
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - dev
+    branches: [ feat/31 ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
 
-      - name: gradlew bootJar
-        run: ./gradlew bootJar
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: baekjonghyun
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: copy jar to server
-        uses: appleboy/scp-action@master
+      - name: Build & Push Docker image
+        run: |
+          docker build -t baekjonghyun/cs25-app:latest .
+          docker push baekjonghyun/cs25-app:latest
+
+      - name: Upload .env and docker-compose.yml to EC2
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          port: 22
-          source: "./build/libs/*.jar"
-          target: "~"
-          strip_components: 2
+          source: ".env,docker-compose.yml"
+          target: "/home/ec2-user/app"
 
-      - name: SSH Commands
-        uses: appleboy/ssh-action@v0.1.6
+      - name: Run docker-compose on EC2
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script_stop: true
           script: |
-            sudo yum update -y && sudo yum install -y java-17-amazon-corretto
-            # 기존 java -jar 프로세스 모두 강제 종료
-            for pid in $(pgrep java); do
-              if ps -p $pid -o args= | grep -q 'java -jar'; then
-                echo "Terminating Java process (PID: $pid)"
-                kill -9 $pid
-              fi
-            done
-            
-            export MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
-            export MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
-            export KAKAO_ID=${{ secrets.KAKAO_ID }}
-            export KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-            export REDIS_PASSWORD=
-            export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-            export JWT_KEY=${{ secrets.JWT_KEY }}
-            export CLIENT_ID=${{ secrets.CLIENT_ID }}
-            export CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
-            
-            # 애플리케이션 즉시 재기동 (백그라운드)
-            nohup java -jar /home/ec2-user/cs25-0.0.1-SNAPSHOT.jar \
-              --spring.profiles.active=local \
-              > /home/ec2-user/app.log 2>&1 &
+            cd /home/ec2-user/app
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
