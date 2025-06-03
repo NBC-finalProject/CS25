@@ -52,7 +52,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          source: "docker-compose.yml"
+          source: ".env, docker-compose.yml"
           target: "/home/ec2-user/app"
 
       - name: Run docker-compose on EC2
