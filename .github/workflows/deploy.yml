@@ -61,6 +61,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
+          timeout: 600 # ← 초 단위. 10분 = 600, 15분 = 900
           script: |
             cd /home/ec2-user/app
             docker-compose pull
