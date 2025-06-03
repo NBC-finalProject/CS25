@@ -35,7 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
-**/docker-compose.yml
+.github/workflows/docker-compose.yml
 
 ### yml ###
-.env
+.github/workflows/.env
