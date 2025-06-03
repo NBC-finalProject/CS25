@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### yml ###
-.github/workflows/.env
+.env
