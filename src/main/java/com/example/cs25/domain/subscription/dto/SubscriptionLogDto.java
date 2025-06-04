@@ -10,7 +10,6 @@ import lombok.Builder;
 public record SubscriptionLogDto(String categoryType, Long subscriptionId,
                                  Set<DayOfWeek> subscriptionType) {
 
-
     public static SubscriptionLogDto fromEntity(SubscriptionLog log) {
         return SubscriptionLogDto.builder()
             .categoryType(log.getCategory().getCategoryType())
