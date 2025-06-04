@@ -10,6 +10,7 @@ import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
+import com.example.cs25.domain.verification.service.VerificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final VerificationService verificationCodeService;
     private final SubscriptionHistoryRepository subscriptionHistoryRepository;
 
     private final QuizCategoryRepository quizCategoryRepository;
