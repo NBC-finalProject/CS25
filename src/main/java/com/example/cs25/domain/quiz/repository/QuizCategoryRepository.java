@@ -12,7 +12,7 @@ public interface QuizCategoryRepository extends JpaRepository<QuizCategory, Long
 
     Optional<QuizCategory> findByCategoryType(QuizCategoryType categoryType);
 
-    default QuizCategory findByIdOrElseThrow(QuizCategoryType categoryType){
+    default QuizCategory findByCategoryTypeOrElseThrow(QuizCategoryType categoryType){
         return findByCategoryType(categoryType)
             .orElseThrow(() ->
                 new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_EVENT));

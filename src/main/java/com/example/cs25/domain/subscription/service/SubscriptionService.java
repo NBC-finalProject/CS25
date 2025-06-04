@@ -1,7 +1,6 @@
 package com.example.cs25.domain.subscription.service;
 
 import com.example.cs25.domain.quiz.entity.QuizCategory;
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
@@ -59,7 +58,7 @@ public class SubscriptionService {
             throw new SubscriptionException(SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
         }
 
-        QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(request.getCategory());
+        QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(request.getCategory());
         try {
             // FIXME: 이메일인증 완료되었다고 가정
             subscriptionRepository.save(
