@@ -113,7 +113,7 @@ public class SubscriptionService {
                 .subscription(subscription)
                 .subscriptionType(subscription.getSubscriptionType())
                 .startDate(subscription.getStartDate())
-                .updateDate(LocalDate.now()) // 구독정보 수정일
+                .updateDate(subscription.getUpdatedAt().toLocalDate()) // 구독정보 수정일
                 .build()
         );
     }
