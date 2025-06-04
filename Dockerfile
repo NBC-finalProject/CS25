@@ -8,7 +8,6 @@ WORKDIR /apps
 COPY . /apps
 RUN gradle clean bootJar --no-daemon
 
-
 # OpenJDK 17 slim 기반 이미지 사용
 FROM openjdk:17
 
