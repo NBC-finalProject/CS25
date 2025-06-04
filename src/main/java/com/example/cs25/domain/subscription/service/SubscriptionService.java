@@ -14,6 +14,8 @@ import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,17 +60,21 @@ public class SubscriptionService {
         }
 
         QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(request.getCategory());
-
-        // FIXME: 이메일인증 완료되었다고 가정
-        subscriptionRepository.save(
-            Subscription.builder()
-                .email(request.getEmail())
-                .category(quizCategory)
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusDays(request.getPeriod().getDays()))
-                .subscriptionType(request.getDays())
-                .build()
-        );
+        try {
+            // FIXME: 이메일인증 완료되었다고 가정
+            subscriptionRepository.save(
+                Subscription.builder()
+                    .email(request.getEmail())
+                    .category(quizCategory)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now().plusDays(request.getPeriod().getDays()))
+                    .subscriptionType(request.getDays())
+                    .build()
+            );
+        } catch (DataIntegrityViolationException e) {
+            // UNIQUE 제약조건 위반 시 발생하는 예외처리
+            throw new SubscriptionException(SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+        }
     }
 
     /**
