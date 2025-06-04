@@ -86,7 +86,7 @@ public class Subscription extends BaseEntity {
         this.category = new QuizCategory(request.getCategory());
         this.subscriptionType = encodeDays(request.getDays());
         this.isActive = request.isActive();
-        this.endDate = endDate.plusDays(request.getPeriod().getDays());
+        this.endDate = endDate.plusMonths(request.getPeriod().getMonths());
     }
 
     /**

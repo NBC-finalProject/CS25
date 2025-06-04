@@ -11,22 +11,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SubscriptionPeriod {
 	NO_PERIOD(0),
-	ONE_MONTH(30),
-	THREE_MONTHS(90),
-	SIX_MONTHS(180),
-	ONE_YEAR(365);
+	ONE_MONTH(1),
+	THREE_MONTHS(3),
+	SIX_MONTHS(6),
+	ONE_YEAR(12);
 
-	private final int days;
+	private final int months;
 
 	/**
 	 * JSON → SubscriptionPeriod 역직렬화 작업을 도와주는 메서드
-	 * @param days 구독기간
+	 * @param months 구독개월
 	 * @return SubscriptionPeriod Enum 객체를 반환
 	 */
 	@JsonCreator
-	public static SubscriptionPeriod from(int days) {
+	public static SubscriptionPeriod from(int months) {
 		for (SubscriptionPeriod period : values()) {
-			if (period.days == days) {
+			if (period.months == months) {
 				return period;
 			}
 		}

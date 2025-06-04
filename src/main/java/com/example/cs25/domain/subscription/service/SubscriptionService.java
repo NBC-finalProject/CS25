@@ -61,12 +61,13 @@ public class SubscriptionService {
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(request.getCategory());
         try {
             // FIXME: 이메일인증 완료되었다고 가정
+            LocalDate nowDate = LocalDate.now();
             subscriptionRepository.save(
                 Subscription.builder()
                     .email(request.getEmail())
                     .category(quizCategory)
-                    .startDate(LocalDate.now())
-                    .endDate(LocalDate.now().plusDays(request.getPeriod().getDays()))
+                    .startDate(nowDate)
+                    .endDate(nowDate.plusMonths(request.getPeriod().getMonths()))
                     .subscriptionType(request.getDays())
                     .build()
             );
