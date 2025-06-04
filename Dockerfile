@@ -19,7 +19,7 @@ WORKDIR /apps
 
 # 애플리케이션 jar 파일을 컨테이너로 복사
 #COPY build/libs/*.jar /apps/app.jar
-COPY --from=builder /apps/build/libs/*-SNAPSHOT.jar /apps/app.jar
+COPY --from=builder /apps/build/libs/*.jar /apps/app.jar
 
 # 애플리케이션이 사용할 포트 노출
 EXPOSE 8080
