@@ -5,15 +5,11 @@ import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.time.Duration;
+import com.example.cs25.domain.verification.service.VerificationService;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
-    private final VerificationCodeService verificationCodeService;
+    private final VerificationService verificationCodeService;
 
     public SubscriptionInfoDto getSubscription(Long subscriptionId) {
 

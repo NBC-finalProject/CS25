@@ -1,4 +1,4 @@
-package com.example.cs25.domain.subscription.exception;
+package com.example.cs25.domain.verification.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
-package com.example.cs25.domain.subscription.service;
+package com.example.cs25.domain.verification.service;
 
-import com.example.cs25.domain.subscription.exception.VerificationException;
-import com.example.cs25.domain.subscription.exception.VerificationExceptionCode;
+import com.example.cs25.domain.verification.exception.VerificationException;
+import com.example.cs25.domain.verification.exception.VerificationExceptionCode;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class VerificationCodeService {
+public class VerificationService {
     private final StringRedisTemplate redisTemplate;
 
     private static final String PREFIX = "VERIFY:";
