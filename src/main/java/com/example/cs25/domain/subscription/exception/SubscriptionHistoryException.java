@@ -7,12 +7,12 @@ import com.example.cs25.global.exception.BaseException;
 import lombok.Getter;
 
 @Getter
-public class SubscriptionLogException extends BaseException {
-	private final SubscriptionLogExceptionCode errorCode;
+public class SubscriptionHistoryException extends BaseException {
+	private final SubscriptionHistoryExceptionCode errorCode;
 	private final HttpStatus httpStatus;
 	private final String message;
 
-	public SubscriptionLogException(SubscriptionLogExceptionCode errorCode) {
+	public SubscriptionHistoryException(SubscriptionHistoryExceptionCode errorCode) {
 		this.errorCode = errorCode;
 		this.httpStatus = errorCode.getHttpStatus();
 		this.message = errorCode.getMessage();
