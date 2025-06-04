@@ -42,18 +42,18 @@ public class Subscription extends BaseEntity {
     @Column(columnDefinition = "DATE")
     private LocalDate endDate;
 
-    private boolean isActive = false;
+    private boolean isActive;
 
     private int subscriptionType; // "월화수목금토일" => "1111111"
 
     @Builder
     public Subscription(QuizCategoryType category, String email, LocalDate startDate,
-        LocalDate endDate, boolean isActive, Set<DayOfWeek> subscriptionType) {
+        LocalDate endDate, Set<DayOfWeek> subscriptionType) {
         this.category = new QuizCategory(category);
         this.email = email;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.isActive = isActive;
+        this.isActive = true;
         this.subscriptionType = encodeDays(subscriptionType);
     }
 
@@ -87,5 +87,12 @@ public class Subscription extends BaseEntity {
         this.subscriptionType = encodeDays(request.getDays());
         this.isActive = request.isActive();
         this.endDate = endDate.plusDays(periodDays);
+    }
+
+    /**
+     * 구독취소하는 메서드
+     */
+    public void cancel(){
+        this.isActive = false;
     }
 }

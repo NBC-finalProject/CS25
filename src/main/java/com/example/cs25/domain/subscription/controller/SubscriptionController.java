@@ -49,4 +49,12 @@ public class SubscriptionController {
         subscriptionService.updateSubscription(subscriptionId, request);
         return new ApiResponse<>(200);
     }
+
+    @PatchMapping("/{subscriptionId}/cancel")
+    public ApiResponse<Void> cancelSubscription(
+        @PathVariable(name = "subscriptionId") Long subscriptionId
+    ){
+        subscriptionService.cancelSubscription(subscriptionId);
+        return new ApiResponse<>(200);
+    }
 }

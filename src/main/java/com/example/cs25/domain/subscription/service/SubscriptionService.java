@@ -1,14 +1,12 @@
 package com.example.cs25.domain.subscription.service;
 
-import static com.example.cs25.domain.subscription.entity.Subscription.*;
-
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
 import com.example.cs25.domain.subscription.entity.Subscription;
-import com.example.cs25.domain.subscription.entity.SubscriptionLog;
+import com.example.cs25.domain.subscription.entity.SubscriptionHistory;
 import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
-import com.example.cs25.domain.subscription.repository.SubscriptionLogRepository;
+import com.example.cs25.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -21,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
-    private final SubscriptionLogRepository subscriptionLogRepository;
+    private final SubscriptionHistoryRepository subscriptionHistoryRepository;
 
     /**
      * 구독아이디로 구독정보를 조회하는 메서드
@@ -54,17 +52,16 @@ public class SubscriptionService {
             throw new SubscriptionException(SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
         }
 
-        Subscription subscription = subscriptionRepository.save(
+        // FIXME: 이메일인증 완료되었다고 가정
+        subscriptionRepository.save(
             Subscription.builder()
                 .email(request.getEmail())
                 .category(request.getCategory())
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(request.getPeriod().getDays()))
                 .subscriptionType(request.getDays())
-                .isActive(true) // FIXME: 이메일인증 완료되었다고 가정
                 .build()
         );
-        createSubscriptionLog(subscription, request);
     }
 
     /**
@@ -76,25 +73,37 @@ public class SubscriptionService {
     public void updateSubscription(Long subscriptionId, SubscriptionRequest request) {
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
+        // 구독 연장일수 계산
         int periodDays = request.getPeriod() != null ? request.getPeriod().getDays() : 0;
-        subscription.update(request, periodDays);
 
-        createSubscriptionLog(subscription, request);
+        subscription.update(request, periodDays);
+        createSubscriptionHistory(subscription);
     }
 
     /**
-     * 구독정보가 생성/수정될 때마다 로그를 생성하는 메서드
-     * @param subscription 구독 객체
-     * @param request 사용자로부터 받은 구독정보
+     * 구독을 취소하는 메서드
+     * @param subscriptionId 구독 아이디
      */
-    private void createSubscriptionLog(Subscription subscription, SubscriptionRequest request) {
-        subscriptionLogRepository.save(
-            SubscriptionLog.builder()
-                .category(request.getCategory())
+    @Transactional
+    public void cancelSubscription(Long subscriptionId) {
+        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+
+        subscription.cancel();
+        createSubscriptionHistory(subscription);
+    }
+
+    /**
+     * 구독정보가 수정될 때 구독내역을 생성하는 메서드
+     * @param subscription 구독 객체
+     */
+    private void createSubscriptionHistory(Subscription subscription) {
+        subscriptionHistoryRepository.save(
+            SubscriptionHistory.builder()
+                .category(subscription.getCategory().getCategoryType())
                 .subscription(subscription)
-                .subscriptionType(encodeDays(request.getDays()))
+                .subscriptionType(subscription.getSubscriptionType())
                 .startDate(subscription.getStartDate())
-                .endDate(subscription.getEndDate())
+                .updateDate(LocalDate.now()) // 구독정보 수정일
                 .build()
         );
     }
