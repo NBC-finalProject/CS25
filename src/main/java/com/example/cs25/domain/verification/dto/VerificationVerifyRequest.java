@@ -2,10 +2,11 @@ package com.example.cs25.domain.verification.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public record VerificationVerifyRequest(
-    @Email String email,
-    @NotBlank String code
+    @NotBlank @Email String email,
+    @NotBlank @Pattern(regexp = "\\d{6}") String code
 ) {
 
 }

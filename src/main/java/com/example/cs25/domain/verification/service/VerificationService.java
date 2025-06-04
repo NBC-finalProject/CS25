@@ -58,6 +58,7 @@ public class VerificationService {
         try {
             mailService.sendVerificationCodeEmail(email, verificationCode);
         }catch (MessagingException e) {
+            delete(email);
             throw new MailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         }
     }
