@@ -33,6 +33,7 @@ jobs:
           echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}" >> .env
 
       - name: Upload .env and docker-compose.yml to EC2
         uses: appleboy/scp-action@v0.1.4
