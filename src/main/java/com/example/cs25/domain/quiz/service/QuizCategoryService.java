@@ -1,7 +1,6 @@
 package com.example.cs25.domain.quiz.service;
 
 import com.example.cs25.domain.quiz.entity.QuizCategory;
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.exception.QuizException;
 import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
@@ -17,10 +16,11 @@ public class QuizCategoryService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void createQuizCategory(QuizCategoryType categoryType) {
-        Optional<QuizCategory> existCategory = quizCategoryRepository.findByCategoryType(categoryType);
-        if(existCategory.isPresent()){
-            throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
+    public void createQuizCategory(String categoryType) {
+        Optional<QuizCategory> existCategory = quizCategoryRepository.findByCategoryType(
+            categoryType);
+        if (existCategory.isPresent()) {
+            throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_EVENT);
         }
 
         QuizCategory quizCategory = new QuizCategory(categoryType);
