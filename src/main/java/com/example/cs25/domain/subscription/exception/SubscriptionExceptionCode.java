@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum SubscriptionExceptionCode {
 
     ILLEGAL_SUBSCRIPTION_TYPE_ERROR(false, HttpStatus.BAD_REQUEST, "요일 값이 비정상적입니다."),
-    NOT_FOUND_SUBSCRIPTION_ERROR(false, HttpStatus.NOT_FOUND, "구독 정보를 불러올 수 없습니다.");
-
+    NOT_FOUND_SUBSCRIPTION_ERROR(false, HttpStatus.NOT_FOUND, "구독 정보를 불러올 수 없습니다."),
+    SUBSCRIPTION_ALREADY_EXIST_ERROR(false, HttpStatus.CONFLICT, "해당 이메일이 이미 존재합니다.");
     private final boolean isSuccess;
     private final HttpStatus httpStatus;
     private final String message;

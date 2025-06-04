@@ -5,9 +5,15 @@ import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final VerificationCodeService verificationCodeService;
 
     public SubscriptionInfoDto getSubscription(Long subscriptionId) {
 
@@ -32,4 +39,13 @@ public class SubscriptionService {
             .category(subscription.getCategory())
             .period(period).build();
     }
+
+    private boolean checkDuplicatedByEmail(String email) {
+        Optional<Subscription> subscription = subscriptionRepository.findByEmail(email);
+        if (subscription.isPresent()) {
+            throw new SubscriptionException(SubscriptionExceptionCode.SUBSCRIPTION_ALREADY_EXIST_ERROR);
+        }
+        return true;
+    }
+
 }
