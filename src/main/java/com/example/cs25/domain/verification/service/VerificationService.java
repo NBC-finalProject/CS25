@@ -62,7 +62,7 @@ public class VerificationService {
         }
     }
 
-    public boolean verify(String email, String inputCode) {
+    public void verify(String email, String inputCode) {
         String stored = get(email);
         if (stored == null) {
             throw new VerificationException(
@@ -73,6 +73,5 @@ public class VerificationService {
                 VerificationExceptionCode.VERIFICATION_CODE_MISMATCH_ERROR);
         }
         delete(email);
-        return true;
     }
 }
