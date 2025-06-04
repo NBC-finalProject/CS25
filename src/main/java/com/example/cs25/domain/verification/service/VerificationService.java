@@ -76,6 +76,7 @@ public class VerificationService {
         }
         String stored = get(email);
         if (stored == null) {
+            redisTemplate.opsForValue().set(attemptKey, String.valueOf(attempts + 1), Duration.ofMinutes(10));
             throw new VerificationException(
                 VerificationExceptionCode.VERIFICATION_CODE_EXPIRED_ERROR);
         }

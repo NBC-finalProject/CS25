@@ -1,4 +1,4 @@
-package com.example.cs25.domain.mail.config;
+package com.example.cs25.global.config;
 
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Value;
