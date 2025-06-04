@@ -7,8 +7,8 @@ import static org.mockito.Mockito.mockStatic;
 
 import com.example.cs25.domain.oauth.dto.SocialType;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
+import com.example.cs25.domain.subscription.dto.SubscriptionHistoryDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
-import com.example.cs25.domain.subscription.dto.SubscriptionLogDto;
 import com.example.cs25.domain.subscription.entity.DayOfWeek;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.entity.SubscriptionHistory;
@@ -100,17 +100,18 @@ class UserServiceTest {
             Set.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
         );
 
-        SubscriptionLogDto dto1 = SubscriptionLogDto.fromEntity(log1);
-        SubscriptionLogDto dto2 = SubscriptionLogDto.fromEntity(log2);
+        SubscriptionHistoryDto dto1 = SubscriptionHistoryDto.fromEntity(log1);
+        SubscriptionHistoryDto dto2 = SubscriptionHistoryDto.fromEntity(log2);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(subscriptionService.getSubscription(subscriptionId)).willReturn(subscriptionInfoDto);
         given(subscriptionHistoryRepository.findAllBySubscriptionId(subscriptionId))
             .willReturn(List.of(log1, log2));
 
-        try (MockedStatic<SubscriptionLogDto> mockedStatic = mockStatic(SubscriptionLogDto.class)) {
-            mockedStatic.when(() -> SubscriptionLogDto.fromEntity(log1)).thenReturn(dto1);
-            mockedStatic.when(() -> SubscriptionLogDto.fromEntity(log2)).thenReturn(dto2);
+        try (MockedStatic<SubscriptionHistoryDto> mockedStatic = mockStatic(
+            SubscriptionHistoryDto.class)) {
+            mockedStatic.when(() -> SubscriptionHistoryDto.fromEntity(log1)).thenReturn(dto1);
+            mockedStatic.when(() -> SubscriptionHistoryDto.fromEntity(log2)).thenReturn(dto2);
 
             // whene
             UserProfileResponse response = userService.getUserProfile(authUser);
