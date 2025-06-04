@@ -1,4 +1,3 @@
 FROM openjdk:17
-ARG CS25_JAR_FILE=*.jar
-COPY ${CS25_JAR_FILE} cs25_app.jar
-ENTRYPOINT ["java","-jar","/cs25_app.jar"]
+COPY build/libs/cs25-app-0.0.1-SNAPSHOT.jar /cs25_app.jar
+ENTRYPOINT ["java", "-jar", "/cs25_app.jar"]
