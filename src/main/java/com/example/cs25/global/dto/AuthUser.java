@@ -1,9 +1,9 @@
 package com.example.cs25.global.dto;
 
-import com.example.cs25.domain.users.entity.Role;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import com.example.cs25.domain.users.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import com.example.cs25.domain.users.entity.Role;
 import com.example.cs25.domain.users.entity.User;
 
 @Builder
