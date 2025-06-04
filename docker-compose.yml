@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: cs25
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+
+  spring-app:
+    image: baekjonghyun/cs25-app:latest
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    env_file:
+      - .env
+
+volumes:
+  mysql-data:
