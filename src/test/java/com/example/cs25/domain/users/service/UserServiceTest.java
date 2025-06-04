@@ -11,8 +11,8 @@ import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionLogDto;
 import com.example.cs25.domain.subscription.entity.DayOfWeek;
 import com.example.cs25.domain.subscription.entity.Subscription;
-import com.example.cs25.domain.subscription.entity.SubscriptionLog;
-import com.example.cs25.domain.subscription.repository.SubscriptionLogRepository;
+import com.example.cs25.domain.subscription.entity.SubscriptionHistory;
+import com.example.cs25.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25.domain.subscription.service.SubscriptionService;
 import com.example.cs25.domain.users.dto.UserProfileResponse;
 import com.example.cs25.domain.users.entity.Role;
@@ -22,7 +22,6 @@ import com.example.cs25.domain.users.exception.UserExceptionCode;
 import com.example.cs25.domain.users.repository.UserRepository;
 import com.example.cs25.global.dto.AuthUser;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -48,7 +47,7 @@ class UserServiceTest {
     private SubscriptionService subscriptionService;
 
     @Mock
-    private SubscriptionLogRepository subscriptionLogRepository;
+    private SubscriptionHistoryRepository subscriptionHistoryRepository;
 
     private Long subscriptionId = 1L;
     private Subscription subscription;
@@ -58,7 +57,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         subscription = Subscription.builder()
-            .subscriptionType(26)
+            .subscriptionType(Set.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY))
             .startDate(LocalDate.of(2024, 1, 1))
             .endDate(LocalDate.of(2024, 1, 31))
             .category(new QuizCategory(1L, "BACKEND"))
@@ -84,32 +83,29 @@ class UserServiceTest {
         QuizCategory quizCategory = new QuizCategory(1L, "BACKEND");
         AuthUser authUser = new AuthUser(userId, "test@email.com", "testUser", Role.USER);
 
-        SubscriptionLog log1 = SubscriptionLog.builder()
+        SubscriptionHistory log1 = SubscriptionHistory.builder()
             .category(quizCategory)
             .subscription(subscription)
             .subscriptionType(64)
             .build();
-        SubscriptionLog log2 = SubscriptionLog.builder()
+        SubscriptionHistory log2 = SubscriptionHistory.builder()
             .category(quizCategory)
             .subscription(subscription)
             .subscriptionType(26)
             .build();
 
         SubscriptionInfoDto subscriptionInfoDto = new SubscriptionInfoDto(
-            "BACKEND",
+            quizCategory,
             30L,
             Set.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
         );
-
-        ReflectionTestUtils.setField(log1, "createdAt", LocalDateTime.of(2024, 1, 10, 10, 0));
-        ReflectionTestUtils.setField(log2, "createdAt", LocalDateTime.of(2024, 1, 11, 10, 0));
 
         SubscriptionLogDto dto1 = SubscriptionLogDto.fromEntity(log1);
         SubscriptionLogDto dto2 = SubscriptionLogDto.fromEntity(log2);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(subscriptionService.getSubscription(subscriptionId)).willReturn(subscriptionInfoDto);
-        given(subscriptionLogRepository.findAllBySubscriptionId(subscriptionId))
+        given(subscriptionHistoryRepository.findAllBySubscriptionId(subscriptionId))
             .willReturn(List.of(log1, log2));
 
         try (MockedStatic<SubscriptionLogDto> mockedStatic = mockStatic(SubscriptionLogDto.class)) {
@@ -154,7 +150,7 @@ class UserServiceTest {
         // then
         assertThat(user.isActive()).isFalse(); // isActive()가 updateDisableUser()에 의해 true가 됐다고 가정
     }
-    
+
     @Test
     void disableUser_유저없음_예외() {
         // given
