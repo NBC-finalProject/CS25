@@ -1,8 +1,18 @@
 package com.example.cs25.domain.users.entity;
 
 import com.example.cs25.domain.oauth.dto.SocialType;
+import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +22,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "users")
 public class User extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String email;
@@ -27,19 +39,24 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
 
     /**
      * Constructs a new User with the specified email and name, initializing totalSolved to zero.
      *
      * @param email the user's email address
-     * @param name the user's name
+     * @param name  the user's name
      */
     @Builder
-    public User(String email, String name, SocialType socialType, Role role){
+    public User(String email, String name, SocialType socialType, Role role,
+        Subscription subscription) {
         this.email = email;
         this.name = name;
         this.socialType = socialType;
         this.role = role;
+        this.subscription = subscription;
     }
 
     /****
@@ -47,7 +64,7 @@ public class User extends BaseEntity {
      *
      * @param email the new email address to set
      */
-    public void updateEmail(String email){
+    public void updateEmail(String email) {
         this.email = email;
     }
 
@@ -56,12 +73,19 @@ public class User extends BaseEntity {
      *
      * @param name the new name to set for the user
      */
-    public void updateName(String name){
+    public void updateName(String name) {
         this.name = name;
     }
 
-    public void updateActive(boolean isActive){
+    public void updateActive(boolean isActive) {
         this.isActive = isActive;
     }
 
+    public void updateDisableUser() {
+        this.isActive = false;
+    }
+
+    public void updateEnableUser() {
+        this.isActive = true;
+    }
 }

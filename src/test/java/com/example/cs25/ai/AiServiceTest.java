@@ -6,7 +6,6 @@ import com.example.cs25.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25.domain.ai.service.AiService;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.example.cs25.domain.subscription.entity.Subscription;
@@ -15,9 +14,7 @@ import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +48,7 @@ class AiServiceTest {
 
     @BeforeEach
     void setUp() {
-        QuizCategory quizCategory = new QuizCategory(null, QuizCategoryType.BACKEND);
+        QuizCategory quizCategory = new QuizCategory(null, "BACKEND");
         em.persist(quizCategory);
 
         quiz = new Quiz(
@@ -70,8 +67,7 @@ class AiServiceTest {
             .email("test@example.com")
             .startDate(LocalDate.now())
             .endDate(LocalDate.now().plusDays(30))
-            .isActive(true)
-            .subscriptionType(0b1111111)
+            .subscriptionType(Subscription.decodeDays(0b1111111))
             .build();
         subscriptionRepository.save(memberSubscription);
 
@@ -80,8 +76,7 @@ class AiServiceTest {
             .email("guest@example.com")
             .startDate(LocalDate.now())
             .endDate(LocalDate.now().plusDays(7))
-            .isActive(true)
-            .subscriptionType(0b1111111)
+            .subscriptionType(Subscription.decodeDays(0b1111111))
             .build();
         subscriptionRepository.save(guestSubscription);
 
