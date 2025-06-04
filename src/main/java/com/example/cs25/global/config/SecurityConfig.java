@@ -49,6 +49,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers("/subscription/**").permitAll()
+                .anyRequest().hasAnyRole(PERMITTED_ROLES)
+                .requestMatchers("/subscription/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경

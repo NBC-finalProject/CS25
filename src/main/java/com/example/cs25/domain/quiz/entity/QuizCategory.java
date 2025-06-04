@@ -9,10 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
 public class QuizCategory extends BaseEntity {
 
     @Id

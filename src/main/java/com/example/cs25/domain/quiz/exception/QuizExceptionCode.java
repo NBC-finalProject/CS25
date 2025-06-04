@@ -13,6 +13,7 @@ public enum QuizExceptionCode {
     QUIZ_CATEGORY_ALREADY_EXISTS_EVENT(false, HttpStatus.CONFLICT, "이미 해당 카테고리가 존재합니다"),
     JSON_PARSING_FAILED(false, HttpStatus.BAD_REQUEST, "JSON 파싱 실패"),
     QUIZ_VALIDATION_FAILED(false, HttpStatus.BAD_REQUEST, "Quiz 유효성 검증 실패");
+
     private final boolean isSuccess;
     private final HttpStatus httpStatus;
     private final String message;

@@ -59,7 +59,11 @@ jobs:
             export KAKAO_ID=${{ secrets.KAKAO_ID }}
             export KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
             export REDIS_PASSWORD=
-
+            export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            export JWT_KEY=${{ secrets.JWT_KEY }}
+            export CLIENT_ID=${{ secrets.CLIENT_ID }}
+            export CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+            
             # 애플리케이션 즉시 재기동 (백그라운드)
             nohup java -jar /home/ec2-user/cs25-0.0.1-SNAPSHOT.jar \
               --spring.profiles.active=local \
