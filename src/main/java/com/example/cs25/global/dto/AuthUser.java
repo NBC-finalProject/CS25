@@ -1,5 +1,6 @@
 package com.example.cs25.global.dto;
 
+import com.example.cs25.domain.users.entity.Role;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

@@ -7,6 +7,7 @@ import com.example.cs25.global.jwt.provider.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String PERMITTED_ROLES[] = {"USER", "ADMIN"};
+    private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -48,7 +49,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers("/subscription/**").permitAll()
-                .anyRequest().hasAnyRole(PERMITTED_ROLES)
+                .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
+                .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
+                .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경
+
+                .anyRequest().authenticated()
             )
 
             .oauth2Login(oauth2 -> oauth2

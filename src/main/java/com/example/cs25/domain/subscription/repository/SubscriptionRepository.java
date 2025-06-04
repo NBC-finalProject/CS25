@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
 	boolean existsByEmail(String email);
 
+    Optional<Subscription> findByEmail(String email);
+
 	@Query("SELECT s FROM Subscription s JOIN FETCH s.category WHERE s.id = :id")
 	Optional<Subscription> findByIdWithCategory(Long id);
 

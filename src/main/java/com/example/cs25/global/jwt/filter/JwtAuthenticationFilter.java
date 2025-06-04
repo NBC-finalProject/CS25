@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (JwtAuthenticationException e) {
                 // 로그 기록 후 인증 실패 처리
-                logger.warn("JWT 인증 실패: {}", e.getMessage());
+                logger.warn("JWT 인증 실패", e);
                 // SecurityContext를 설정하지 않고 다음 필터로 진행
                 // 인증이 필요한 엔드포인트에서는 별도 처리됨
             }

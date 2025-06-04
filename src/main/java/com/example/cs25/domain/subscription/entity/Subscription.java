@@ -1,7 +1,6 @@
 package com.example.cs25.domain.subscription.entity;
 
 import com.example.cs25.domain.quiz.entity.QuizCategory;
-import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -80,6 +79,7 @@ public class Subscription extends BaseEntity {
 
     /**
      * 사용자가 입력한 값으로 구독정보를 업데이트하는 메서드
+     *
      * @param request 사용자를 통해 받은 구독 정보
      */
     public void update(SubscriptionRequest request) {
@@ -92,7 +92,7 @@ public class Subscription extends BaseEntity {
     /**
      * 구독취소하는 메서드
      */
-    public void cancel(){
+    public void cancel() {
         this.isActive = false;
     }
 }

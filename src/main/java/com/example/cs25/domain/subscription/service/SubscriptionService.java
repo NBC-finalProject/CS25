@@ -11,9 +11,10 @@ import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class SubscriptionService {
 
     /**
      * 구독아이디로 구독정보를 조회하는 메서드
+     *
      * @param subscriptionId 구독 아이디
      * @return 구독정보 DTO 반환
      */
@@ -50,15 +52,18 @@ public class SubscriptionService {
 
     /**
      * 구독정보를 생성하는 메서드
+     *
      * @param request 사용자를 통해 받은 생성할 구독 정보
      */
     @Transactional
     public void createSubscription(SubscriptionRequest request) {
-        if(subscriptionRepository.existsByEmail(request.getEmail())){
-            throw new SubscriptionException(SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+        if (subscriptionRepository.existsByEmail(request.getEmail())) {
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
         }
 
-        QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(request.getCategory());
+        QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
+            request.getCategory());
         try {
             // FIXME: 이메일인증 완료되었다고 가정
             LocalDate nowDate = LocalDate.now();
@@ -73,14 +78,16 @@ public class SubscriptionService {
             );
         } catch (DataIntegrityViolationException e) {
             // UNIQUE 제약조건 위반 시 발생하는 예외처리
-            throw new SubscriptionException(SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
         }
     }
 
     /**
      * 구독정보를 업데이트하는 메서드
+     *
      * @param subscriptionId 구독 아이디
-     * @param request 사용자로부터 받은 업데이트할 구독정보
+     * @param request        사용자로부터 받은 업데이트할 구독정보
      */
     @Transactional
     public void updateSubscription(Long subscriptionId, SubscriptionRequest request) {
@@ -92,6 +99,7 @@ public class SubscriptionService {
 
     /**
      * 구독을 취소하는 메서드
+     *
      * @param subscriptionId 구독 아이디
      */
     @Transactional
@@ -104,16 +112,21 @@ public class SubscriptionService {
 
     /**
      * 구독정보가 수정될 때 구독내역을 생성하는 메서드
+     *
      * @param subscription 구독 객체
      */
     private void createSubscriptionHistory(Subscription subscription) {
+        LocalDate updateDate = Optional.ofNullable(subscription.getUpdatedAt())
+            .map(LocalDateTime::toLocalDate)
+            .orElse(LocalDate.now()); // 또는 적절한 기본값
+
         subscriptionHistoryRepository.save(
             SubscriptionHistory.builder()
                 .category(subscription.getCategory())
                 .subscription(subscription)
                 .subscriptionType(subscription.getSubscriptionType())
                 .startDate(subscription.getStartDate())
-                .updateDate(subscription.getUpdatedAt().toLocalDate()) // 구독정보 수정일
+                .updateDate(updateDate) // 구독정보 수정일
                 .build()
         );
     }
