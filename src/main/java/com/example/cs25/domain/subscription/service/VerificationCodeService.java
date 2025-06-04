@@ -60,6 +60,7 @@ public class VerificationCodeService {
         if(!stored.equals(inputCode)){
             throw new VerificationException(VerificationExceptionCode.VERIFICATION_CODE_MISMATCH_ERROR);
         }
+        delete(email);
         return true;
     }
 }
