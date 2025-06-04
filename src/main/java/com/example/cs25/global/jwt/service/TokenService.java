@@ -1,6 +1,6 @@
 package com.example.cs25.global.jwt.service;
 
-import com.example.cs25.domain.users.entity.AuthUser;
+import com.example.cs25.global.dto.AuthUser;
 import com.example.cs25.global.jwt.dto.TokenResponseDto;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;

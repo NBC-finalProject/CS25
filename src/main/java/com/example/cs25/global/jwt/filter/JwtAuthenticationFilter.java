@@ -1,20 +1,18 @@
 package com.example.cs25.global.jwt.filter;
 
-import com.example.cs25.domain.users.entity.AuthUser;
 import com.example.cs25.domain.users.entity.Role;
+import com.example.cs25.global.dto.AuthUser;
 import com.example.cs25.global.jwt.exception.JwtAuthenticationException;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-
-import java.io.IOException;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -26,7 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
 
-
         String token = resolveToken(request);
 
         if (token != null) {
@@ -37,16 +34,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String nickname = jwtTokenProvider.getNickname(token);
                     Role role = jwtTokenProvider.getRole(token);
 
-                    AuthUser authUser = new AuthUser(userId, email,nickname , role);
+                    AuthUser authUser = new AuthUser(userId, email, nickname, role);
 
                     UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(authUser, null,
+                            authUser.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (JwtAuthenticationException e) {
                 // 로그 기록 후 인증 실패 처리
-                logger.warn("JWT 인증 실패: {}" + e.getMessage());
+                logger.warn("JWT 인증 실패", e);
                 // SecurityContext를 설정하지 않고 다음 필터로 진행
                 // 인증이 필요한 엔드포인트에서는 별도 처리됨
             }
