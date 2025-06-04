@@ -2,8 +2,6 @@ package com.example.cs25.domain.subscription.dto;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
-
 import com.example.cs25.domain.quiz.entity.QuizCategoryType;
 import com.example.cs25.domain.subscription.entity.DayOfWeek;
 import com.example.cs25.domain.subscription.entity.SubscriptionPeriod;
@@ -11,6 +9,7 @@ import com.example.cs25.domain.subscription.entity.SubscriptionPeriod;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,6 +28,7 @@ public class SubscriptionRequest {
 
 	private boolean isActive;
 
-	// 수정하면서 기간을 늘릴수도, 안늘릴수도 있기 때문에 null 허용
+	// 수정하면서 기간을 늘릴수도, 안늘릴수도 있음, 기본값은 0
+	@NotNull
 	private SubscriptionPeriod period;
 }

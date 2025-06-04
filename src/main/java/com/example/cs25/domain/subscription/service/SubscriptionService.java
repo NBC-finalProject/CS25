@@ -1,5 +1,8 @@
 package com.example.cs25.domain.subscription.service;
 
+import com.example.cs25.domain.quiz.entity.QuizCategory;
+import com.example.cs25.domain.quiz.entity.QuizCategoryType;
+import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
 import com.example.cs25.domain.subscription.entity.Subscription;
@@ -20,6 +23,8 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionHistoryRepository subscriptionHistoryRepository;
+
+    private final QuizCategoryRepository quizCategoryRepository;
 
     /**
      * 구독아이디로 구독정보를 조회하는 메서드
@@ -52,11 +57,13 @@ public class SubscriptionService {
             throw new SubscriptionException(SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
         }
 
+        QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(request.getCategory());
+
         // FIXME: 이메일인증 완료되었다고 가정
         subscriptionRepository.save(
             Subscription.builder()
                 .email(request.getEmail())
-                .category(request.getCategory())
+                .category(quizCategory)
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(request.getPeriod().getDays()))
                 .subscriptionType(request.getDays())
@@ -73,10 +80,7 @@ public class SubscriptionService {
     public void updateSubscription(Long subscriptionId, SubscriptionRequest request) {
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
-        // 구독 연장일수 계산
-        int periodDays = request.getPeriod() != null ? request.getPeriod().getDays() : 0;
-
-        subscription.update(request, periodDays);
+        subscription.update(request);
         createSubscriptionHistory(subscription);
     }
 
@@ -99,7 +103,7 @@ public class SubscriptionService {
     private void createSubscriptionHistory(Subscription subscription) {
         subscriptionHistoryRepository.save(
             SubscriptionHistory.builder()
-                .category(subscription.getCategory().getCategoryType())
+                .category(subscription.getCategory())
                 .subscription(subscription)
                 .subscriptionType(subscription.getSubscriptionType())
                 .startDate(subscription.getStartDate())

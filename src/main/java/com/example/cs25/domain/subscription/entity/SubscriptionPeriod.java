@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum SubscriptionPeriod {
+	NO_PERIOD(0),
 	ONE_MONTH(30),
 	THREE_MONTHS(90),
 	SIX_MONTHS(180),

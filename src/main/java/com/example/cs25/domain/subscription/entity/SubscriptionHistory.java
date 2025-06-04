@@ -50,9 +50,9 @@ public class SubscriptionHistory {
     private int subscriptionType; // "월화수목금토일" => "1111111" , "월수금" => "1010100"
 
     @Builder
-    public SubscriptionHistory(QuizCategoryType category, Subscription subscription,
+    public SubscriptionHistory(QuizCategory category, Subscription subscription,
         LocalDate startDate, LocalDate updateDate, int subscriptionType){
-        this.category = new QuizCategory(category);
+        this.category = category;
         this.subscription = subscription;
         this.startDate = startDate;
         this.updateDate = updateDate;

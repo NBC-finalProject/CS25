@@ -34,6 +34,7 @@ public class Subscription extends BaseEntity {
     @JoinColumn(name = "quizCategory_id")
     private QuizCategory category;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(columnDefinition = "DATE")
@@ -47,9 +48,9 @@ public class Subscription extends BaseEntity {
     private int subscriptionType; // "월화수목금토일" => "1111111"
 
     @Builder
-    public Subscription(QuizCategoryType category, String email, LocalDate startDate,
+    public Subscription(QuizCategory category, String email, LocalDate startDate,
         LocalDate endDate, Set<DayOfWeek> subscriptionType) {
-        this.category = new QuizCategory(category);
+        this.category = category;
         this.email = email;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -80,13 +81,12 @@ public class Subscription extends BaseEntity {
     /**
      * 사용자가 입력한 값으로 구독정보를 업데이트하는 메서드
      * @param request 사용자를 통해 받은 구독 정보
-     * @param periodDays 구독연장일 수
      */
-    public void update(SubscriptionRequest request, int periodDays) {
+    public void update(SubscriptionRequest request) {
         this.category = new QuizCategory(request.getCategory());
         this.subscriptionType = encodeDays(request.getDays());
         this.isActive = request.isActive();
-        this.endDate = endDate.plusDays(periodDays);
+        this.endDate = endDate.plusDays(request.getPeriod().getDays());
     }
 
     /**
