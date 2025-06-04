@@ -22,6 +22,9 @@ public class VerificationService {
     private final StringRedisTemplate redisTemplate;
     private final MailService mailService;
 
+    private static final String ATTEMPT_PREFIX = "VERIFY_ATTEMPT:";
+    private static final int MAX_ATTEMPTS = 5;
+
     private String create() {
         int length = 6;
         Random random;
@@ -63,16 +66,24 @@ public class VerificationService {
         }
     }
 
-    public void verify(String email, String inputCode) {
+    public void verify(String email, String code) {
+        String attemptKey = ATTEMPT_PREFIX + email;
+        String attemptCount = redisTemplate.opsForValue().get(attemptKey);
+        int attempts = attemptCount != null ? Integer.parseInt(attemptCount) : 0;
+
+        if (attempts >= MAX_ATTEMPTS) {
+            throw new VerificationException(VerificationExceptionCode.TOO_MANY_ATTEMPTS_ERROR);
+        }
         String stored = get(email);
         if (stored == null) {
             throw new VerificationException(
                 VerificationExceptionCode.VERIFICATION_CODE_EXPIRED_ERROR);
         }
-        if (!stored.equals(inputCode)) {
-            throw new VerificationException(
-                VerificationExceptionCode.VERIFICATION_CODE_MISMATCH_ERROR);
+        if (!stored.equals(code)) {
+            redisTemplate.opsForValue().set(attemptKey, String.valueOf(attempts + 1), Duration.ofMinutes(10));
+            throw new VerificationException(VerificationExceptionCode.VERIFICATION_CODE_MISMATCH_ERROR);
         }
         delete(email);
+        redisTemplate.delete(attemptKey);
     }
 }
