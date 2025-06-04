@@ -6,7 +6,9 @@ import com.example.cs25.global.dto.ApiResponse;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -23,4 +25,24 @@ public class SubscriptionController {
 
         return new ApiResponse<>(200, subscription);
     }
+
+    @PatchMapping("/subscription/{subscriptionId}")
+    public ApiResponse<Void> disableSubscription(
+        @PathVariable @Positive Long subscriptionId
+    ) {
+        subscriptionService.disableSubscription(subscriptionId);
+
+        return new ApiResponse<>(204, null);
+    }
+
+    @PutMapping("/subscription/{subscriptionId}")
+    public ApiResponse<SubscriptionInfoDto> updateSubscription(
+        @PathVariable @Positive Long subscriptionId
+    ) {
+        SubscriptionInfoDto updateSubscription = subscriptionService.updateSubscription(
+            subscriptionId);
+
+        return new ApiResponse<>(204, updateSubscription);
+    }
+
 }
