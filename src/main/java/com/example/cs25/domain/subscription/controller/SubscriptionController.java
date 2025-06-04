@@ -27,10 +27,10 @@ public class SubscriptionController {
     public ApiResponse<SubscriptionInfoDto> getSubscription(
         @PathVariable Long subscriptionId
     ){
-        return ApiResponse.<SubscriptionInfoDto>builder()
-            .httpCode(200)
-            .data(subscriptionService.getSubscription(subscriptionId))
-            .build();
+        return new ApiResponse<>(
+            200,
+            subscriptionService.getSubscription(subscriptionId)
+        );
     }
 
     @PostMapping
@@ -38,9 +38,7 @@ public class SubscriptionController {
         @RequestBody @Valid SubscriptionRequest request
     ) {
         subscriptionService.createSubscription(request);
-        return ApiResponse.<Void>builder()
-            .httpCode(201)
-            .build();
+        return new ApiResponse<>(201);
     }
 
     @PatchMapping("/{subscriptionId}")
@@ -49,8 +47,6 @@ public class SubscriptionController {
         @ModelAttribute @Valid SubscriptionRequest request
     ){
         subscriptionService.updateSubscription(subscriptionId, request);
-        return ApiResponse.<Void>builder()
-            .httpCode(200)
-            .build();
+        return new ApiResponse<>(200);
     }
 }
