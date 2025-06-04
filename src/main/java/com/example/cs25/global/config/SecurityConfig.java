@@ -48,6 +48,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers("/subscription/**").permitAll()
+                .requestMatchers("/emails/**").permitAll()
                 .anyRequest().hasAnyRole(PERMITTED_ROLES)
             )
 
