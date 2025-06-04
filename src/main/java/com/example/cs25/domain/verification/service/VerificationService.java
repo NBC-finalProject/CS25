@@ -1,21 +1,26 @@
 package com.example.cs25.domain.verification.service;
 
+import com.example.cs25.domain.mail.exception.MailException;
+import com.example.cs25.domain.mail.exception.MailExceptionCode;
+import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.verification.exception.VerificationException;
 import com.example.cs25.domain.verification.exception.VerificationExceptionCode;
+import jakarta.mail.MessagingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class VerificationService {
-    private final StringRedisTemplate redisTemplate;
 
     private static final String PREFIX = "VERIFY:";
+    private final StringRedisTemplate redisTemplate;
+    private final MailService mailService;
 
     private String create() {
         int length = 6;
@@ -47,18 +52,25 @@ public class VerificationService {
         redisTemplate.delete(PREFIX + email);
     }
 
-    public void issue(String email){
+    public void issue(String email) {
         String verificationCode = create();
         save(email, verificationCode, Duration.ofMinutes(3));
+        try {
+            mailService.sendVerificationCodeEmail(email, verificationCode);
+        }catch (MessagingException e) {
+            throw new MailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
+        }
     }
 
     public boolean verify(String email, String inputCode) {
         String stored = get(email);
-        if(stored == null){
-            throw new VerificationException(VerificationExceptionCode.VERIFICATION_CODE_EXPIRED_ERROR);
+        if (stored == null) {
+            throw new VerificationException(
+                VerificationExceptionCode.VERIFICATION_CODE_EXPIRED_ERROR);
         }
-        if(!stored.equals(inputCode)){
-            throw new VerificationException(VerificationExceptionCode.VERIFICATION_CODE_MISMATCH_ERROR);
+        if (!stored.equals(inputCode)) {
+            throw new VerificationException(
+                VerificationExceptionCode.VERIFICATION_CODE_MISMATCH_ERROR);
         }
         delete(email);
         return true;

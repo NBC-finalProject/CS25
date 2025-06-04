@@ -24,7 +24,7 @@ public class VerificationController {
         return new ApiResponse<>(200, "인증코드가 발급되었습니다.");
     }
 
-    @PostMapping()
+    @PostMapping("/verify")
     public ApiResponse<String> verifyVerificationCode(@Valid @RequestBody VerificationVerifyRequest request){
         verificationService.verify(request.email(), request.code());
         return new ApiResponse<>(200, "인증 성공");
