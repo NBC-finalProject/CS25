@@ -101,7 +101,7 @@ public class TodayQuizService {
         Quiz selectedQuiz = quizAccuracyMap.entrySet().stream()
             .filter(entry -> !solvedQuizIds.contains(entry.getKey()))
             .min(Comparator.comparingDouble(entry -> Math.abs(entry.getValue() - userAccuracy)))
-            .map(entry -> quizRepository.findById(entry.getKey()).orElse(null))
+            .flatMap(entry -> quizRepository.findById(entry.getKey()))
             .orElse(null); // 없으면 null 또는 랜덤
 
         if (selectedQuiz == null) {
