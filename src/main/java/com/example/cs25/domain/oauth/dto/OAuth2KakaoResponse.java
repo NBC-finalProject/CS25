@@ -5,11 +5,15 @@ import java.util.Map;
 import com.example.cs25.domain.oauth.exception.OAuth2Exception;
 import com.example.cs25.domain.oauth.exception.OAuth2ExceptionCode;
 
-import lombok.RequiredArgsConstructor;
+public class OAuth2KakaoResponse extends AbstractOAuth2Response {
 
-@RequiredArgsConstructor
-public class OAuth2KakaoResponse implements OAuth2Response{
-	private final Map<String, Object> attributes;
+	private final Map<String , Object> kakaoAccount;
+	private final Map<String, Object> properties;
+
+	public OAuth2KakaoResponse(Map<String, Object> attributes){
+		this.kakaoAccount = castOrThrow(attributes.get("kakao_account"));
+		this.properties = castOrThrow(attributes.get("properties"));
+	}
 
 	@Override
 	public SocialType getProvider() {
@@ -19,9 +23,7 @@ public class OAuth2KakaoResponse implements OAuth2Response{
 	@Override
 	public String getEmail() {
 		try {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-			return kakaoAccount.get("email").toString();
+			return (String) kakaoAccount.get("email");
 		} catch (Exception e){
 			throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_EMAIL_NOT_FOUND);
 		}
@@ -30,9 +32,7 @@ public class OAuth2KakaoResponse implements OAuth2Response{
 	@Override
 	public String getName() {
 		try {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-			return properties.get("nickname").toString();
+			return (String) properties.get("nickname");
 		} catch (Exception e){
 			throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_NAME_NOT_FOUND);
 		}

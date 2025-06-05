@@ -13,7 +13,8 @@ import com.example.cs25.domain.oauth.exception.OAuth2ExceptionCode;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class OAuth2GithubResponse implements OAuth2Response{
+public class OAuth2GithubResponse extends AbstractOAuth2Response {
+
 	private final Map<String, Object> attributes;
 	private final String accessToken;
 
