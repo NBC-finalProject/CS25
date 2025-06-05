@@ -1,5 +1,6 @@
 package com.example.cs25.domain.quiz.service;
 
+import com.example.cs25.domain.quiz.dto.QuizDto;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizAccuracy;
 import com.example.cs25.domain.quiz.exception.QuizException;
@@ -12,12 +13,14 @@ import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * SubscriptionRepository, UserQuizAnswerRepository 참조를 하기때문에 따로 뗏음
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TodayQuizService {
 
@@ -34,7 +38,7 @@ public class TodayQuizService {
     private final QuizAccuracyRedisRepository quizAccuracyRedisRepository;
 
     @Transactional
-    public Quiz getTodayQuiz(Long subscriptionId) {
+    public QuizDto getTodayQuiz(Long subscriptionId) {
         //해당 구독자의 문제 구독 카테고리 확인
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
@@ -56,11 +60,20 @@ public class TodayQuizService {
 
         // 슬라이딩 인덱스로 문제 선택
         int offset = Math.toIntExact((subscriptionId + daysSinceCreated) % quizList.size());
-        return quizList.get(offset);
+        Quiz selectedQuiz = quizList.get(offset);
+
+        //return selectedQuiz;
+        return QuizDto.builder()
+            .id(selectedQuiz.getId())
+            .quizCategory(selectedQuiz.getCategory().getCategoryType())
+            .question(selectedQuiz.getQuestion())
+            .choice(selectedQuiz.getChoice())
+            .type(selectedQuiz.getType())
+            .build();  //return -> QuizDto
     }
 
     @Transactional
-    public Quiz getTodayQuizNew(Long subscriptionId) {
+    public QuizDto getTodayQuizNew(Long subscriptionId) {
         //1. 해당 구독자의 문제 구독 카테고리 확인
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
         Long categoryId = subscription.getCategory().getId();
@@ -71,6 +84,7 @@ public class TodayQuizService {
             categoryId);
         double userAccuracy = calculateAccuracy(answers); // 정답 수 / 전체 수
 
+        log.info("✳ getTodayQuizNew  유저의 정답률 계산 : {}", userAccuracy);
         // 3. Redis에서 정답률 리스트 가져오기
         List<QuizAccuracy> accuracyList = quizAccuracyRedisRepository.findAllByCategoryId(
             categoryId);
@@ -84,11 +98,24 @@ public class TodayQuizService {
             .collect(Collectors.toSet());
 
         // 5. 가장 비슷한 정답률을 가진 안푼 문제 찾기
-        return quizAccuracyMap.entrySet().stream()
+        Quiz selectedQuiz = quizAccuracyMap.entrySet().stream()
             .filter(entry -> !solvedQuizIds.contains(entry.getKey()))
             .min(Comparator.comparingDouble(entry -> Math.abs(entry.getValue() - userAccuracy)))
             .map(entry -> quizRepository.findById(entry.getKey()).orElse(null))
             .orElse(null); // 없으면 null 또는 랜덤
+
+        if (selectedQuiz == null) {
+            throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
+        }
+        //return selectedQuiz;   //return -> Quiz
+        return QuizDto.builder()
+            .id(selectedQuiz.getId())
+            .quizCategory(selectedQuiz.getCategory().getCategoryType())
+            .question(selectedQuiz.getQuestion())
+            .choice(selectedQuiz.getChoice())
+            .type(selectedQuiz.getType())
+            .build(); //return -> QuizDto
+
     }
 
     private double calculateAccuracy(List<UserQuizAnswer> answers) {
@@ -101,4 +128,27 @@ public class TodayQuizService {
         return (double) totalCorrect / answers.size();
     }
 
+    public void calculateAndCacheAllQuizAccuracies() {
+        List<Quiz> quizzes = quizRepository.findAll();
+
+        List<QuizAccuracy> accuracyList = new ArrayList<>();
+        for (Quiz quiz : quizzes) {
+
+            List<UserQuizAnswer> answers = userQuizAnswerRepository.findAllByQuizId(quiz.getId());
+            long total = answers.size();
+            long correct = answers.stream().filter(UserQuizAnswer::getIsCorrect).count();
+            double accuracy = total == 0 ? 100.0 : ((double) correct / total);
+
+            QuizAccuracy qa = QuizAccuracy.builder()
+                .id("quiz:" + quiz.getId())
+                .quizId(quiz.getId())
+                .categoryId(quiz.getCategory().getId())
+                .accuracy(accuracy)
+                .build();
+
+            accuracyList.add(qa);
+        }
+        log.info("총 {}개의 정답률 캐싱 완료", accuracyList.size());
+        quizAccuracyRedisRepository.saveAll(accuracyList);
+    }
 }
