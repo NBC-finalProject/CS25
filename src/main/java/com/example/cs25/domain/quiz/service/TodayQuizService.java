@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * SubscriptionRepository, UserQuizAnswerRepository 참조를 하기때문에 따로 뗏음
+ * SubscriptionRepository, UserQuizAnswerRepository,QuizAccuracyRedisRepository 참조를 하기때문에 따로 뗏음
  */
 @Service
 @Slf4j
@@ -77,10 +77,10 @@ public class TodayQuizService {
         //1. 해당 구독자의 문제 구독 카테고리 확인
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
         Long categoryId = subscription.getCategory().getId();
-        Long userId = subscription.getId();
 
         // 2. 유저의 정답률 계산
-        List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndCategoryId(userId,
+        List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndCategoryId(
+            subscriptionId,
             categoryId);
         double userAccuracy = calculateAccuracy(answers); // 정답 수 / 전체 수
 
