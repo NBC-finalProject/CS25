@@ -23,7 +23,7 @@
 
       <div style="margin: 30px 0; text-align: center;">
         <a
-            th:href="'https://example.com/solve?email=' + ${userEmail} + '&problemId=' + ${problemId}"
+            th:href="'http://localhost:8080/example' + ${toEmail} + '&problemId=' + ${quizId}"
             style="display: inline-block; background-color: #4CAF50; color: white; padding: 14px 24px; text-decoration: none; font-weight: bold; border-radius: 6px;"
         >
           문제 풀러 가기
@@ -31,7 +31,7 @@
       </div>
 
       <p style="color: #999999; font-size: 12px; text-align: center;">
-        이 메일은 <span th:text="${userEmail}">example@email.com</span> 계정으로 발송되었습니다.<br />
+        이 메일은 <span th:text="${toEmail}">example@email.com</span> 계정으로 발송되었습니다.<br />
       </p>
     </td>
   </tr>

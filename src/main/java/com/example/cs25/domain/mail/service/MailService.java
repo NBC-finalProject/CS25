@@ -32,12 +32,12 @@ public class MailService {
     }
 
     public void sendQuizEmail(String toEmail, int quiz) throws MessagingException {
-        //이메일과 퀴즈로 url 생성
-        //Html Context에 내용 입력하기 - 임시
+
         Context context = new Context();
-        context.setVariable("code", quiz);
-        String htmlContent = templateEngine.process("verification-code", context);
-        //보내기
+        context.setVariable("toEmail", toEmail);
+        context.setVariable("quizId", quiz);
+        String htmlContent = templateEngine.process("today-quiz", context);
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

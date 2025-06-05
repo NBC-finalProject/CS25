@@ -1,5 +1,8 @@
 package com.example.cs25.domain.quiz.service;
 
+import com.example.cs25.domain.mail.exception.MailException;
+import com.example.cs25.domain.mail.exception.MailExceptionCode;
+import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
@@ -8,13 +11,17 @@ import com.example.cs25.domain.quiz.exception.QuizException;
 import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25.domain.quiz.repository.QuizRepository;
+import com.example.cs25.domain.subscription.entity.Subscription;
+import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +35,8 @@ public class QuizService {
     private final Validator validator;
     private final QuizRepository quizRepository;
     private final QuizCategoryRepository quizCategoryRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final MailService mailService;
 
     @Transactional
     public void uploadQuizJson(MultipartFile file, String categoryType,
