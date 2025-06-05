@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers("/subscription/**").permitAll()
                 .requestMatchers("/emails/**").permitAll()
+                .requestMatchers("/accuracyTest/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경

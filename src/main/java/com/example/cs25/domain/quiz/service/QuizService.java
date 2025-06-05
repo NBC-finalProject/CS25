@@ -67,13 +67,4 @@ public class QuizService {
     }
 
 
-    @Transactional
-    public int getTodayQuiz(Long subscriptionId) {
-        //해당 구독자의 문제 구독 카테고리 확인
-
-        //해당 구독자의 최근 문제 풀이 기록확인
-
-        //다음 문제 내주기
-        return 0;
-    }
 }
