@@ -23,7 +23,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final MacAlgorithm algorithm = Jwts.SIG.HS256;
-    @Value("${jwt.secret-key}")
+    @Value("${JWT_SECRET_KEY}")
     private String secret;
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpiration;
