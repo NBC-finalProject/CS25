@@ -1,9 +1,9 @@
-package com.example.cs25.domain.oauth.dto;
+package com.example.cs25.domain.oauth2.dto;
 
 import java.util.Map;
 
-import com.example.cs25.domain.oauth.exception.OAuth2Exception;
-import com.example.cs25.domain.oauth.exception.OAuth2ExceptionCode;
+import com.example.cs25.domain.oauth2.exception.OAuth2Exception;
+import com.example.cs25.domain.oauth2.exception.OAuth2ExceptionCode;
 
 public class OAuth2KakaoResponse extends AbstractOAuth2Response {
 

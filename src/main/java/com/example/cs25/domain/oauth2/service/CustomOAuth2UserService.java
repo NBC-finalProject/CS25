@@ -1,4 +1,4 @@
-package com.example.cs25.domain.users.service;
+package com.example.cs25.domain.oauth2.service;
 
 import java.util.Map;
 
@@ -8,13 +8,13 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.example.cs25.domain.oauth.dto.OAuth2GithubResponse;
-import com.example.cs25.domain.oauth.dto.OAuth2KakaoResponse;
-import com.example.cs25.domain.oauth.dto.OAuth2NaverResponse;
-import com.example.cs25.domain.oauth.dto.OAuth2Response;
-import com.example.cs25.domain.oauth.dto.SocialType;
-import com.example.cs25.domain.oauth.exception.OAuth2Exception;
-import com.example.cs25.domain.oauth.exception.OAuth2ExceptionCode;
+import com.example.cs25.domain.oauth2.dto.OAuth2GithubResponse;
+import com.example.cs25.domain.oauth2.dto.OAuth2KakaoResponse;
+import com.example.cs25.domain.oauth2.dto.OAuth2NaverResponse;
+import com.example.cs25.domain.oauth2.dto.OAuth2Response;
+import com.example.cs25.domain.oauth2.dto.SocialType;
+import com.example.cs25.domain.oauth2.exception.OAuth2Exception;
+import com.example.cs25.domain.oauth2.exception.OAuth2ExceptionCode;
 import com.example.cs25.domain.users.entity.Role;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.domain.users.exception.UserException;

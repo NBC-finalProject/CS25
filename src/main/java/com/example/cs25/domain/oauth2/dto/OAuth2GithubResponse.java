@@ -1,4 +1,4 @@
-package com.example.cs25.domain.oauth.dto;
+package com.example.cs25.domain.oauth2.dto;
 
 import java.util.List;
 import java.util.Map;
@@ -7,8 +7,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.example.cs25.domain.oauth.exception.OAuth2Exception;
-import com.example.cs25.domain.oauth.exception.OAuth2ExceptionCode;
+import com.example.cs25.domain.oauth2.exception.OAuth2Exception;
+import com.example.cs25.domain.oauth2.exception.OAuth2ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 

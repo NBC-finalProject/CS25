@@ -1,4 +1,4 @@
-package com.example.cs25.domain.oauth.exception;
+package com.example.cs25.domain.oauth2.exception;
 
 import org.springframework.http.HttpStatus;
 

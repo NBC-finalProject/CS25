@@ -1,4 +1,4 @@
-package com.example.cs25.domain.oauth.dto;
+package com.example.cs25.domain.oauth2.dto;
 
 
 import java.util.Arrays;
