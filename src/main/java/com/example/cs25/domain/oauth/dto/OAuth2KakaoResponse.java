@@ -2,6 +2,9 @@ package com.example.cs25.domain.oauth.dto;
 
 import java.util.Map;
 
+import com.example.cs25.domain.oauth.exception.OAuth2Exception;
+import com.example.cs25.domain.oauth.exception.OAuth2ExceptionCode;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -20,7 +23,7 @@ public class OAuth2KakaoResponse implements OAuth2Response{
 			Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
 			return kakaoAccount.get("email").toString();
 		} catch (Exception e){
-			throw new IllegalStateException("카카오 계정정보에 이메일이 존재하지 않습니다.");
+			throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_EMAIL_NOT_FOUND);
 		}
 	}
 
@@ -31,7 +34,7 @@ public class OAuth2KakaoResponse implements OAuth2Response{
 			Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
 			return properties.get("nickname").toString();
 		} catch (Exception e){
-			throw new IllegalStateException("카카오 계정정보에 닉네임이 존재하지 않습니다.");
+			throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_NAME_NOT_FOUND);
 		}
 	}
 }
