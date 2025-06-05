@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.cs25.domain.oauth.dto.OAuth2GithubResponse;
 import com.example.cs25.domain.oauth.dto.OAuth2KakaoResponse;
+import com.example.cs25.domain.oauth.dto.OAuth2NaverResponse;
 import com.example.cs25.domain.oauth.dto.OAuth2Response;
 import com.example.cs25.domain.oauth.dto.SocialType;
 import com.example.cs25.domain.oauth.exception.OAuth2Exception;
@@ -55,11 +56,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * @throws UserException 지원하지 않는 서비스 제공자일 경우 예외처리
      */
     private OAuth2Response getOAuth2Response(SocialType socialType, Map<String, Object> attributes, String accessToken) {
-        if(socialType == SocialType.KAKAO) {
-            return new OAuth2KakaoResponse(attributes);
-        } else if(socialType == SocialType.GITHUB) {
-            return new OAuth2GithubResponse(attributes, accessToken);
-        } else {
+        try {
+            return switch (socialType) {
+                case KAKAO -> new OAuth2KakaoResponse(attributes);
+                case GITHUB -> new OAuth2GithubResponse(attributes, accessToken);
+                case NAVER -> new OAuth2NaverResponse(attributes);
+            };
+        } catch (Exception e) {
             throw new OAuth2Exception(OAuth2ExceptionCode.UNSUPPORTED_SOCIAL_PROVIDER);
         }
     }
