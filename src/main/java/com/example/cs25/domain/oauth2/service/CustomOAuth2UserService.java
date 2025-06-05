@@ -53,18 +53,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * @param attributes 제공받은 데이터
      * @param accessToken 액세스토큰 (Github 이메일 찾는데 사용)
      * @return OAuth2 응답객체를 반환
-     * @throws UserException 지원하지 않는 서비스 제공자일 경우 예외처리
      */
     private OAuth2Response getOAuth2Response(SocialType socialType, Map<String, Object> attributes, String accessToken) {
-        try {
-            return switch (socialType) {
-                case KAKAO -> new OAuth2KakaoResponse(attributes);
-                case GITHUB -> new OAuth2GithubResponse(attributes, accessToken);
-                case NAVER -> new OAuth2NaverResponse(attributes);
-            };
-        } catch (Exception e) {
-            throw new OAuth2Exception(OAuth2ExceptionCode.UNSUPPORTED_SOCIAL_PROVIDER);
-        }
+        return switch (socialType) {
+            case KAKAO -> new OAuth2KakaoResponse(attributes);
+            case GITHUB -> new OAuth2GithubResponse(attributes, accessToken);
+            case NAVER -> new OAuth2NaverResponse(attributes);
+            default -> throw new OAuth2Exception(OAuth2ExceptionCode.UNSUPPORTED_SOCIAL_PROVIDER);
+        };
     }
 
     /**

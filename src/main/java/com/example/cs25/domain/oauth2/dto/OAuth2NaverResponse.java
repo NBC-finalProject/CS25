@@ -2,6 +2,9 @@ package com.example.cs25.domain.oauth2.dto;
 
 import java.util.Map;
 
+import com.example.cs25.domain.oauth2.exception.OAuth2Exception;
+import com.example.cs25.domain.oauth2.exception.OAuth2ExceptionCode;
+
 public class OAuth2NaverResponse extends AbstractOAuth2Response {
 
 	private final Map<String, Object> response;
@@ -17,11 +20,19 @@ public class OAuth2NaverResponse extends AbstractOAuth2Response {
 
 	@Override
 	public String getEmail() {
-		return (String) response.get("email");
+		try {
+			return (String) response.get("email");
+		} catch (Exception e) {
+			throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_EMAIL_NOT_FOUND);
+		}
 	}
 
 	@Override
 	public String getName() {
-		return (String) response.get("name");
+		try {
+			return (String) response.get("name");
+		} catch (Exception e) {
+			throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_NAME_NOT_FOUND);
+		}
 	}
 }
