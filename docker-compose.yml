@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: cs25
     ports:
-      - "13306:3306"
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
 
