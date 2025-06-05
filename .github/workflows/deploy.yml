@@ -1,70 +1,59 @@
-name: Deploy
+name: Deploy to EC2
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - dev
+    branches: [ feat/41 ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          java-version: '17'
-          distribution: 'adopt'
+          username: baekjonghyun
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: Build & Push Docker image
+        run: |
+          docker build -t baekjonghyun/cs25-app:latest .
+          docker push baekjonghyun/cs25-app:latest
 
-      - name: gradlew bootJar
-        run: ./gradlew bootJar
+      - name: Create .env from secrets
+        run: |
+          echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "JWT_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
+          echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}" >> .env
+          echo "mysql_host=${{ secrets.MYSQL_HOST }}" >> .env
+          echo "redis_host=${{ secrets.REDIS_HOST }}" >> .env
 
-      - name: copy jar to server
-        uses: appleboy/scp-action@master
+      - name: Upload .env and docker-compose.yml to EC2
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          port: 22
-          source: "./build/libs/*.jar"
-          target: "~"
-          strip_components: 2
+          source: ".env, docker-compose.yml"
+          target: "/home/ec2-user/app"
 
-      - name: SSH Commands
-        uses: appleboy/ssh-action@v0.1.6
+      - name: Run docker-compose on EC2
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script_stop: true
           script: |
-            sudo yum update -y && sudo yum install -y java-17-amazon-corretto
-            # 기존 java -jar 프로세스 모두 강제 종료
-            for pid in $(pgrep java); do
-              if ps -p $pid -o args= | grep -q 'java -jar'; then
-                echo "Terminating Java process (PID: $pid)"
-                kill -9 $pid
-              fi
-            done
-            
-            export MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
-            export MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
-            export KAKAO_ID=${{ secrets.KAKAO_ID }}
-            export KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-            export REDIS_PASSWORD=
-            export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-            export JWT_KEY=${{ secrets.JWT_KEY }}
-            export CLIENT_ID=${{ secrets.CLIENT_ID }}
-            export CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
-            
-            # 애플리케이션 즉시 재기동 (백그라운드)
-            nohup java -jar /home/ec2-user/cs25-0.0.1-SNAPSHOT.jar \
-              --spring.profiles.active=local \
-              > /home/ec2-user/app.log 2>&1 &
+            cd /home/ec2-user/app
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d

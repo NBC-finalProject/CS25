@@ -35,9 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
-**/application-local.properties
-**/docker-compose.yml
 
-### yml ###
-/src/main/resources/application.yml
 .env
+
+
