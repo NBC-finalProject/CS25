@@ -1,15 +1,15 @@
 package com.example.cs25.domain.quiz.entity;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash("quizAccuracy")
+
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
+@RedisHash(value = "quizAccuracy", timeToLive = 86400)
 public class QuizAccuracy {
 
     @Id
@@ -18,4 +18,12 @@ public class QuizAccuracy {
     private Long quizId;
     private Long categoryId;
     private double accuracy;
+
+    @Builder
+    public QuizAccuracy(String id, Long quizId, Long categoryId, double accuracy) {
+        this.id = id;
+        this.quizId = quizId;
+        this.categoryId = categoryId;
+        this.accuracy = accuracy;
+    }
 }

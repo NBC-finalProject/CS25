@@ -1,8 +1,10 @@
 package com.example.cs25.domain.quiz.service;
 
 import com.example.cs25.domain.quiz.entity.Quiz;
+import com.example.cs25.domain.quiz.entity.QuizAccuracy;
 import com.example.cs25.domain.quiz.exception.QuizException;
 import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
+import com.example.cs25.domain.quiz.repository.QuizAccuracyRedisRepository;
 import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class TodayQuizService {
     private final QuizRepository quizRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
+    private final QuizAccuracyRedisRepository quizAccuracyRedisRepository;
 
     @Transactional
     public Quiz getTodayQuiz(Long subscriptionId) {
@@ -66,6 +70,13 @@ public class TodayQuizService {
         List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndCategoryId(userId,
             categoryId);
         double userAccuracy = calculateAccuracy(answers); // 정답 수 / 전체 수
+
+        // 3. Redis에서 정답률 리스트 가져오기
+        List<QuizAccuracy> accuracyList = quizAccuracyRedisRepository.findAllByCategoryId(
+            categoryId);
+        //  QuizAccuracy 리스트를 Map<quizId, accuracy>로 변환
+        Map<Long, Double> quizAccuracyMap = accuracyList.stream()
+            .collect(Collectors.toMap(QuizAccuracy::getQuizId, QuizAccuracy::getAccuracy));
 
         // 4. 유저가 푼 문제 ID 목록
         Set<Long> solvedQuizIds = answers.stream()
