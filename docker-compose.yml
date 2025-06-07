@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: cs25
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
 
@@ -16,16 +16,16 @@ services:
     ports:
       - "6379:6379"
 
-  spring-app:
-    image: baekjonghyun/cs25-app:latest
-    ports:
-      - "8080:8080"
-    restart: always
-    depends_on:
-      - mysql
-      - redis
-    env_file:
-      - .env
+#  spring-app:
+#    image: baekjonghyun/cs25-app:latest
+#    ports:
+#      - "8080:8080"
+#    restart: always
+#    depends_on:
+#      - mysql
+#      - redis
+#    env_file:
+#      - .env
 
 volumes:
   mysql-data:
