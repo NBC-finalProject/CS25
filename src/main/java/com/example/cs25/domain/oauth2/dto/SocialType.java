@@ -1,4 +1,4 @@
-package com.example.cs25.domain.oauth.dto;
+package com.example.cs25.domain.oauth2.dto;
 
 
 import java.util.Arrays;
@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum SocialType {
     KAKAO("kakao_account", "id", "email"),
-    GITHUB(null, "id", "login");
+    GITHUB(null, "id", "login"),
+    NAVER("response", "id", "email");
 
     private final String attributeKey; //소셜로부터 전달받은 데이터를 Parsing하기 위해 필요한 key 값,
                                         // kakao는 kakao_account안에 필요한 정보들이 담겨져있음.
