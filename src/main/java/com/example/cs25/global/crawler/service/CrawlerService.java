@@ -2,6 +2,10 @@ package com.example.cs25.global.crawler.service;
 
 import com.example.cs25.global.crawler.github.GitHubRepoInfo;
 import com.example.cs25.global.crawler.github.GitHubUrlParser;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import java.nio.file.StandardOpenOption;
 
 @RequiredArgsConstructor
 public class CrawlerService {
@@ -67,6 +72,23 @@ public class CrawlerService {
 
         Document doc = new Document(content, metadata);
         //일단 로컬에 저장 후, 저장이 잘 되면 RagService 호출로 리팩터링
+        saveToFile(doc);
+    }
 
+    private void saveToFile(Document document) {
+
+        String SAVE_DIR = "data/markdowns";
+        try {
+            Files.createDirectories(Paths.get(SAVE_DIR));
+
+            String safeFileName = document.getMetadata().get("path").toString().replace("/", "-").replace(".md", ".txt");
+            Path filePath = Paths.get(SAVE_DIR, safeFileName);
+
+            // 파일 쓰기
+            Files.writeString(filePath, document.getText(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+        } catch (IOException e) {
+            System.err.println("저장 실패: " + e.getMessage());
+        }
     }
 }
