@@ -1,5 +1,10 @@
 package com.example.cs25.domain.mail.service;
 
+import com.example.cs25.domain.mail.exception.MailException;
+import com.example.cs25.domain.mail.exception.MailExceptionCode;
+import com.example.cs25.domain.quiz.service.QuizService;
+import com.example.cs25.domain.subscription.entity.Subscription;
+import com.example.cs25.domain.verification.service.VerificationService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -47,4 +52,5 @@ public class MailService {
 
         mailSender.send(message);
     }
+
 }
