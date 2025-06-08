@@ -23,19 +23,24 @@ import java.nio.file.StandardOpenOption;
 public class CrawlerService {
 
     private final RestTemplate restTemplate;
+    private String githubToken;
 
     public void crawlingGithubDocument(String url){
         //url에서 필요 정보 추출
         GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
-        //깃허브 크롤링 api 호출
 
+        githubToken = System.getenv("GITHUB_TOKEN");
+
+        //깃허브 크롤링 api 호출
+        crawlOnlyFolderMarkdowns(repoInfo.getOwner(), repoInfo.getRepo(), repoInfo.getPath());
     }
 
     private void crawlOnlyFolderMarkdowns(String owner, String repo, String path) {
         String url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path;
 
+
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + GITHUB_TOKEN); // Optional
+        headers.set("Authorization", "Bearer " + githubToken); // Optional
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
