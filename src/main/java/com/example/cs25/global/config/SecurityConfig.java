@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/crawlers/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
-                .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경
+                .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
 
                 .anyRequest().authenticated()
             )

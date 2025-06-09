@@ -24,7 +24,8 @@ public class TokenService {
         String refreshToken = jwtTokenProvider.generateRefreshToken(
             authUser.getId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
         );
-        refreshTokenService.save(authUser.getId(), refreshToken, jwtTokenProvider.getRefreshTokenDuration());
+        refreshTokenService.save(authUser.getId(), refreshToken,
+            jwtTokenProvider.getRefreshTokenDuration());
 
         return new TokenResponseDto(accessToken, refreshToken);
     }
@@ -32,13 +33,14 @@ public class TokenService {
 
     public ResponseCookie createAccessTokenCookie(String accessToken) {
         return ResponseCookie.from("accessToken", accessToken)
-            .httpOnly(false)
-            .secure(false)
+            .httpOnly(false) //프론트 생기면 true
+            .secure(false) //https 적용되면 true
             .path("/")
             .maxAge(Duration.ofMinutes(60))
             .sameSite("Lax")
             .build();
     }
+
     public void clearTokenForUser(Long userId, HttpServletResponse response) {
         // 1. Redis refreshToken 삭제
         refreshTokenService.delete(userId);
