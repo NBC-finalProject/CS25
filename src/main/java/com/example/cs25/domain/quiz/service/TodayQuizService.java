@@ -110,7 +110,7 @@ public class TodayQuizService {
         Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
         //메일 발송
         try {
-            mailService.sendQuizEmail(subscription.getEmail(), subscriptionId, selectedQuiz.getId());
+            mailService.sendQuizEmail(subscription, selectedQuiz);
         }catch (MessagingException e) {
             throw new MailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         }
