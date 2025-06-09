@@ -1,5 +1,6 @@
 package com.example.cs25.global.crawler.service;
 
+import com.example.cs25.domain.ai.service.RagService;
 import com.example.cs25.global.crawler.github.GitHubRepoInfo;
 import com.example.cs25.global.crawler.github.GitHubUrlParser;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +30,10 @@ import java.nio.file.StandardOpenOption;
 @RequiredArgsConstructor
 public class CrawlerService {
 
+    private final RagService ragService;
     private final RestTemplate restTemplate;
     private String githubToken;
+    private final List<Document> documentList = new ArrayList<>();
 
     public void crawlingGithubDocument(String url){
         //url에서 필요 정보 추출
@@ -40,6 +44,8 @@ public class CrawlerService {
         //깃허브 크롤링 api 호출
         crawlOnlyFolderMarkdowns(repoInfo.getOwner(), repoInfo.getRepo(), repoInfo.getPath());
 
+        //List에 저장된 문서 ChromaVectorDB에 저장
+        ragService.saveDocumentsToVectorStore(documentList);
     }
 
     private void crawlOnlyFolderMarkdowns(String owner, String repo, String path) {
@@ -70,7 +76,7 @@ public class CrawlerService {
             else if ("file".equals(type) && name.endsWith(".md") && filePath.contains("/")) {
                 String downloadUrl = (String) item.get("download_url");
                 downloadUrl = URLDecoder.decode(downloadUrl, StandardCharsets.UTF_8);
-                System.out.println("📄 DOWNLOAD URL: " + downloadUrl);
+                //System.out.println("DOWNLOAD URL: " + downloadUrl);
                 try {
                     String content = restTemplate.getForObject(downloadUrl, String.class);
                     saveMarkdown(name, filePath, content);
@@ -91,7 +97,8 @@ public class CrawlerService {
 
         Document doc = new Document(content, metadata);
         //일단 로컬에 저장 후, 저장이 잘 되면 RagService 호출로 리팩터링
-        saveToFile(doc);
+        //saveToFile(doc);
+        documentList.add(doc);
     }
 
     private void saveToFile(Document document) {
