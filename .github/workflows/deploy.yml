@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ feat/41 ]
 
 jobs:
   deploy:
@@ -27,13 +27,15 @@ jobs:
         run: |
           echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-          echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> .env
+          echo "JWT_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
           echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
           echo "GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}" >> .env
+          echo "mysql_host=${{ secrets.MYSQL_HOST }}" >> .env
+          echo "redis_host=${{ secrets.REDIS_HOST }}" >> .env
 
       - name: Upload .env and docker-compose.yml to EC2
         uses: appleboy/scp-action@v0.1.4
