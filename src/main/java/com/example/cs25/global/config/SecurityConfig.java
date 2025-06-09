@@ -1,6 +1,6 @@
 package com.example.cs25.global.config;
 
-import com.example.cs25.domain.users.service.CustomOAuth2UserService;
+import com.example.cs25.domain.oauth2.service.CustomOAuth2UserService;
 import com.example.cs25.global.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25.global.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
