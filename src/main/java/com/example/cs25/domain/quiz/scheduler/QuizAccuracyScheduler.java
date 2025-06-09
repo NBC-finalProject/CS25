@@ -15,7 +15,12 @@ public class QuizAccuracyScheduler {
 
     @Scheduled(cron = "0 55 8 * * *")
     public void calculateAndCacheAllQuizAccuracies() {
-        log.info("⏰ [Scheduler] 정답률 계산 시작");
-        quizService.calculateAndCacheAllQuizAccuracies();
+        try {
+            log.info("⏰ [Scheduler] 정답률 계산 시작");
+            quizService.calculateAndCacheAllQuizAccuracies();
+            log.info("[Scheduler] 정답률 계산 완료");
+        } catch (Exception e) {
+            log.error("[Scheduler] 정답률 계산 중 오류 발생", e);
+        }
     }
 }
