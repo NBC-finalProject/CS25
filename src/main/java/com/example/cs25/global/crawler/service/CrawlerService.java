@@ -38,14 +38,16 @@ public class CrawlerService {
         GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
 
         githubToken = System.getenv("GITHUB_TOKEN");
-
+        if (githubToken == null || githubToken.trim().isEmpty()) {
+            throw new IllegalStateException("GITHUB_TOKEN 환경변수가 설정되지 않았습니다.");
+        }
         //깃허브 크롤링 api 호출
         List<Document> documentList = crawlOnlyFolderMarkdowns(repoInfo.getOwner(),
             repoInfo.getRepo(), repoInfo.getPath());
 
         //List 에 저장된 문서 ChromaVectorDB에 저장
-        ragService.saveDocumentsToVectorStore(documentList);
-        //saveToFile(documentList);
+        //ragService.saveDocumentsToVectorStore(documentList);
+        saveToFile(documentList);
     }
 
     private List<Document> crawlOnlyFolderMarkdowns(String owner, String repo, String path) {
@@ -126,7 +128,8 @@ public class CrawlerService {
                 Files.writeString(filePath, document.getText(),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
-                System.err.println("파일 저장 실패 (" + document.getMetadata().get("path") + "): " + e.getMessage());
+                System.err.println(
+                    "파일 저장 실패 (" + document.getMetadata().get("path") + "): " + e.getMessage());
             }
         }
     }
