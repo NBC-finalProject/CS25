@@ -44,11 +44,19 @@ public class AiQuestionGeneratorService {
             """.formatted(context);
 
         String extractedTopic = chatClient.prompt()
+<<<<<<< Updated upstream
                 .system("너는 문서에서 중심 주제를 추출하는 CS 요약 전문가야. 반드시 하나의 키워드만 출력해.")
                 .user(topicExtractionPrompt)
                 .call()
                 .content()
                 .trim();
+=======
+            .system("너는 문서에서 중심 주제를 추출하는 CS 요약 전문가야. 반드시 하나의 키워드만 출력해.")
+            .user(topicExtractionPrompt)
+            .call()
+            .content()
+            .trim();
+>>>>>>> Stashed changes
 
         // Step 4. 카테고리 자동 분류
         String categoryPrompt = """
@@ -58,11 +66,19 @@ public class AiQuestionGeneratorService {
             """.formatted(extractedTopic);
 
         String categoryType = chatClient.prompt()
+<<<<<<< Updated upstream
                 .system("너는 CS 주제를 기반으로 카테고리를 자동 분류하는 전문가야. 하나만 출력해.")
                 .user(categoryPrompt)
                 .call()
                 .content()
                 .trim();
+=======
+            .system("너는 CS 주제를 기반으로 카테고리를 자동 분류하는 전문가야. 하나만 출력해.")
+            .user(categoryPrompt)
+            .call()
+            .content()
+            .trim();
+>>>>>>> Stashed changes
 
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
 
@@ -85,11 +101,19 @@ public class AiQuestionGeneratorService {
             """.formatted(context);
 
         String aiOutput = chatClient.prompt()
+<<<<<<< Updated upstream
                 .system("너는 문서 기반으로 문제를 출제하는 전문가야. 정확히 문제/정답/해설 세 부분을 출력해.")
                 .user(generationPrompt)
                 .call()
                 .content()
                 .trim();
+=======
+            .system("너는 문서 기반으로 문제를 출제하는 전문가야. 정확히 문제/정답/해설 세 부분을 출력해.")
+            .user(generationPrompt)
+            .call()
+            .content()
+            .trim();
+>>>>>>> Stashed changes
 
         // Step 6. Parsing
         String[] lines = aiOutput.split("\n");
@@ -99,12 +123,21 @@ public class AiQuestionGeneratorService {
 
         // Step 7. 저장
         Quiz quiz = Quiz.builder()
+<<<<<<< Updated upstream
                 .type(QuizFormatType.SUBJECTIVE)
                 .question(question)
                 .answer(answer)
                 .commentary(commentary)
                 .category(category)
                 .build();
+=======
+            .type(QuizFormatType.SUBJECTIVE)
+            .question(question)
+            .answer(answer)
+            .commentary(commentary)
+            .category(category)
+            .build();
+>>>>>>> Stashed changes
 
         return quizRepository.save(quiz);
     }

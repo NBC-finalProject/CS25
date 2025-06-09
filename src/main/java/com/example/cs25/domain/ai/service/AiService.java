@@ -6,12 +6,11 @@ import com.example.cs25.domain.ai.exception.AiExceptionCode;
 import com.example.cs25.domain.quiz.repository.QuizRepository;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.stereotype.Service;
 import org.springframework.ai.document.Document;
-
-import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +22,14 @@ public class AiService {
     private final UserQuizAnswerRepository userQuizAnswerRepository;
     private final RagService ragService;
 
-    public AiFeedbackResponse getFeedback(Long quizId, Long subscriptionId) {
-
-        var quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_QUIZ));
-
-        var answer = userQuizAnswerRepository.findFirstByQuizIdAndSubscriptionIdOrderByCreatedAtDesc(
-                quizId, subscriptionId)
+    public AiFeedbackResponse getFeedback(Long answerId) {
+        var answer = userQuizAnswerRepository.findById(answerId)
             .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
+        var quiz = answer.getQuiz();
         StringBuilder context = new StringBuilder();
-        List<Document>  relevantDocs = ragService.searchRelevant(quiz.getQuestion());
+        List<Document> relevantDocs = ragService.searchRelevant(quiz.getQuestion());
+
         for (Document doc : relevantDocs) {
             context.append("- 문서: ").append(doc.getText()).append("\n");
         }
@@ -41,18 +37,17 @@ public class AiService {
         String prompt = """
             당신은 CS 문제 채점 전문가입니다. 아래 문서를 참고하여 사용자의 답변이 문제의 요구사항에 부합하는지 판단하세요.
             문서가 충분하지 않거나 관련 정보가 없는 경우, 당신이 알고 있는 CS 지식으로 보완해서 판단해도 됩니다.
-
+            
             문서:
             %s
-
+            
             문제: %s
             사용자 답변: %s
-
+            
             아래 형식으로 답변하세요:
             - 정답 또는 오답: 이유를 명확하게 작성
             - 피드백: 어떤 점이 잘되었고, 어떤 점을 개선해야 하는지 구체적으로 작성
             """.formatted(context, quiz.getQuestion(), answer.getUserAnswer());
-
 
         String feedback;
         try {
