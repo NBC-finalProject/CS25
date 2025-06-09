@@ -45,7 +45,7 @@ public class RagService {
     public List<Document> getAllDocuments() {
         List<Document> docs = vectorStore.similaritySearch(SearchRequest.builder()
                 .query("")
-                .topK()
+                .topK(100)
                 .build());
         log.info("저장된 문서 개수: {}", docs.size());
         docs.forEach(doc -> log.info("문서 ID: {}, 내용: {}", doc.getId(), doc.getText()));
