@@ -1,6 +1,6 @@
 package com.example.cs25.global.config;
 
-import com.example.cs25.domain.users.service.CustomOAuth2UserService;
+import com.example.cs25.domain.oauth2.service.CustomOAuth2UserService;
 import com.example.cs25.global.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25.global.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
+    private static final String PERMITTED_ROLES[] = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -49,6 +49,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers("/subscription/**").permitAll()
+                .requestMatchers("/emails/**").permitAll()
+                .requestMatchers("/accuracyTest/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경

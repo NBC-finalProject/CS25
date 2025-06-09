@@ -1,6 +1,6 @@
 package com.example.cs25.domain.users.entity;
 
-import com.example.cs25.domain.oauth.dto.SocialType;
+import com.example.cs25.domain.oauth2.dto.SocialType;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.global.entity.BaseEntity;
 import jakarta.persistence.Entity;

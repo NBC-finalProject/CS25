@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class QuizService {
-
     private final ObjectMapper objectMapper;
     private final Validator validator;
     private final QuizRepository quizRepository;
@@ -35,8 +34,7 @@ public class QuizService {
         QuizFormatType formatType) {
         try {
             QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)
-                .orElseThrow(
-                    () -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_EVENT));
+                .orElseThrow(() -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
 
             CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(),
                 CreateQuizDto[].class);
@@ -62,20 +60,11 @@ public class QuizService {
 
             quizRepository.saveAll(quizzes);
         } catch (IOException e) {
-            throw new QuizException(QuizExceptionCode.JSON_PARSING_FAILED);
+            throw new QuizException(QuizExceptionCode.JSON_PARSING_FAILED_ERROR);
         } catch (ConstraintViolationException e) {
-            throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED);
+            throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
         }
     }
 
 
-    @Transactional
-    public int getTodayQuiz(Long subscriptionId) {
-        //해당 구독자의 문제 구독 카테고리 확인
-
-        //해당 구독자의 최근 문제 풀이 기록확인
-
-        //다음 문제 내주기
-        return 0;
-    }
 }

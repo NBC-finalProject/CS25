@@ -9,6 +9,9 @@ import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+import org.springframework.ai.document.Document;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ public class AiService {
     private final QuizRepository quizRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
+    private final RagService ragService;
 
     public AiFeedbackResponse getFeedback(Long quizId, Long subscriptionId) {
 
@@ -28,19 +32,27 @@ public class AiService {
                 quizId, subscriptionId)
             .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
-        String prompt = "문제: " + quiz.getQuestion() + "\n" +
-            "사용자 답변: " + answer.getUserAnswer() + "\n" +
-            "너는 CS 문제를 채점하는 AI 채점관이야. 아래 조건에 맞게 답변해.\n" +
-            "1. 답변은 반드시 '정답' 또는 '오답'이라는 단어로 시작해야 해. 다른 단어로 시작하지 말 것.\n" +
-            "2. '정답' 또는 '오답' 다음에는 채점 이유를 명확하게 작성해. (예: 문제 요구사항과 얼마나 일치하는지, 핵심 개념이 잘 설명되었는지 등)\n" +
-            "3. 그 다음에는 사용자 답변에 대한 구체적인 피드백을 작성해. (어떤 부분이 잘 되었고, 어떤 부분을 개선해야 하는지)\n" +
-            "4. 다른 표현(예: '맞습니다', '틀렸습니다')은 사용하지 말고, 무조건 '정답' 또는 '오답'으로 시작해.\n" +
-            "5. 예시:\n" +
-            "- 정답: 답변이 문제의 요구사항을 정확히 충족하며, 네트워크 계층의 개념을 올바르게 설명했다. 피드백: 전체적인 설명이 명확하며, 추가적으로 HTTP 상태 코드의 예시를 들어주면 더 좋겠다.\n"
-            +
-            "- 오답: 사용자가 작성한 답변이 문제의 요구사항을 충족하지 못했고, TCP와 UDP의 차이점을 명확하게 설명하지 못했다. 피드백: TCP의 연결 방식과 UDP의 비연결 방식 차이에 대한 구체적인 설명이 필요하다.\n"
-            +
-            "위 조건을 반드시 지켜서 평가해줘.";
+        StringBuilder context = new StringBuilder();
+        List<Document>  relevantDocs = ragService.searchRelevant(quiz.getQuestion());
+        for (Document doc : relevantDocs) {
+            context.append("- 문서: ").append(doc.getText()).append("\n");
+        }
+
+        String prompt = """
+            당신은 CS 문제 채점 전문가입니다. 아래 문서를 참고하여 사용자의 답변이 문제의 요구사항에 부합하는지 판단하세요.
+            문서가 충분하지 않거나 관련 정보가 없는 경우, 당신이 알고 있는 CS 지식으로 보완해서 판단해도 됩니다.
+
+            문서:
+            %s
+
+            문제: %s
+            사용자 답변: %s
+
+            아래 형식으로 답변하세요:
+            - 정답 또는 오답: 이유를 명확하게 작성
+            - 피드백: 어떤 점이 잘되었고, 어떤 점을 개선해야 하는지 구체적으로 작성
+            """.formatted(context, quiz.getQuestion(), answer.getUserAnswer());
+
 
         String feedback;
         try {
