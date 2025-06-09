@@ -1,10 +1,7 @@
 package com.example.cs25.domain.mail.service;
 
-import com.example.cs25.domain.mail.exception.MailException;
-import com.example.cs25.domain.mail.exception.MailExceptionCode;
-import com.example.cs25.domain.quiz.service.QuizService;
+import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.subscription.entity.Subscription;
-import com.example.cs25.domain.verification.service.VerificationService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -36,18 +33,18 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendQuizEmail(String toEmail, Long subscriptionId, Long quiz) throws MessagingException {
+    public void sendQuizEmail(Subscription subscription, Quiz quiz) throws MessagingException {
 
         Context context = new Context();
-        context.setVariable("toEmail", toEmail);
-        context.setVariable("subscriptionId", subscriptionId);
-        context.setVariable("quizId", quiz);
+        context.setVariable("toEmail", subscription.getEmail());
+        context.setVariable("subscriptionId", subscription.getId());
+        context.setVariable("quizId", quiz.getId());
         String htmlContent = templateEngine.process("today-quiz", context);
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setTo(toEmail);
+        helper.setTo(subscription.getEmail());
         helper.setSubject("[CS25] 오늘의 문제 도착");
         helper.setText(htmlContent, true);
 

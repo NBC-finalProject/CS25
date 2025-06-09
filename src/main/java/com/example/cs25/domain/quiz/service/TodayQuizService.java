@@ -78,7 +78,7 @@ public class TodayQuizService {
     }
 
     @Transactional
-    public QuizDto getTodayQuizBySubscription(Subscription subscription) {
+    public Quiz getTodayQuizBySubscription(Subscription subscription) {
         //id 순으로 정렬
         List<Quiz> quizList = quizRepository.findAllByCategoryId(
                 subscription.getCategory().getId())
@@ -97,16 +97,9 @@ public class TodayQuizService {
 
         // 슬라이딩 인덱스로 문제 선택
         int offset = Math.toIntExact((subscription.getId() + daysSinceCreated) % quizList.size());
-        Quiz selectedQuiz = quizList.get(offset);
 
         //return selectedQuiz;
-        return QuizDto.builder()
-            .id(selectedQuiz.getId())
-            .quizCategory(selectedQuiz.getCategory().getCategoryType())
-            .question(selectedQuiz.getQuestion())
-            .choice(selectedQuiz.getChoice())
-            .type(selectedQuiz.getType())
-            .build();  //return -> QuizDto
+        return quizList.get(offset);
     }
 
     @Transactional
@@ -114,7 +107,7 @@ public class TodayQuizService {
         //해당 구독자의 문제 구독 카테고리 확인
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
         //문제 발급
-        QuizDto selectedQuiz = getTodayQuizBySubscription(subscription);
+        Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
         //메일 발송
         try {
             mailService.sendQuizEmail(subscription.getEmail(), subscriptionId, selectedQuiz.getId());
