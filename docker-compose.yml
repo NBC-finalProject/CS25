@@ -15,6 +15,16 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/data
 
 #  spring-app:
 #    image: baekjonghyun/cs25-app:latest
@@ -30,3 +40,4 @@ services:
 volumes:
   mysql-data:
   redis-data:
+  chroma-data:
