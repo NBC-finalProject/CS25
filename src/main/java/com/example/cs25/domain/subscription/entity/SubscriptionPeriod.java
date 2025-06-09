@@ -24,11 +24,16 @@ public enum SubscriptionPeriod {
 	 * @return SubscriptionPeriod Enum 객체를 반환
 	 */
 	@JsonCreator
-	public static SubscriptionPeriod from(int months) {
-		for (SubscriptionPeriod period : values()) {
-			if (period.months == months) {
-				return period;
+	public static SubscriptionPeriod from(String value) {
+		try {
+			int months = Integer.parseInt(value);
+			for (SubscriptionPeriod period : values()) {
+				if (period.months == months) {
+					return period;
+				}
 			}
+		} catch (NumberFormatException e) {
+			// 무시하고 아래 예외로 이동
 		}
 		throw new SubscriptionException(SubscriptionExceptionCode.ILLEGAL_SUBSCRIPTION_PERIOD_ERROR);
 	}
