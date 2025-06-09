@@ -20,6 +20,11 @@ public class RagService {
         vectorStore.add(docs);
     }
 
+    public void saveDocumentsToVectorStore(List<Document> docs) {
+        vectorStore.add(docs);
+        System.out.println(docs.size() + "개 문서 저장 완료");
+    }
+
     public List<Document> searchRelevant(String query) {
         return vectorStore.similaritySearch(query);
     }
