@@ -48,7 +48,7 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
-                .requestMatchers("/subscription/**").permitAll()
+                .requestMatchers("/subscriptions/**").permitAll()
                 .requestMatchers("/emails/**").permitAll()
                 .requestMatchers("/accuracyTest/**").permitAll()
                 .requestMatchers("/crawlers/**").permitAll()
