@@ -38,86 +38,108 @@ public class CrawlerService {
     private String githubToken;
 
     public void crawlingGithubDocument(String url) {
-        GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
-
-        githubToken = System.getenv("GITHUB_TOKEN");
-        if (githubToken == null || githubToken.trim().isEmpty()) {
-            throw new IllegalStateException("GITHUB_TOKEN 환경변수가 설정되지 않았습니다.");
-        }
-
-        List<Document> documentList = crawlOnlyFolderMarkdowns(repoInfo.getOwner(),
-                repoInfo.getRepo(), repoInfo.getPath());
-
-        // 크롤링 완료 후, 문서 리스트 로그 추가
-        log.info("크롤링 완료, 문서 개수: {}", documentList.size());
-        for (Document doc : documentList) {
-            log.info("문서 경로: {}, 글자 수: {}", doc.getMetadata().get("path"), doc.getText().length());
-            log.info("문서 내용(앞 200자): {}", doc.getText().substring(0, Math.min(doc.getText().length(), 200)));
-        }
-
-        // 벡터스토어에 저장 시 에러 스택 트레이스도 로그로 남기기
+        log.info("크롤링 시작: {}", url);
         try {
-            ragService.saveDocumentsToVectorStore(documentList);
+            GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
+            log.info("파싱된 정보: owner={}, repo={}, path={}", repoInfo.getOwner(), repoInfo.getRepo(), repoInfo.getPath());
+
+            githubToken = System.getenv("GITHUB_TOKEN");
+            if (githubToken == null || githubToken.trim().isEmpty()) {
+                throw new IllegalStateException("GITHUB_TOKEN 환경변수가 설정되지 않았습니다.");
+            }
+
+            List<Document> documentList = crawlOnlyFolderMarkdowns(repoInfo.getOwner(),
+                    repoInfo.getRepo(), repoInfo.getPath());
+
+            // 크롤링 완료 후, 문서 리스트 로그 추가
+            log.info("크롤링 완료, 문서 개수: {}", documentList.size());
+            for (Document doc : documentList) {
+                log.info("문서 경로: {}, 글자 수: {}", doc.getMetadata().get("path"), doc.getText().length());
+                log.info("문서 내용(앞 200자): {}", doc.getText().substring(0, Math.min(doc.getText().length(), 200)));
+            }
+
+            // 벡터스토어에 저장 시 에러 스택 트레이스도 로그로 남기기
+            try {
+                ragService.saveDocumentsToVectorStore(documentList);
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                String stackTrace = sw.toString();
+                log.error("벡터스토어 저장 중 에러 발생: {}", e.getMessage());
+                log.error("전체 스택 트레이스:\n{}", stackTrace);
+            }
+
+            // 파일로 저장 (테스트용)
+            saveToFile(documentList);
+
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             String stackTrace = sw.toString();
-            log.error("에러 발생: {}", e.getMessage());
+            log.error("크롤링 중 예외 발생: {}", e.getMessage());
             log.error("전체 스택 트레이스:\n{}", stackTrace);
         }
-
-        // 파일로 저장 (테스트용)
-        saveToFile(documentList);
     }
 
     private List<Document> crawlOnlyFolderMarkdowns(String owner, String repo, String path) {
         List<Document> docs = new ArrayList<>();
+        try {
+            // 직접 경로 조합 시 인코딩 적용
+            String encodedPath = encodePath(path);
+            log.info("인코딩 전 경로: {}", path);
+            log.info("인코딩 후 경로: {}", encodedPath);
 
-        // 직접 경로 조합 시 인코딩 적용
-        String url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + encodePath(path);
+            String url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + encodedPath;
+            log.info("GitHub API 호출 URL: {}", url);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + githubToken);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + githubToken);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                new ParameterizedTypeReference<>() {}
-        );
+            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<>() {}
+            );
 
-        for (Map<String, Object> item : response.getBody()) {
-            String type = (String) item.get("type");
-            String name = (String) item.get("name");
-            String filePath = (String) item.get("path");
+            for (Map<String, Object> item : response.getBody()) {
+                String type = (String) item.get("type");
+                String name = (String) item.get("name");
+                String filePath = (String) item.get("path");
 
-            if ("dir".equals(type)) {
-                List<Document> subDocs = crawlOnlyFolderMarkdowns(owner, repo, filePath);
-                docs.addAll(subDocs);
-            }
-            else if ("file".equals(type) && name.endsWith(".md") && filePath.contains("/")) {
-                String downloadUrl = (String) item.get("download_url");
-                if (downloadUrl == null) {
-                    log.warn("download_url이 null인 파일: {}", filePath);
-                    continue;
-                }
-                // download_url은 그대로 사용 (추가 인코딩 X)
-                try {
-                    String content = restTemplate.getForObject(downloadUrl, String.class);
-                    if (content != null && !content.trim().isEmpty()) {
-                        Document doc = makeDocument(name, filePath, content);
-                        docs.add(doc);
-                        log.info("정상적으로 다운로드: {}", filePath);
-                    } else {
-                        log.warn("빈 내용의 파일: {}", filePath);
+                if ("dir".equals(type)) {
+                    List<Document> subDocs = crawlOnlyFolderMarkdowns(owner, repo, filePath);
+                    docs.addAll(subDocs);
+                } else if ("file".equals(type) && name.endsWith(".md") && filePath.contains("/")) {
+                    String downloadUrl = (String) item.get("download_url");
+                    if (downloadUrl == null) {
+                        log.warn("download_url이 null인 파일: {}", filePath);
+                        continue;
                     }
-                } catch (HttpClientErrorException e) {
-                    log.error("다운로드 실패: {} → {}", downloadUrl, e.getStatusCode());
-                } catch (Exception e) {
-                    log.error("예외: {} → {}", downloadUrl, e.getMessage());
+                    // download_url은 그대로 사용 (추가 인코딩 X)
+                    try {
+                        String content = restTemplate.getForObject(downloadUrl, String.class);
+                        if (content != null && !content.trim().isEmpty()) {
+                            Document doc = makeDocument(name, filePath, content);
+                            docs.add(doc);
+                            log.info("정상적으로 다운로드: {}", filePath);
+                        } else {
+                            log.warn("빈 내용의 파일: {}", filePath);
+                        }
+                    } catch (HttpClientErrorException e) {
+                        log.error("다운로드 실패: {} → {}", downloadUrl, e.getStatusCode());
+                    } catch (Exception e) {
+                        log.error("예외: {} → {}", downloadUrl, e.getMessage());
+                    }
                 }
             }
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String stackTrace = sw.toString();
+            log.error("GitHub API 호출 중 예외 발생: {}", e.getMessage());
+            log.error("전체 스택 트레이스:\n{}", stackTrace);
         }
         return docs;
     }
@@ -140,7 +162,6 @@ public class CrawlerService {
         return encodedPath.toString();
     }
 
-
     private Document makeDocument(String fileName, String path, String content) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("fileName", fileName);
@@ -151,21 +172,18 @@ public class CrawlerService {
 
     private void saveToFile(List<Document> docs) {
         String SAVE_DIR = "data/markdowns";
-
         try {
             Files.createDirectories(Paths.get(SAVE_DIR));
         } catch (IOException e) {
             log.error("디렉토리 생성 실패: {}", e.getMessage());
             return;
         }
-
         for (Document document : docs) {
             try {
                 String safeFileName = document.getMetadata().get("path").toString()
                         .replace("/", "-")
                         .replace(".md", ".txt");
                 Path filePath = Paths.get(SAVE_DIR, safeFileName);
-
                 Files.writeString(filePath, document.getText(),
                         StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
