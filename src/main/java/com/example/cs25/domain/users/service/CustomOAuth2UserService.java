@@ -74,10 +74,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = oAuth2Response.getName();
         SocialType provider = oAuth2Response.getProvider();
 
-        log.info("email : {}", email);
-        log.info("name : {}", name);
-        log.info("provider : {}", provider);
-
         if (email == null || name == null || provider == null) {
             throw new UserException(UserExceptionCode.OAUTH2_PROFILE_INCOMPLETE);
         }

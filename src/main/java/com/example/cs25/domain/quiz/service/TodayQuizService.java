@@ -119,13 +119,17 @@ public class TodayQuizService {
     }
 
     private double calculateAccuracy(List<UserQuizAnswer> answers) {
+        if (answers.isEmpty()) {
+            return 0.0;
+        }
+
         int totalCorrect = 0;
         for (UserQuizAnswer answer : answers) {
             if (answer.getIsCorrect()) {
                 totalCorrect++;
             }
         }
-        return (double) totalCorrect / answers.size();
+        return ((double) totalCorrect / answers.size()) * 100.0;
     }
 
     public void calculateAndCacheAllQuizAccuracies() {
@@ -137,7 +141,7 @@ public class TodayQuizService {
             List<UserQuizAnswer> answers = userQuizAnswerRepository.findAllByQuizId(quiz.getId());
             long total = answers.size();
             long correct = answers.stream().filter(UserQuizAnswer::getIsCorrect).count();
-            double accuracy = total == 0 ? 100.0 : ((double) correct / total);
+            double accuracy = total == 0 ? 100.0 : ((double) correct / total) * 100.0;
 
             QuizAccuracy qa = QuizAccuracy.builder()
                 .id("quiz:" + quiz.getId())
