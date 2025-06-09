@@ -10,6 +10,7 @@ import com.example.cs25.global.jwt.service.TokenService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,8 +54,10 @@ public class AuthController {
     @PostMapping("/logout")
     public ApiResponse<String> logout(@AuthenticationPrincipal AuthUser authUser,
         HttpServletResponse response) {
+
         tokenService.clearTokenForUser(authUser.getId(), response);
-        authService.logout(authUser.getId());
+        SecurityContextHolder.clearContext();
+
         return new ApiResponse<>(200, "로그아웃 완료");
     }
 

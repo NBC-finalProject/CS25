@@ -1,6 +1,7 @@
 package com.example.cs25.global.config;
 
 import com.example.cs25.domain.oauth2.service.CustomOAuth2UserService;
+import com.example.cs25.global.exception.ErrorResponseUtil;
 import com.example.cs25.global.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25.global.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
@@ -57,6 +58,18 @@ public class SecurityConfig {
                 .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
 
                 .anyRequest().authenticated()
+            )
+
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    ErrorResponseUtil.writeJsonError(response, 401,
+                        "사용자 인증이 필요한 요청입니다.");
+                    //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증되지 않은 사용자입니다.");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    ErrorResponseUtil.writeJsonError(response, 403, "접근 권한이 없습니다.");
+                    //response.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
+                })
             )
 
             .oauth2Login(oauth2 -> oauth2
