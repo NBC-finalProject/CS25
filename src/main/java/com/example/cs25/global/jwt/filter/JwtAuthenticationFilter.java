@@ -52,6 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 handleJwtError(response, e.getHttpStatus().value(), e.getMessage());
                 // SecurityContext를 설정하지 않고 다음 필터로 진행
                 // 인증이 필요한 엔드포인트에서는 별도 처리됨
+                return;
             }
         }
 
