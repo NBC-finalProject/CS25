@@ -62,7 +62,7 @@ class SubscriptionServiceTest {
 
         // then
         assertThat(dto.getSubscriptionType()).isEqualTo(Set.of(DayOfWeek.SUNDAY));
-        assertThat(dto.getCategory().getCategoryType()).isEqualTo("BACKEND");
+        assertThat(dto.getCategory()).isEqualTo("BACKEND");
         assertThat(dto.getPeriod()).isEqualTo(30L);
     }
 

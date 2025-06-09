@@ -23,7 +23,7 @@ public class SubscriptionController {
 
     @GetMapping("/{subscriptionId}")
     public ApiResponse<SubscriptionInfoDto> getSubscription(
-        @PathVariable Long subscriptionId
+        @PathVariable("subscriptionId") Long subscriptionId
     ) {
         return new ApiResponse<>(
             200,
