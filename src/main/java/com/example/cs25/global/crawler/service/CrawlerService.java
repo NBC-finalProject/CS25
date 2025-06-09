@@ -3,6 +3,9 @@ package com.example.cs25.global.crawler.service;
 import com.example.cs25.global.crawler.github.GitHubRepoInfo;
 import com.example.cs25.global.crawler.github.GitHubUrlParser;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,9 +19,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import java.nio.file.StandardOpenOption;
 
+@Service
 @RequiredArgsConstructor
 public class CrawlerService {
 
@@ -33,11 +39,11 @@ public class CrawlerService {
 
         //깃허브 크롤링 api 호출
         crawlOnlyFolderMarkdowns(repoInfo.getOwner(), repoInfo.getRepo(), repoInfo.getPath());
+
     }
 
     private void crawlOnlyFolderMarkdowns(String owner, String repo, String path) {
         String url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path;
-
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + githubToken); // Optional
@@ -63,8 +69,16 @@ public class CrawlerService {
             // 2. 폴더 안의 md 파일만 처리
             else if ("file".equals(type) && name.endsWith(".md") && filePath.contains("/")) {
                 String downloadUrl = (String) item.get("download_url");
-                String content = restTemplate.getForObject(downloadUrl, String.class);
-                saveMarkdown(name, filePath, content);
+                downloadUrl = URLDecoder.decode(downloadUrl, StandardCharsets.UTF_8);
+                System.out.println("📄 DOWNLOAD URL: " + downloadUrl);
+                try {
+                    String content = restTemplate.getForObject(downloadUrl, String.class);
+                    saveMarkdown(name, filePath, content);
+                } catch (HttpClientErrorException e) {
+                    System.err.println("다운로드 실패 (404 등): " + downloadUrl + " → " + e.getStatusCode());
+                } catch (Exception e) {
+                    System.err.println("예외: " + downloadUrl + " → " + e.getMessage());
+                }
             }
         }
     }
