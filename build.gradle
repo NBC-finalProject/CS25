@@ -51,6 +51,13 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
+    //queryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma:1.0.0'
+
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma:1.0.0'
 
 }

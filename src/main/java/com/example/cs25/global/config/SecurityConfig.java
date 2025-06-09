@@ -1,6 +1,6 @@
 package com.example.cs25.global.config;
 
-import com.example.cs25.domain.users.service.CustomOAuth2UserService;
+import com.example.cs25.domain.oauth2.service.CustomOAuth2UserService;
 import com.example.cs25.global.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25.global.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers("/subscription/**").permitAll()
                 .requestMatchers("/emails/**").permitAll()
+                .requestMatchers("/accuracyTest/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경
