@@ -36,10 +36,11 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendQuizEmail(String toEmail, Long quiz) throws MessagingException {
+    public void sendQuizEmail(String toEmail, Long subscriptionId, Long quiz) throws MessagingException {
 
         Context context = new Context();
         context.setVariable("toEmail", toEmail);
+        context.setVariable("subscriptionId", subscriptionId);
         context.setVariable("quizId", quiz);
         String htmlContent = templateEngine.process("today-quiz", context);
 
