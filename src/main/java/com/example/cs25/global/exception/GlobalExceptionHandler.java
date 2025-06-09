@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class) //Json 파싱 오류 핸들링
     public ResponseEntity<Map<String, Object>> handleJsonParseError(
         HttpMessageNotReadableException ex) {
-        String message = "요청 본문(JSON)을 파싱할 수 없습니다: " + ex.getMostSpecificCause().getMessage();
+        String message = "JSON 파싱 에러 " + ex.getMostSpecificCause().getMessage();
         return getErrorResponse(HttpStatus.BAD_REQUEST, message);
     }
 
