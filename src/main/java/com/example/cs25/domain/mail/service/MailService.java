@@ -36,7 +36,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendQuizEmail(String toEmail, int quiz) throws MessagingException {
+    public void sendQuizEmail(String toEmail, Long quiz) throws MessagingException {
 
         Context context = new Context();
         context.setVariable("toEmail", toEmail);
