@@ -35,7 +35,7 @@ class SubscriptionServiceTest {
     private SubscriptionHistoryRepository subscriptionHistoryRepository;
 
 
-    private Long subscriptionId = 1L;
+    private final Long subscriptionId = 1L;
     private Subscription subscription;
 
     @BeforeEach

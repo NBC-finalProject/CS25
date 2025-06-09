@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String PERMITTED_ROLES[] = {"USER", "ADMIN"};
+    private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
