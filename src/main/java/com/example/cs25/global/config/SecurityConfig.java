@@ -46,19 +46,13 @@ public class SecurityConfig {
             // 세션 사용 안함 (STATELESS)
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
             .authorizeHttpRequests(request -> request
-                .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
-                .requestMatchers("/subscriptions/**").permitAll()
-                .requestMatchers("/emails/**").permitAll()
-                .requestMatchers("/accuracyTest/**").permitAll()
-                .requestMatchers("/quizzes/**").permitAll()
-                .requestMatchers("/crawlers/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
+                .requestMatchers(HttpMethod.POST, "/auth/**").hasAnyRole(PERMITTED_ROLES)
 
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
 
             .exceptionHandling(ex -> ex
