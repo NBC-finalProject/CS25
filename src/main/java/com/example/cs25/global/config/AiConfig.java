@@ -23,8 +23,8 @@ public class AiConfig {
     @Bean
     public EmbeddingModel embeddingModel() {
         OpenAiApi openAiApi = OpenAiApi.builder()
-            .apiKey(openAiKey)
-            .build();
+                .apiKey(openAiKey)
+                .build();
         return new OpenAiEmbeddingModel(openAiApi);
     }
 }
