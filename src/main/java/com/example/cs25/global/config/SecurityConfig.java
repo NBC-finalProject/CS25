@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .requestMatchers("/subscription/**").permitAll()
                 .requestMatchers("/emails/**").permitAll()
                 .requestMatchers("/accuracyTest/**").permitAll()
+                .requestMatchers("/quizzes/**").permitAll()
                 .requestMatchers("/crawlers/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")

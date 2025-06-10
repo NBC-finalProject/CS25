@@ -1,6 +1,7 @@
 package com.example.cs25.domain.users.repository;
 
 import com.example.cs25.domain.oauth2.dto.SocialType;
+import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.domain.users.exception.UserException;
 import com.example.cs25.domain.users.exception.UserExceptionCode;
@@ -18,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             }
         });
     }
+
+    User findBySubscription(Subscription subscription);
 }
