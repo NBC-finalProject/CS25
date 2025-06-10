@@ -25,7 +25,6 @@ public class MailLogAspect {
         
         Subscription subscription = (Subscription) args[0];
         Quiz quiz = (Quiz) args[1];
-        LocalDateTime sendTime = LocalDateTime.now();
         MailStatus status = null;
 
         try {
@@ -39,7 +38,7 @@ public class MailLogAspect {
             MailLog log = MailLog.builder()
                 .subscription(subscription)
                 .quiz(quiz)
-                .sendDate(sendTime)
+                .sendDate(LocalDateTime.now())
                 .status(status)
                 .build();
 
