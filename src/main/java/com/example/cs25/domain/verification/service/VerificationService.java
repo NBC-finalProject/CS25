@@ -1,6 +1,6 @@
 package com.example.cs25.domain.verification.service;
 
-import com.example.cs25.domain.mail.exception.MailException;
+import com.example.cs25.domain.mail.exception.CustomMailException;
 import com.example.cs25.domain.mail.exception.MailExceptionCode;
 import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.verification.exception.VerificationException;
@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -60,9 +61,10 @@ public class VerificationService {
         save(email, verificationCode, Duration.ofMinutes(3));
         try {
             mailService.sendVerificationCodeEmail(email, verificationCode);
-        }catch (MessagingException e) {
+        }
+        catch (MessagingException | MailException e) {
             delete(email);
-            throw new MailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
+            throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         }
     }
 

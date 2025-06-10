@@ -1,7 +1,5 @@
 package com.example.cs25.domain.quiz.service;
 
-import com.example.cs25.domain.mail.exception.MailException;
-import com.example.cs25.domain.mail.exception.MailExceptionCode;
 import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.quiz.dto.QuizDto;
 import com.example.cs25.domain.quiz.entity.Quiz;
@@ -14,7 +12,6 @@ import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import jakarta.mail.MessagingException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -109,11 +106,7 @@ public class TodayQuizService {
         //문제 발급
         Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
         //메일 발송
-        try {
-            mailService.sendQuizEmail(subscription, selectedQuiz);
-        }catch (MessagingException e) {
-            throw new MailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
-        }
+        mailService.sendQuizEmail(subscription, selectedQuiz);
     }
 
     @Transactional
