@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.example.cs25.domain.mail.exception.CustomMailException;
@@ -18,6 +19,8 @@ import com.example.cs25.domain.subscription.entity.Subscription;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +32,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.StopWatch;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -114,5 +118,42 @@ class MailServiceTest {
         assertThrows(CustomMailException.class, () ->
             mailService.sendQuizEmail(subscription, quiz)
         );
+    }
+
+    @Test
+    void 대량메일발송_동기_성능측정() throws Exception {
+        // given
+        int count = 1000;
+        List<Subscription> subscriptions = IntStream.range(0, count)
+            .mapToObj(i -> {
+                Subscription sub = Subscription.builder()
+                    .email("test" + i + "@test.com")
+                    .subscriptionType(Subscription.decodeDays(1))
+                    .startDate(LocalDate.of(2025, 6, 1))
+                    .endDate(LocalDate.of(2025, 6, 30))
+                    .category(new QuizCategory(1L, "BACKEND"))
+                    .build();
+                ReflectionTestUtils.setField(sub, "id", (long) i);
+                return sub;
+            }).toList();
+
+        // when
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("bulk-mail");
+
+        for (Subscription sub : subscriptions) {
+            mailService.sendQuizEmail(sub, quiz);
+        }
+
+        stopWatch.stop();
+
+        // then
+        long totalMillis = stopWatch.getTotalTimeMillis();
+        double avgMillis = totalMillis / (double) count;
+
+        System.out.println("총 발송 시간: " + totalMillis + "ms");
+        System.out.println("평균 시간: " + avgMillis + "ms");
+
+        verify(mailSender, times(count)).send(any(MimeMessage.class));
     }
 }
