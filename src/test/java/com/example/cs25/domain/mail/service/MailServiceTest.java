@@ -137,12 +137,20 @@ class MailServiceTest {
                 return sub;
             }).toList();
 
+        int success = 0;
+        int fail = 0;
+
         // when
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("bulk-mail");
 
         for (Subscription sub : subscriptions) {
-            mailService.sendQuizEmail(sub, quiz);
+            try {
+                mailService.sendQuizEmail(sub, quiz);
+                success++;
+            } catch (CustomMailException e) {
+                fail++;
+            }
         }
 
         stopWatch.stop();
@@ -153,6 +161,10 @@ class MailServiceTest {
 
         System.out.println("총 발송 시간: " + totalMillis + "ms");
         System.out.println("평균 시간: " + avgMillis + "ms");
+
+        System.out.println("총 발송 시도: " + count);
+        System.out.println("성공: " + success + "건");
+        System.out.println("실패: " + fail + "건");
 
         verify(mailSender, times(count)).send(any(MimeMessage.class));
     }
