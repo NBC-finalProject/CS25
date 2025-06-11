@@ -10,7 +10,7 @@ import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import com.example.cs25.domain.userQuizAnswer.requestDto.UserQuizAnswerRequestDto;
+import com.example.cs25.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.cs25.domain.userQuizAnswer.requestDto;
+package com.example.cs25.domain.userQuizAnswer.dto;
 
 import lombok.Builder;
 import lombok.Getter;

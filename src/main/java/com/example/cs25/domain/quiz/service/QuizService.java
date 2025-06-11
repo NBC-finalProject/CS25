@@ -2,6 +2,7 @@ package com.example.cs25.domain.quiz.service;
 
 import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.quiz.dto.CreateQuizDto;
+import com.example.cs25.domain.quiz.dto.QuizResponseDto;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
@@ -70,5 +71,8 @@ public class QuizService {
         }
     }
 
-
+    public QuizResponseDto getQuizDetail(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        return new QuizResponseDto(quiz.getQuestion(), quiz.getAnswer(), quiz.getCommentary());
+    }
 }
