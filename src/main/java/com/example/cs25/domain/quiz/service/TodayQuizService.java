@@ -1,5 +1,6 @@
 package com.example.cs25.domain.quiz.service;
 
+import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.quiz.dto.QuizDto;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizAccuracy;
@@ -36,6 +37,7 @@ public class TodayQuizService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
     private final QuizAccuracyRedisRepository quizAccuracyRedisRepository;
+    private final MailService mailService;
 
     @Transactional
     public QuizDto getTodayQuiz(Long subscriptionId) {
@@ -70,6 +72,41 @@ public class TodayQuizService {
             .choice(selectedQuiz.getChoice())
             .type(selectedQuiz.getType())
             .build();  //return -> QuizDto
+    }
+
+    @Transactional
+    public Quiz getTodayQuizBySubscription(Subscription subscription) {
+        //id 순으로 정렬
+        List<Quiz> quizList = quizRepository.findAllByCategoryId(
+                subscription.getCategory().getId())
+            .stream()
+            .sorted(Comparator.comparing(Quiz::getId))
+            .toList();
+
+        if (quizList.isEmpty()) {
+            throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
+        }
+
+        // 구독 시작일 기준 날짜 차이 계산
+        LocalDate createdDate = subscription.getCreatedAt().toLocalDate();
+        LocalDate today = LocalDate.now();
+        long daysSinceCreated = ChronoUnit.DAYS.between(createdDate, today);
+
+        // 슬라이딩 인덱스로 문제 선택
+        int offset = Math.toIntExact((subscription.getId() + daysSinceCreated) % quizList.size());
+
+        //return selectedQuiz;
+        return quizList.get(offset);
+    }
+
+    @Transactional
+    public void issueTodayQuiz(Long subscriptionId) {
+        //해당 구독자의 문제 구독 카테고리 확인
+        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+        //문제 발급
+        Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
+        //메일 발송
+        mailService.sendQuizEmail(subscription, selectedQuiz);
     }
 
     @Transactional

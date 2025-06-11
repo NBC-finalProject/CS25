@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>오늘의 문제</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px 20px;">
+<table style="width: 100%; border-spacing: 0; padding: 0; max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <tr>
+    <td style="padding: 30px; text-align: center;">
+      <!-- 권장 방식: 단순 변수로 이미지 URL 주입 -->
+      <img src="https://avatars.githubusercontent.com/u/210986242?s=400&u=714ce227205c75a54bccc8e9e19b82e360b1de2b&v=4" alt="오늘의 문제 이미지" style="max-width: 100%; border-radius: 6px; margin-bottom: 20px;" />
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 0 30px 30px;">
+      <h2 style="color: #333333;">오늘의 문제를 풀어보세요!</h2>
+      <p style="color: #555555; line-height: 1.6;">
+        안녕하세요, CS25에서 오늘의 문제를 보내드립니다.
+        <br />
+        아래 버튼을 클릭해 오늘의 문제를 확인하세요.
+      </p>
+
+      <div style="margin: 30px 0; text-align: center;">
+        <a
+            th:href="${quizLink}"
+            style="display: inline-block; background-color: #4CAF50; color: white; padding: 14px 24px; text-decoration: none; font-weight: bold; border-radius: 6px;"
+        >
+          문제 풀러 가기
+        </a>
+      </div>
+
+      <p style="color: #999999; font-size: 12px; text-align: center;">
+        이 메일은 <span th:text="${toEmail}">example@email.com</span> 계정으로 발송되었습니다.<br />
+      </p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
