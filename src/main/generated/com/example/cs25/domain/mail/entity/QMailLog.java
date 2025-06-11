@@ -30,7 +30,7 @@ public class QMailLog extends EntityPathBase<MailLog> {
 
     public final EnumPath<com.example.cs25.domain.mail.enums.MailStatus> status = createEnum("status", com.example.cs25.domain.mail.enums.MailStatus.class);
 
-    public final com.example.cs25.domain.users.entity.QUser user;
+    public final com.example.cs25.domain.subscription.entity.QSubscription subscription;
 
     public QMailLog(String variable) {
         this(MailLog.class, forVariable(variable), INITS);
@@ -51,7 +51,7 @@ public class QMailLog extends EntityPathBase<MailLog> {
     public QMailLog(Class<? extends MailLog> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.quiz = inits.isInitialized("quiz") ? new com.example.cs25.domain.quiz.entity.QQuiz(forProperty("quiz"), inits.get("quiz")) : null;
-        this.user = inits.isInitialized("user") ? new com.example.cs25.domain.users.entity.QUser(forProperty("user"), inits.get("user")) : null;
+        this.subscription = inits.isInitialized("subscription") ? new com.example.cs25.domain.subscription.entity.QSubscription(forProperty("subscription"), inits.get("subscription")) : null;
     }
 
 }

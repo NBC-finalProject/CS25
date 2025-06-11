@@ -2,11 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title><!DOCTYPE html>
-    <html lang="ko">
-    <head>
-    <meta charset="UTF-8">
-    <title>문제제출 페이지</title>
+  <title> CS25 - 오늘의 문제</title>
   <style>
     body {
       font-family: sans-serif;
@@ -62,7 +58,6 @@
 
 <form id="quiz-form" action="/submit" method="POST">
   <input type="hidden" name="answer" id="selected-answer">
-  <input type="hidden" name="subscriptionId" value="${subscriptionId}">
 
   <div class="options">
     <div class="option" data-value="1" th:text="${choice1}">선택지1</div>
@@ -98,12 +93,6 @@
     }
   });
 </script>
-
-</body>
-</html>
-</title>
-</head>
-<body>
 
 </body>
 </html>
