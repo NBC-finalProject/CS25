@@ -22,7 +22,7 @@ public class MailService {
     private final SpringTemplateEngine templateEngine;
 
     protected String generateQuizLink(Long subscriptionId, Long quizId) {
-        String domain = "https://localhost:8080/example";
+        String domain = "http://localhost:8080/todayQuiz";
         return String.format("%s?subscriptionId=%d&quizId=%d", domain, subscriptionId, quizId);
     }
 

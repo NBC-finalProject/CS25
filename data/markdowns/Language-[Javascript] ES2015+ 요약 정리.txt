@@ -1,0 +1,203 @@
+ition){
+        resolve('성공');
+    } else {
+        reject('실패');
+    }
+});
+ 
+promise
+    .then((message) => {
+        console.log(message);
+    })
+    .catch((error) => {
+        console.log(error);
+    });
+```
+
+<br>
+
+`new Promise`로 프로미스를 생성할 수 있다. 그리고 안에 `resolve와 reject`를 매개변수로 갖는 콜백 함수를 넣는 방식이다.
+
+이제 선언한 promise 변수에 `then과 catch` 메서드를 붙이는 것이 가능하다. 
+
+```
+resolve가 호출되면 then이 실행되고, reject가 호출되면 catch가 실행된다.
+```
+
+이제 resolve와 reject에 넣어준 인자는 각각 then과 catch의 매개변수에서 받을 수 있게 되었다. 
+
+즉, condition이 true가 되면 resolve('성공')이 호출되어 message에 '성공'이 들어가 log로 출력된다. 반대로 false면 reject('실패')가 호출되어 catch문이 실행되고 error에 '실패'가 되어 출력될 것이다.
+
+<br>
+
+이제 이러한 방식을 활용해 콜백을 프로미스로 바꿔보자.
+
+```javascript
+function findAndSaveUser(Users) {
+    Users.findOne({}, (err, user) => { // 첫번째 콜백
+        if(err) {
+            return console.error(err);
+        }
+        user.name = 'kim';
+        user.save((err) => { // 두번째 콜백
+            if(err) {
+                return console.error(err);
+            }
+            Users.findOne({gender: 'm'}, (err, user) => { // 세번째 콜백
+                // 생략
+            });
+        });
+    });
+}
+```
+
+<br>
+
+보통 콜백 함수를 사용하는 패턴은 이와 같이 작성할 것이다. **현재 콜백 함수가 세 번 중첩**된 모습을 볼 수 있다.
+
+즉, 콜백 함수가 나올때 마다 코드가 깊어지고 각 콜백 함수마다 에러도 따로 처리해주고 있다.
+
+<br>
+
+프로미스를 활용하면 아래와 같이 작성이 가능하다.
+
+```javascript
+function findAndSaveUser1(Users) {
+    Users.findOne({})
+        .then((user) => {
+            user.name = 'kim';
+            return user.save();
+        })
+        .then((user) => {
+            return Users.findOne({gender: 'm'});
+        })
+        .then((user) => {
+            // 생략
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+```
+
+<br>
+
+`then`을 활용해 코드가 깊어지지 않도록 만들었다. 이때, then 메서드들은 순차적으로 실행된다. 
+
+에러는 마지막 catch를 통해 한번에 처리가 가능하다. 하지만 모든 콜백 함수를 이처럼 고칠 수 있는 건 아니고, `find와 save` 메서드가 프로미스 방식을 지원하기 때문에 가능한 상황이다.
+
+> 지원하지 않는 콜백 함수는 `util.promisify`를 통해 가능하다.
+
+<br>
+
+프로미스 여러개를 한꺼번에 실행할 수 있는 방법은 `Promise.all`을 활용하면 된다.
+
+```javascript
+const promise1 = Promise.resolve('성공1');
+const promise2 = Promise.resolve('성공2');
+ 
+Promise.all([promise1, promise2])
+    .then((result) => {
+        console.log(result);
+    })
+    .catch((error) => {
+        console.error(err);
+    });
+```
+
+<br>
+
+`promise.all`에 해당하는 모든 프로미스가 resolve 상태여야 then으로 넘어간다. 만약 하나라도 reject가 있다면, catch문으로 넘어간다.
+
+기존의 콜백을 활용했다면, 여러번 중첩해서 구현했어야하지만 프로미스를 사용하면 이처럼 깔끔하게 만들 수 있다.
+
+<br>
+
+<br>
+
+### 7. async/await
+
+---
+
+ES2017에 추가된 최신 기능이며, Node에서는 7,6버전부터 지원하는 기능이다. Node처럼 **비동기 프로그래밍을 할 때 유용하게 사용**되고, 콜백의 복잡성을 해결하기 위한 **프로미스를 조금 더 깔끔하게 만들어주는 도움**을 준다.
+
+<br>
+
+이전에 학습한 프로미스 코드를 가져와보자.
+
+```javascript
+function findAndSaveUser1(Users) {
+    Users.findOne({})
+        .then((user) => {
+            user.name = 'kim';
+            return user.save();
+        })
+        .then((user) => {
+            return Users.findOne({gender: 'm'});
+        })
+        .then((user) => {
+            // 생략
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+```
+
+<br>
+
+콜백의 깊이 문제를 해결하기는 했지만, 여전히 코드가 길긴 하다. 여기에 `async/await` 문법을 사용하면 아래와 같이 바꿀 수 있다.
+
+<br>
+
+```javascript
+async function findAndSaveUser(Users) {
+    try{
+        let user = await Users.findOne({});
+        user.name = 'kim';
+        user = await user.save();
+        user = await Users.findOne({gender: 'm'});
+        // 생략
+ 
+    } catch(err) {
+        console.error(err);
+    } 
+}
+```
+
+<br>
+
+상당히 짧아진 모습을 볼 수 있다.
+
+function 앞에 `async`을 붙여주고, 프로미스 앞에 `await`을 붙여주면 된다. await을 붙인 프로미스가 resolve될 때까지 기다린 후 다음 로직으로 넘어가는 방식이다.
+
+<br>
+
+앞에서 배운 화살표 함수로 나타냈을 때 `async/await`을 사용하면 아래와 같다.
+
+```javascript
+const findAndSaveUser = async (Users) => {
+    try{
+        let user = await Users.findOne({});
+        user.name = 'kim';
+        user = await user.save();
+        user = await user.findOne({gender: 'm'});
+    } catch(err){
+        console.error(err);
+    }
+}
+```
+
+<br>
+
+화살표 함수를 사용하면서도 `async/await`으로 비교적 간단히 코드를 작성할 수 있다. 
+
+예전에는 중첩된 콜백함수를 활용한 구현이 당연시 되었지만, 이제 그런 상황에 `async/await`을 적극 활용해 작성하는 연습을 해보면 좋을 것이다.
+
+<br>
+
+<br>
+
+#### [참고 자료]
+
+- [링크 - Node.js 도서](http://www.yes24.com/Product/Goods/62597864)

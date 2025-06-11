@@ -1,14 +1,12 @@
 package com.example.cs25.domain.quiz.controller;
 
+import com.example.cs25.domain.quiz.dto.QuizResponseDto;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.quiz.service.QuizService;
 import com.example.cs25.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -35,5 +33,10 @@ public class QuizController {
 
         quizService.uploadQuizJson(file, categoryType, formatType);
         return new ApiResponse<>(200, "문제 등록 성공");
+    }
+
+    @GetMapping("/{quizId}")
+    public ApiResponse<QuizResponseDto> getQuizDetail(@PathVariable Long quizId){
+        return new ApiResponse<>(200, quizService.getQuizDetail(quizId));
     }
 }

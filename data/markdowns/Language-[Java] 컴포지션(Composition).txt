@@ -1,0 +1,11 @@
+것이 객체 지향적인 설계를 할 때 유연함을 갖추고 나아갈 수 있을 것이다.
+
+<br>
+
+<br>
+
+#### [참고 자료]
+
+- [링크](https://github.com/jbloch/effective-java-3e-source-code/tree/master/src/effectivejava/chapter4/item18)
+- [링크](https://dev-cool.tistory.com/22)
+
