@@ -47,6 +47,8 @@ public class SecurityConfig {
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(request -> request
+
+                //로그인이 필요한 서비스만 여기다가 추가하기 (permaiAll 은 패싱 ㄱㄱ)
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
@@ -68,7 +70,7 @@ public class SecurityConfig {
             )
 
             .oauth2Login(oauth2 -> oauth2
-                    //.loginPage("/login")
+                    .loginPage("/login")
                     .successHandler(oAuth2LoginSuccessHandler)
                     .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                         .userService(customOAuth2UserService)
