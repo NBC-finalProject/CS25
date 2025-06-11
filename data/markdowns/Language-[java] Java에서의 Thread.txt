@@ -1,0 +1,22 @@
+   }
+    breadCount++;    // 빵 생산
+    System.out.println("빵을 만듦. 총 " + breadCount + "개");
+    notify();    // Thread를 Runnable 상태로 전환
+}
+
+public synchronized void eatBread(){
+    if (breadCount < 1){
+        try {
+            System.out.println("빵이 없어 기다림");
+            wait();
+        } catch (Exception e) {
+
+        }
+    }
+    breadCount--;
+    System.out.println("빵을 먹음. 총 " + breadCount + "개");
+    notify();
+}
+```
+
+조건 만족 안할 시 wait(), 만족 시 notify()를 받아 수행한다.

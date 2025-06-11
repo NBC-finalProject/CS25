@@ -17,6 +17,7 @@ import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,91 +38,101 @@ class AiServiceTest {
     @Autowired
     private SubscriptionRepository subscriptionRepository;
 
+    @Autowired
+    private VectorStore vectorStore; // RAG 문서 저장소
+
     @PersistenceContext
     private EntityManager em;
 
     private Quiz quiz;
     private Subscription memberSubscription;
     private Subscription guestSubscription;
-    private UserQuizAnswer answerWithMember; // 회원
-    private UserQuizAnswer answerWithGuest;  // 비회원
+    private UserQuizAnswer answerWithMember;
+    private UserQuizAnswer answerWithGuest;
 
     @BeforeEach
     void setUp() {
+        // 카테고리 생성
         QuizCategory quizCategory = new QuizCategory(null, "BACKEND");
         em.persist(quizCategory);
 
+        // 퀴즈 생성
         quiz = new Quiz(
-            null,
-            QuizFormatType.SUBJECTIVE,
-            "HTTP와 HTTPS의 차이점을 설명하세요.",
-            "HTTPS는 암호화, HTTP는 암호화X",
-            "HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.",
-            null,
-            quizCategory
+                null,
+                QuizFormatType.SUBJECTIVE,
+                "HTTP와 HTTPS의 차이점을 설명하세요.",
+                "HTTPS는 암호화, HTTP는 암호화X",
+                "HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.",
+                null,
+                quizCategory
         );
         quizRepository.save(quiz);
 
-        // 회원 구독
+        // 구독 생성 (회원, 비회원)
         memberSubscription = Subscription.builder()
-            .email("test@example.com")
-            .startDate(LocalDate.now())
-            .endDate(LocalDate.now().plusDays(30))
-            .subscriptionType(Subscription.decodeDays(0b1111111))
-            .build();
+                .email("test@example.com")
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(30))
+                .subscriptionType(Subscription.decodeDays(0b1111111))
+                .build();
         subscriptionRepository.save(memberSubscription);
 
-        // 비회원 구독
         guestSubscription = Subscription.builder()
-            .email("guest@example.com")
-            .startDate(LocalDate.now())
-            .endDate(LocalDate.now().plusDays(7))
-            .subscriptionType(Subscription.decodeDays(0b1111111))
-            .build();
+                .email("guest@example.com")
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(7))
+                .subscriptionType(Subscription.decodeDays(0b1111111))
+                .build();
         subscriptionRepository.save(guestSubscription);
 
-        // 회원 답변
+        // 사용자 답변 생성
         answerWithMember = UserQuizAnswer.builder()
-            .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
-            .subscription(memberSubscription)
-            .isCorrect(null)
-            .quiz(quiz)
-            .build();
+                .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
+                .subscription(memberSubscription)
+                .isCorrect(null)
+                .quiz(quiz)
+                .build();
         userQuizAnswerRepository.save(answerWithMember);
 
-        // 비회원 답변
         answerWithGuest = UserQuizAnswer.builder()
-            .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
-            .subscription(guestSubscription)
-            .isCorrect(null)
-            .quiz(quiz)
-            .build();
+                .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
+                .subscription(guestSubscription)
+                .isCorrect(null)
+                .quiz(quiz)
+                .build();
         userQuizAnswerRepository.save(answerWithGuest);
+
     }
 
     @Test
     void testGetFeedbackForMember() {
-        AiFeedbackResponse response = aiService.getFeedback(quiz.getId(),
-            memberSubscription.getId());
+        AiFeedbackResponse response = aiService.getFeedback(answerWithMember.getId());
 
         assertThat(response).isNotNull();
         assertThat(response.getQuizId()).isEqualTo(quiz.getId());
         assertThat(response.getQuizAnswerId()).isEqualTo(answerWithMember.getId());
-        assertThat(response.getAiFeedback()).isNotEmpty();
+        assertThat(response.getAiFeedback()).isNotBlank();
 
-        System.out.println("[회원 구독] AI 피드백: " + response.getAiFeedback());
+        var updated = userQuizAnswerRepository.findById(answerWithMember.getId()).orElseThrow();
+        assertThat(updated.getAiFeedback()).isEqualTo(response.getAiFeedback());
+        assertThat(updated.getIsCorrect()).isNotNull();
+
+        System.out.println("[회원 구독] AI 피드백:\n" + response.getAiFeedback());
     }
 
     @Test
     void testGetFeedbackForGuest() {
-        AiFeedbackResponse response = aiService.getFeedback(quiz.getId(),
-            guestSubscription.getId());
+        AiFeedbackResponse response = aiService.getFeedback(answerWithGuest.getId());
 
         assertThat(response).isNotNull();
         assertThat(response.getQuizId()).isEqualTo(quiz.getId());
         assertThat(response.getQuizAnswerId()).isEqualTo(answerWithGuest.getId());
-        assertThat(response.getAiFeedback()).isNotEmpty();
+        assertThat(response.getAiFeedback()).isNotBlank();
 
-        System.out.println("[비회원 구독] AI 피드백: " + response.getAiFeedback());
+        var updated = userQuizAnswerRepository.findById(answerWithGuest.getId()).orElseThrow();
+        assertThat(updated.getAiFeedback()).isEqualTo(response.getAiFeedback());
+        assertThat(updated.getIsCorrect()).isNotNull();
+
+        System.out.println("[비회원 구독] AI 피드백:\n" + response.getAiFeedback());
     }
 }
