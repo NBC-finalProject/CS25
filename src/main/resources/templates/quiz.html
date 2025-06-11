@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> CS25 - 오늘의 문제</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .question-box {
+      background-color: #d6f5d6;
+      padding: 15px;
+      font-size: 18px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 400px;
+      margin: 0 auto 20px;
+    }
+
+    .option {
+      border: 1px solid #aaa;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: white;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .option.selected {
+      background-color: #a1d9ff;
+    }
+
+    button.submit {
+      background-color: #b3f7c6;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="question-box">
+  <strong> Q.<span th:text="${quizQuestion}">문제 질문</span></strong>
+</div>
+
+<form id="quiz-form" action="/submit" method="POST">
+  <input type="hidden" name="answer" id="selected-answer">
+
+  <div class="options">
+    <div class="option" data-value="1" th:text="${choice1}">선택지1</div>
+    <div class="option" data-value="2" th:text="${choice2}">선택지2</div>
+    <div class="option" data-value="3" th:text="${choice3}">선택지3</div>
+    <div class="option" data-value="4" th:text="${choice4}">선택지4</div>
+  </div>
+
+  <button type="submit" class="submit">제출하기</button>
+</form>
+
+<script>
+  const options = document.querySelectorAll(".option");
+  const hiddenInput = document.getElementById("selected-answer");
+
+  options.forEach(option => {
+    option.addEventListener("click", () => {
+      // 기존 선택 초기화
+      options.forEach(o => o.classList.remove("selected"));
+
+      // 현재 선택 강조
+      option.classList.add("selected");
+
+      // 선택 값 설정
+      hiddenInput.value = option.dataset.value;
+    });
+  });
+
+  document.getElementById("quiz-form").addEventListener("submit", (e) => {
+    if (!hiddenInput.value) {
+      e.preventDefault();
+      alert("선택지를 먼저 클릭해주세요!");
+    }
+  });
+</script>
+
+</body>
+</html>
