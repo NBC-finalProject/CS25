@@ -102,7 +102,7 @@ class MailServiceTest {
     void sendQuizEmail_문제풀이링크_발송에_성공하면_Template를_생성하고_send요청을_보낸다() throws Exception {
         //given
         //when
-        mailService.sendQuizEmail(subscription, quiz);
+        mailService.sendQuizEmail("quizzes", subscription, quiz);
         //then
         verify(templateEngine)
             .process(eq("today-quiz"), any(Context.class));
@@ -116,7 +116,7 @@ class MailServiceTest {
             .when(mailSender).send(any(MimeMessage.class));
         // when & then
         assertThrows(CustomMailException.class, () ->
-            mailService.sendQuizEmail(subscription, quiz)
+            mailService.sendQuizEmail("quizzes", subscription, quiz)
         );
     }
 
@@ -146,7 +146,7 @@ class MailServiceTest {
 
         for (Subscription sub : subscriptions) {
             try {
-                mailService.sendQuizEmail(sub, quiz);
+                mailService.sendQuizEmail("quizzes", sub, quiz);
                 success++;
             } catch (CustomMailException e) {
                 fail++;

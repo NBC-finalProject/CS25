@@ -106,7 +106,7 @@ public class TodayQuizService {
         //문제 발급
         Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
         //메일 발송
-        mailService.sendQuizEmail(subscription, selectedQuiz);
+        mailService.sendQuizEmail("quizzes", subscription, selectedQuiz);
     }
 
     @Transactional

@@ -21,8 +21,9 @@ public class MailService {
     private final JavaMailSender mailSender; //config 없어도 properties 있으면 자동 생성되므로 autowired 사용도 가능
     private final SpringTemplateEngine templateEngine;
 
-    protected String generateQuizLink(Long subscriptionId, Long quizId) {
-        String domain = "https://localhost:8080/example";
+    protected String generateQuizLink(String apiUrl, Long subscriptionId, Long quizId) {
+        String path = apiUrl.startsWith("/") ? apiUrl.substring(1) : apiUrl;
+        String domain = "https://localhost:8080/" + path;
         return String.format("%s?subscriptionId=%d&quizId=%d", domain, subscriptionId, quizId);
     }
 
@@ -42,11 +43,11 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendQuizEmail(Subscription subscription, Quiz quiz) {
+    public void sendQuizEmail(String apiUrl, Subscription subscription, Quiz quiz) {
         try {
             Context context = new Context();
             context.setVariable("toEmail", subscription.getEmail());
-            context.setVariable("quizLink", generateQuizLink(subscription.getId(), quiz.getId()));
+            context.setVariable("quizLink", generateQuizLink(apiUrl, subscription.getId(), quiz.getId()));
             String htmlContent = templateEngine.process("today-quiz", context);
 
             MimeMessage message = mailSender.createMimeMessage();
