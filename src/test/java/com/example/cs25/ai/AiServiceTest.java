@@ -15,10 +15,8 @@ import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepositor
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -108,14 +106,14 @@ class AiServiceTest {
 
     @Test
     void testGetFeedbackForMember() {
-        AiFeedbackResponse response = aiService.getFeedback(quiz.getId(), memberSubscription.getId());
+        AiFeedbackResponse response = aiService.getFeedback(answerWithMember.getId());
 
         assertThat(response).isNotNull();
         assertThat(response.getQuizId()).isEqualTo(quiz.getId());
         assertThat(response.getQuizAnswerId()).isEqualTo(answerWithMember.getId());
         assertThat(response.getAiFeedback()).isNotBlank();
 
-        var updated = userQuizAnswerRepository.findById(response.getQuizAnswerId()).orElseThrow();
+        var updated = userQuizAnswerRepository.findById(answerWithMember.getId()).orElseThrow();
         assertThat(updated.getAiFeedback()).isEqualTo(response.getAiFeedback());
         assertThat(updated.getIsCorrect()).isNotNull();
 
@@ -124,14 +122,14 @@ class AiServiceTest {
 
     @Test
     void testGetFeedbackForGuest() {
-        AiFeedbackResponse response = aiService.getFeedback(quiz.getId(), guestSubscription.getId());
+        AiFeedbackResponse response = aiService.getFeedback(answerWithGuest.getId());
 
         assertThat(response).isNotNull();
         assertThat(response.getQuizId()).isEqualTo(quiz.getId());
         assertThat(response.getQuizAnswerId()).isEqualTo(answerWithGuest.getId());
         assertThat(response.getAiFeedback()).isNotBlank();
 
-        var updated = userQuizAnswerRepository.findById(response.getQuizAnswerId()).orElseThrow();
+        var updated = userQuizAnswerRepository.findById(answerWithGuest.getId()).orElseThrow();
         assertThat(updated.getAiFeedback()).isEqualTo(response.getAiFeedback());
         assertThat(updated.getIsCorrect()).isNotNull();
 

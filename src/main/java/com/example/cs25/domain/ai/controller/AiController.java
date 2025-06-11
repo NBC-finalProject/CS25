@@ -7,7 +7,10 @@ import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/quizzes")
@@ -17,12 +20,9 @@ public class AiController {
     private final AiService aiService;
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
 
-    @GetMapping("/{quizId}/feedback")
-    public ResponseEntity<?> getFeedback(
-            @PathVariable Long quizId,
-            @RequestHeader(value = "subscriptionId") Long subscriptionId) {
-
-        AiFeedbackResponse response = aiService.getFeedback(quizId, subscriptionId);
+    @GetMapping("/{answerId}/feedback")
+    public ResponseEntity<?> getFeedback(@PathVariable Long answerId) {
+        AiFeedbackResponse response = aiService.getFeedback(answerId);
         return ResponseEntity.ok(new ApiResponse<>(200, response));
     }
 
