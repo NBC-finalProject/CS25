@@ -6,6 +6,7 @@ import com.example.cs25.global.crawler.github.GitHubUrlParser;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,26 +42,34 @@ public class CrawlerService {
         log.info("크롤링 시작: {}", url);
         try {
             GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
-            log.info("파싱된 정보: owner={}, repo={}, path={}", repoInfo.getOwner(), repoInfo.getRepo(), repoInfo.getPath());
+            log.info("파싱된 정보: owner={}, repo={}, path={}",
+                    repoInfo.getOwner(), repoInfo.getRepo(), repoInfo.getPath());
 
             githubToken = System.getenv("GITHUB_TOKEN");
             if (githubToken == null || githubToken.trim().isEmpty()) {
+                log.error("GITHUB_TOKEN 환경변수가 설정되지 않았습니다.");
                 throw new IllegalStateException("GITHUB_TOKEN 환경변수가 설정되지 않았습니다.");
+            } else {
+                log.info("GITHUB_TOKEN 확인: {}", githubToken.substring(0, 4) + "...");
             }
 
             List<Document> documentList = crawlOnlyFolderMarkdowns(repoInfo.getOwner(),
                     repoInfo.getRepo(), repoInfo.getPath());
 
-            // 크롤링 완료 후, 문서 리스트 로그 추가
-            log.info("크롤링 완료, 문서 개수: {}", documentList.size());
+            // 문서를 5000자 단위로 분할
+            List<Document> splitDocs = new ArrayList<>();
             for (Document doc : documentList) {
-                log.info("문서 경로: {}, 글자 수: {}", doc.getMetadata().get("path"), doc.getText().length());
-                log.info("문서 내용(앞 200자): {}", doc.getText().substring(0, Math.min(doc.getText().length(), 200)));
+                splitDocs.addAll(splitDocument(doc, 5000));
             }
 
-            // 벡터스토어에 저장 시 에러 스택 트레이스도 로그로 남기기
+            log.info("크롤링 완료, 분할된 문서 개수: {}", splitDocs.size());
+            for (Document doc : splitDocs) {
+                log.info("문서 경로: {}, 글자 수: {}", doc.getMetadata().get("path"), doc.getText().length());
+                log.info("문서 내용(앞 100자): {}", doc.getText().substring(0, Math.min(doc.getText().length(), 100)));
+            }
+
             try {
-                ragService.saveDocumentsToVectorStore(documentList);
+                ragService.saveDocumentsToVectorStore(splitDocs);
             } catch (Exception e) {
                 StringWriter sw = new StringWriter();
                 e.printStackTrace(new PrintWriter(sw));
@@ -69,8 +78,7 @@ public class CrawlerService {
                 log.error("전체 스택 트레이스:\n{}", stackTrace);
             }
 
-            // 파일로 저장 (테스트용)
-            saveToFile(documentList);
+            saveToFile(splitDocs);
 
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
@@ -94,6 +102,9 @@ public class CrawlerService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + githubToken);
+            headers.set("User-Agent", "cs25-crawler");
+            log.info("헤더: {}", headers);
+
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
@@ -103,10 +114,17 @@ public class CrawlerService {
                     new ParameterizedTypeReference<>() {}
             );
 
+            log.info("GitHub API 응답 상태: {}", response.getStatusCode());
+            if (response.getBody() == null) {
+                log.warn("GitHub API 응답 body가 null입니다.");
+                return docs;
+            }
+
             for (Map<String, Object> item : response.getBody()) {
                 String type = (String) item.get("type");
                 String name = (String) item.get("name");
                 String filePath = (String) item.get("path");
+                log.info("폴더/파일: type={}, name={}, path={}", type, name, filePath);
 
                 if ("dir".equals(type)) {
                     List<Document> subDocs = crawlOnlyFolderMarkdowns(owner, repo, filePath);
@@ -117,12 +135,15 @@ public class CrawlerService {
                         log.warn("download_url이 null인 파일: {}", filePath);
                         continue;
                     }
-                    // download_url은 그대로 사용 (추가 인코딩 X)
+                    log.info("다운로드 URL: {}", downloadUrl);
                     try {
                         String content = restTemplate.getForObject(downloadUrl, String.class);
                         if (content != null && !content.trim().isEmpty()) {
-                            Document doc = makeDocument(name, filePath, content);
-                            docs.add(doc);
+                            Map<String, Object> metadata = new HashMap<>();
+                            metadata.put("fileName", name);
+                            metadata.put("path", filePath);
+                            metadata.put("source", "GitHub");
+                            docs.add(new Document(content, metadata));
                             log.info("정상적으로 다운로드: {}", filePath);
                         } else {
                             log.warn("빈 내용의 파일: {}", filePath);
@@ -144,12 +165,36 @@ public class CrawlerService {
         return docs;
     }
 
-    // 직접 경로 조합 시에만 인코딩 적용
+    private List<Document> splitDocument(Document doc, int maxLength) {
+        List<Document> result = new ArrayList<>();
+        String text = doc.getText();
+        Map<String, Object> metadata = new HashMap<>(doc.getMetadata());
+
+        for (int i = 0; i < text.length(); i += maxLength) {
+            int end = Math.min(i + maxLength, text.length());
+            String subText = text.substring(i, end);
+            result.add(new Document(subText, metadata));
+        }
+        return result;
+    }
+
     private String encodePath(String path) {
-        // 이미 인코딩된 %20 등이 있으면 decode해서 원본으로 만듦
-        String decodedPath = java.net.URLDecoder.decode(path, StandardCharsets.UTF_8);
-        // 다시 한 번만 인코딩
-        String[] parts = decodedPath.split("/");
+        if (path.contains("%")) {
+            try {
+                String decodedPath = java.net.URLDecoder.decode(path, StandardCharsets.UTF_8);
+                log.info("decode 후 경로: {}", decodedPath);
+                return encodeRawPath(decodedPath);
+            } catch (Exception e) {
+                log.warn("decode 실패: {}", path);
+                return encodeRawPath(path);
+            }
+        } else {
+            return encodeRawPath(path);
+        }
+    }
+
+    private String encodeRawPath(String rawPath) {
+        String[] parts = rawPath.split("/");
         StringBuilder encodedPath = new StringBuilder();
         for (int i = 0; i < parts.length; i++) {
             String encodedPart = URLEncoder.encode(parts[i], StandardCharsets.UTF_8);
@@ -160,14 +205,6 @@ public class CrawlerService {
             }
         }
         return encodedPath.toString();
-    }
-
-    private Document makeDocument(String fileName, String path, String content) {
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("fileName", fileName);
-        metadata.put("path", path);
-        metadata.put("source", "GitHub");
-        return new Document(content, metadata);
     }
 
     private void saveToFile(List<Document> docs) {
