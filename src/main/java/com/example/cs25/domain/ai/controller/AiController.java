@@ -19,8 +19,8 @@ public class AiController {
 
     @GetMapping("/{quizId}/feedback")
     public ResponseEntity<?> getFeedback(
-        @PathVariable Long quizId,
-        @RequestHeader(value = "subscriptionId") Long subscriptionId) {
+            @PathVariable Long quizId,
+            @RequestHeader(value = "subscriptionId") Long subscriptionId) {
 
         AiFeedbackResponse response = aiService.getFeedback(quizId, subscriptionId);
         return ResponseEntity.ok(new ApiResponse<>(200, response));

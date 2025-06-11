@@ -26,11 +26,11 @@ public class AiService {
     public AiFeedbackResponse getFeedback(Long quizId, Long subscriptionId) {
 
         var quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_QUIZ));
+                .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_QUIZ));
 
         var answer = userQuizAnswerRepository.findFirstByQuizIdAndSubscriptionIdOrderByCreatedAtDesc(
-                quizId, subscriptionId)
-            .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
+                        quizId, subscriptionId)
+                .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
         StringBuilder context = new StringBuilder();
         List<Document>  relevantDocs = ragService.searchRelevant(quiz.getQuestion());
@@ -57,12 +57,12 @@ public class AiService {
         String feedback;
         try {
             feedback = chatClient.prompt()
-                .system("너는 CS 지식을 평가하는 채점관이야. 문제와 답변을 보고 '정답' 또는 '오답'으로 시작하는 문장으로 답변해. " +
-                    "다른 단어나 표현은 사용하지 말고, 반드시 '정답' 또는 '오답'으로 시작해. " +
-                    "그리고 사용자 답변에 대한 피드백도 반드시 작성해.")
-                .user(prompt)
-                .call()
-                .content();
+                    .system("너는 CS 지식을 평가하는 채점관이야. 문제와 답변을 보고 '정답' 또는 '오답'으로 시작하는 문장으로 답변해. " +
+                            "다른 단어나 표현은 사용하지 말고, 반드시 '정답' 또는 '오답'으로 시작해. " +
+                            "그리고 사용자 답변에 대한 피드백도 반드시 작성해.")
+                    .user(prompt)
+                    .call()
+                    .content();
         } catch (Exception e) {
             throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
         }
@@ -74,10 +74,10 @@ public class AiService {
         userQuizAnswerRepository.save(answer);
 
         return new AiFeedbackResponse(
-            quiz.getId(),
-            isCorrect,
-            feedback,
-            answer.getId()
+                quiz.getId(),
+                isCorrect,
+                feedback,
+                answer.getId()
         );
     }
 }
