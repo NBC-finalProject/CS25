@@ -49,7 +49,7 @@ public class SubscriptionService {
 
         return SubscriptionInfoDto.builder()
             .subscriptionType(Subscription.decodeDays(subscription.getSubscriptionType()))
-            .category(subscription.getCategory())
+            .category(subscription.getCategory().getCategoryType())
             .period(period)
             .build();
     }
