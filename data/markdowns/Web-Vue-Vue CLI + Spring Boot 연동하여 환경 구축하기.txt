@@ -257,9 +257,9 @@ config/index.js을 열어 build 부분에 정의한 곳을 수정해야 한다.
 
 ***************************
 APPLICATION FAILED TO START
-*************************** 
-Description: 
-Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured. 
+***************************
+Description:
+Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
 
 Reason: Failed to determine a suitable driver class
 
@@ -276,6 +276,8 @@ datasource 내용이 없어서 뜬 에러다.
 <br>
 
 이 공간이 비어있기 때문에 서버가 실행을 하고 있지 못하는 것이다. 현재는 어떤 데이터베이스를 지정할 지 결정이 되있는 상태가 아니기 때문에 스프링 부트의 메인 클래스에서 어노테이션을 추가해주자
+
+있지 못하는 것이다. 현재는 어떤 데이터베이스를 지정할 지 결정이 되있는 상태가 아니기 때문에 스프링 부트의 메인 클래스에서 어노테이션을 추가해주자
 
 <br>
 

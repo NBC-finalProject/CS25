@@ -590,6 +590,8 @@ createUserWithEmailAndPassword 메소드는 onResolve, onReject 콜백과 파이
 
 로그인 방법으로 들어가서 `이메일/비밀번호`를 활성화 시킨다.
 
+이메일/비밀번호`를 활성화 시킨다.
+
 <br>
 
 <img src="https://github.com/kim6394/tech-interview-for-developer/blob/master/resources/%ED%99%9C%EC%84%B1%ED%99%94.JPG?raw=true">

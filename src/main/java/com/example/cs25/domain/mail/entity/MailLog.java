@@ -2,6 +2,7 @@ package com.example.cs25.domain.mail.entity;
 
 import com.example.cs25.domain.mail.enums.MailStatus;
 import com.example.cs25.domain.quiz.entity.Quiz;
+import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.users.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,8 +28,8 @@ public class MailLog {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
@@ -42,15 +43,15 @@ public class MailLog {
      * Constructs a MailLog entity with the specified id, user, quiz, send date, and mail status.
      *
      * @param id the unique identifier for the mail log entry
-     * @param user the user associated with the mail log
+     * @param subscription the user associated with the mail log
      * @param quiz the quiz associated with the mail log
      * @param sendDate the date and time the mail was sent
      * @param status the status of the mail
      */
     @Builder
-    public MailLog(Long id, User user, Quiz quiz, LocalDateTime sendDate, MailStatus status) {
+    public MailLog(Long id, Subscription subscription, Quiz quiz, LocalDateTime sendDate, MailStatus status) {
         this.id = id;
-        this.user = user;
+        this.subscription = subscription;
         this.quiz = quiz;
         this.sendDate = sendDate;
         this.status = status;

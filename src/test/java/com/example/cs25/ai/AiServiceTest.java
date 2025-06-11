@@ -58,48 +58,48 @@ class AiServiceTest {
 
         // 퀴즈 생성
         quiz = new Quiz(
-            null,
-            QuizFormatType.SUBJECTIVE,
-            "HTTP와 HTTPS의 차이점을 설명하세요.",
-            "HTTPS는 암호화, HTTP는 암호화X",
-            "HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.",
-            null,
-            quizCategory
+                null,
+                QuizFormatType.SUBJECTIVE,
+                "HTTP와 HTTPS의 차이점을 설명하세요.",
+                "HTTPS는 암호화, HTTP는 암호화X",
+                "HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.",
+                null,
+                quizCategory
         );
         quizRepository.save(quiz);
 
         // 구독 생성 (회원, 비회원)
         memberSubscription = Subscription.builder()
-            .email("test@example.com")
-            .startDate(LocalDate.now())
-            .endDate(LocalDate.now().plusDays(30))
-            .subscriptionType(Subscription.decodeDays(0b1111111))
-            .build();
+                .email("test@example.com")
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(30))
+                .subscriptionType(Subscription.decodeDays(0b1111111))
+                .build();
         subscriptionRepository.save(memberSubscription);
 
         guestSubscription = Subscription.builder()
-            .email("guest@example.com")
-            .startDate(LocalDate.now())
-            .endDate(LocalDate.now().plusDays(7))
-            .subscriptionType(Subscription.decodeDays(0b1111111))
-            .build();
+                .email("guest@example.com")
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(7))
+                .subscriptionType(Subscription.decodeDays(0b1111111))
+                .build();
         subscriptionRepository.save(guestSubscription);
 
         // 사용자 답변 생성
         answerWithMember = UserQuizAnswer.builder()
-            .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
-            .subscription(memberSubscription)
-            .isCorrect(null)
-            .quiz(quiz)
-            .build();
+                .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
+                .subscription(memberSubscription)
+                .isCorrect(null)
+                .quiz(quiz)
+                .build();
         userQuizAnswerRepository.save(answerWithMember);
 
         answerWithGuest = UserQuizAnswer.builder()
-            .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
-            .subscription(guestSubscription)
-            .isCorrect(null)
-            .quiz(quiz)
-            .build();
+                .userAnswer("HTTP는 암호화가 없고, HTTPS는 암호화로 보안성이 높아요.")
+                .subscription(guestSubscription)
+                .isCorrect(null)
+                .quiz(quiz)
+                .build();
         userQuizAnswerRepository.save(answerWithGuest);
 
     }

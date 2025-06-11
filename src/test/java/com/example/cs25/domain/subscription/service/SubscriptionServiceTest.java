@@ -35,7 +35,7 @@ class SubscriptionServiceTest {
     private SubscriptionHistoryRepository subscriptionHistoryRepository;
 
 
-    private Long subscriptionId = 1L;
+    private final Long subscriptionId = 1L;
     private Subscription subscription;
 
     @BeforeEach
@@ -62,7 +62,7 @@ class SubscriptionServiceTest {
 
         // then
         assertThat(dto.getSubscriptionType()).isEqualTo(Set.of(DayOfWeek.SUNDAY));
-        assertThat(dto.getCategory().getCategoryType()).isEqualTo("BACKEND");
+        assertThat(dto.getCategory()).isEqualTo("BACKEND");
         assertThat(dto.getPeriod()).isEqualTo(30L);
     }
 

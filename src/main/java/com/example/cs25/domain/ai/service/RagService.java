@@ -55,7 +55,8 @@ public class RagService {
     public List<Document> searchRelevant(String keyword) {
         List<Document> docs = vectorStore.similaritySearch(SearchRequest.builder()
                 .query(keyword)
-                .topK(4)
+                .topK(3)
+                .similarityThreshold(0.5)
                 .build());
         log.info("키워드 '{}'로 검색된 문서 개수: {}", keyword, docs.size());
         docs.forEach(doc -> log.info("검색 결과 - 문서 ID: {}, 내용: {}", doc.getId(), doc.getText()));

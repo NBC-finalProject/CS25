@@ -156,7 +156,7 @@ export default {
         console.log("user : " + user)
 
         this.$router.replace('welcome')
-        
+
       }).catch((err) => {
         alert('에러 : ' + err.message)
       })
@@ -213,6 +213,7 @@ export default {
     login() {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password).then(
         (user) => {
+   (user) => {
           this.$router.replace('welcome')
         },
         (err) => {

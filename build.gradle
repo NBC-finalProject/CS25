@@ -43,7 +43,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.12.6'
 
     compileOnly 'org.projectlombok:lombok'
-    implementation 'com.mysql:mysql-connector-j:8.0.33'
+    implementation 'com.mysql:mysql-connector-j:8.2.0'
     annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -59,8 +59,9 @@ dependencies {
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma:1.0.0'
 
-    implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma:1.0.0'
-
+    //Prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
