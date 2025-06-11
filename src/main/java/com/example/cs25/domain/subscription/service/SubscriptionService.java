@@ -1,5 +1,6 @@
 package com.example.cs25.domain.subscription.service;
 
+import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
@@ -27,6 +28,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final VerificationService verificationCodeService;
     private final SubscriptionHistoryRepository subscriptionHistoryRepository;
+    private final MailService mailService;
 
     private final QuizCategoryRepository quizCategoryRepository;
 
@@ -132,4 +134,5 @@ public class SubscriptionService {
                 .build()
         );
     }
+
 }
