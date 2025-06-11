@@ -37,7 +37,7 @@ public class QUser extends EntityPathBase<User> {
 
     public final EnumPath<Role> role = createEnum("role", Role.class);
 
-    public final EnumPath<com.example.cs25.domain.oauth.dto.SocialType> socialType = createEnum("socialType", com.example.cs25.domain.oauth.dto.SocialType.class);
+    public final EnumPath<com.example.cs25.domain.oauth2.dto.SocialType> socialType = createEnum("socialType", com.example.cs25.domain.oauth2.dto.SocialType.class);
 
     public final com.example.cs25.domain.subscription.entity.QSubscription subscription;
 
