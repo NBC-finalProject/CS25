@@ -46,8 +46,9 @@ public class MailService {
     public void sendQuizEmail(String apiUrl, Subscription subscription, Quiz quiz) {
         try {
             Context context = new Context();
-            context.setVariable("toEmail", subscription.getEmail());
+            context.setVariable("question", quiz.getQuestion());
             context.setVariable("quizLink", generateQuizLink(apiUrl, subscription.getId(), quiz.getId()));
+            context.setVariable("toEmail", subscription.getEmail());
             String htmlContent = templateEngine.process("today-quiz", context);
 
             MimeMessage message = mailSender.createMimeMessage();
