@@ -71,7 +71,6 @@ public class QuizService {
         }
     }
 
-
     public QuizResponseDto getQuizDetail(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
         return new QuizResponseDto(quiz.getQuestion(), quiz.getAnswer(), quiz.getCommentary());
