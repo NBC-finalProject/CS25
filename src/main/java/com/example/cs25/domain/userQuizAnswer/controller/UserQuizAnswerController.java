@@ -1,6 +1,6 @@
 package com.example.cs25.domain.userQuizAnswer.controller;
 
-import com.example.cs25.domain.userQuizAnswer.requestDto.UserQuizAnswerRequestDto;
+import com.example.cs25.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25.domain.userQuizAnswer.service.UserQuizAnswerService;
 import com.example.cs25.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
