@@ -24,6 +24,31 @@ services:
     volumes:
       - chroma-data:/data
 
+  # FIXME: 임시 배포 파일
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "9000:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
   #  spring-app:
   #    image: baekjonghyun/cs25-app:latest
   #    ports:
@@ -58,3 +83,4 @@ volumes:
   redis-data:
   chroma-data:
   grafana-data:
+  jenkins_home:
