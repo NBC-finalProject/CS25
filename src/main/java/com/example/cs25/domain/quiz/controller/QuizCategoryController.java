@@ -15,7 +15,7 @@ public class QuizCategoryController {
 
     @PostMapping("/quiz-categories")
     public ApiResponse<String> createQuizCategory(
-        @RequestParam String categoryType
+        @RequestParam("categoryType") String categoryType
     ) {
         quizCategoryService.createQuizCategory(categoryType);
         return new ApiResponse<>(200, "카테고리 등록 성공");

@@ -1,6 +1,7 @@
 package com.example.cs25.global.config;
 
 import com.example.cs25.domain.oauth2.service.CustomOAuth2UserService;
+import com.example.cs25.global.exception.ErrorResponseUtil;
 import com.example.cs25.global.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25.global.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
@@ -23,7 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String PERMITTED_ROLES[] = {"USER", "ADMIN"};
+    private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -45,22 +46,31 @@ public class SecurityConfig {
             // 세션 사용 안함 (STATELESS)
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
             .authorizeHttpRequests(request -> request
-                .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
-                .requestMatchers("/subscription/**").permitAll()
-                .requestMatchers("/emails/**").permitAll()
-                .requestMatchers("/accuracyTest/**").permitAll()
-                .requestMatchers("/crawlers/**").permitAll()
+
+                //로그인이 필요한 서비스만 여기다가 추가하기 (permaiAll 은 패싱 ㄱㄱ)
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
-                .hasAnyRole(PERMITTED_ROLES) //추후 ADMIN으로 변경
+                .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
+                .requestMatchers(HttpMethod.POST, "/auth/**").hasAnyRole(PERMITTED_ROLES)
 
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
+            )
+
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    ErrorResponseUtil.writeJsonError(response, 401,
+                        "사용자 인증이 필요한 요청입니다.");
+                    //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증되지 않은 사용자입니다.");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    ErrorResponseUtil.writeJsonError(response, 403, "접근 권한이 없습니다.");
+                    //response.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
+                })
             )
 
             .oauth2Login(oauth2 -> oauth2
-                    //.loginPage("/login")
+                    .loginPage("/login")
                     .successHandler(oAuth2LoginSuccessHandler)
                     .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                         .userService(customOAuth2UserService)

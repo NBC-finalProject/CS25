@@ -13,19 +13,18 @@ import org.springframework.context.annotation.Configuration;
 public class AiConfig {
 
     @Value("${spring.ai.openai.api-key}")
-    private String openAiApiKey;
+    private String openAiKey;
 
     @Bean
-    public ChatClient chatClient(OpenAiChatModel chatModel){
+    public ChatClient chatClient(OpenAiChatModel chatModel) {
         return ChatClient.create(chatModel);
     }
 
     @Bean
     public EmbeddingModel embeddingModel() {
         OpenAiApi openAiApi = OpenAiApi.builder()
-                .apiKey(openAiApiKey)
+                .apiKey(openAiKey)
                 .build();
         return new OpenAiEmbeddingModel(openAiApi);
     }
 }
-

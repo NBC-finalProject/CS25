@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class MailException extends BaseException {
+public class CustomMailException extends BaseException {
     private final MailExceptionCode errorCode;
     private final HttpStatus httpStatus;
     private final String message;
@@ -17,7 +17,7 @@ public class MailException extends BaseException {
      *
      * @param errorCode the mail-specific error code containing error details
      */
-    public MailException(MailExceptionCode errorCode) {
+    public CustomMailException(MailExceptionCode errorCode) {
         this.errorCode = errorCode;
         this.httpStatus = errorCode.getHttpStatus();
         this.message = errorCode.getMessage();
