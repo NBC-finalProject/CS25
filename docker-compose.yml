@@ -1,19 +1,19 @@
 services:
 
-#  spring-app:
-#    image: baekjonghyun/cs25-app:latest
-#    ports:
-#      - "8080:8080"
-#    restart: always
-#    depends_on:
-#      - mysql
-#      - redis
-#      - chroma
-#      - jenkins
-#      - prometheus
-#      - grafana
-#    env_file:
-#      - .env
+  spring-app:
+    image: baekjonghyun/cs25-app:latest
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - chroma
+      - jenkins
+      - prometheus
+      - grafana
+    env_file:
+      - .env
 
   mysql:
     image: mysql:8.0
