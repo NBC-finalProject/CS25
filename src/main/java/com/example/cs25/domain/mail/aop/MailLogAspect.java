@@ -15,7 +15,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -37,7 +36,6 @@ public class MailLogAspect {
             status = MailStatus.SENT;
             return result;
         } catch (Exception e) {
-            log.error("[메일 발송 실패] email={}, quizId={}, error={}", subscription.getEmail(), quiz.getId(), e.getMessage());
             status = MailStatus.FAILED;
             throw e;
         } finally {

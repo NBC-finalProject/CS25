@@ -2,6 +2,7 @@ package com.example.cs25.batch.jobs;
 
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.mail.service.MailService;
+import com.example.cs25.domain.mail.stream.logger.MailStepLogger;
 import com.example.cs25.domain.mail.stream.reader.RedisStreamReader;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
@@ -29,6 +30,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Slf4j
@@ -39,6 +42,17 @@ public class DailyMailSendJob {
     private final SubscriptionService subscriptionService;
     private final TodayQuizService todayQuizService;
     private final MailService mailService;
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("mail-step-thread-");
+        executor.initialize();
+        return executor;
+    }
 
     @Bean
     public Job mailJob(JobRepository jobRepository,
@@ -68,13 +82,15 @@ public class DailyMailSendJob {
         @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
         @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
-        PlatformTransactionManager transactionManager
+        PlatformTransactionManager transactionManager,
+        MailStepLogger mailStepLogger
     ) {
         return new StepBuilder("mailConsumeStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)
+            .listener(mailStepLogger)
             .build();
     }
 
@@ -93,13 +109,15 @@ public class DailyMailSendJob {
         @Qualifier("redisRetryReader") ItemReader<Map<String, String>> reader,
         @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
-        PlatformTransactionManager transactionManager
+        PlatformTransactionManager transactionManager,
+        MailStepLogger mailStepLogger
     ) {
-        return new StepBuilder("mailConsumeStep", jobRepository)
+        return new StepBuilder("mailRetryStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)
+            .listener(mailStepLogger)
             .build();
     }
 
