@@ -6,10 +6,12 @@ import com.example.cs25.domain.mail.repository.MailLogRepository;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -18,8 +20,9 @@ import org.springframework.stereotype.Component;
 public class MailLogAspect {
 
     private final MailLogRepository mailLogRepository;
+    private final StringRedisTemplate redisTemplate;
 
-    //@Around("execution(* com.example.cs25.domain.mail.service.MailService.sendQuizEmail(..))")
+    @Around("execution(* com.example.cs25.domain.mail.service.MailService.sendQuizEmail(..))")
     public Object logMailSend(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         
@@ -43,6 +46,15 @@ public class MailLogAspect {
                 .build();
 
             mailLogRepository.save(log);
+
+            if (status == MailStatus.FAILED) {
+                Map<String, String> retryMessage = Map.of(
+                    "email", subscription.getEmail(),
+                    "subscriptionId", subscription.getId().toString(),
+                    "quizId", quiz.getId().toString()
+                );
+                redisTemplate.opsForStream().add("quiz-email-retry-stream", retryMessage);
+            }
         }
     }
 }
