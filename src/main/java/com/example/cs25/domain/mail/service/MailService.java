@@ -62,7 +62,7 @@ public class MailService {
             context.setVariable("toEmail", subscription.getEmail());
             context.setVariable("question", quiz.getQuestion());
             context.setVariable("quizLink", generateQuizLink(subscription.getId(), quiz.getId()));
-            String htmlContent = templateEngine.process("today-quiz", context);
+            String htmlContent = templateEngine.process("mail-template", context);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
