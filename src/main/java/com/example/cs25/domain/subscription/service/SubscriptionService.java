@@ -72,10 +72,7 @@ public class SubscriptionService {
      */
     @Transactional
     public void createSubscription(SubscriptionRequest request) {
-        if (subscriptionRepository.existsByEmail(request.getEmail())) {
-            throw new SubscriptionException(
-                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
-        }
+        this.checkEmail(request.getEmail());
 
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             request.getCategory());
@@ -146,4 +143,15 @@ public class SubscriptionService {
         );
     }
 
+    /**
+     * 이미 구독하고 있는 이메일인지 확인하는 메서드
+     *
+     * @param email 이메일
+     */
+    public void checkEmail(String email) {
+        if (subscriptionRepository.existsByEmail(email)) {
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+        }
+    }
 }
