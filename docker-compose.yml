@@ -1,4 +1,20 @@
 services:
+
+#  spring-app:
+#    image: baekjonghyun/cs25-app:latest
+#    ports:
+#      - "8080:8080"
+#    restart: always
+#    depends_on:
+#      - mysql
+#      - redis
+#      - chroma
+#      - jenkins
+#      - prometheus
+#      - grafana
+#    env_file:
+#      - .env
+
   mysql:
     image: mysql:8.0
     environment:
@@ -24,19 +40,6 @@ services:
     volumes:
       - chroma-data:/data
 
-  # FIXME: 임시 배포 파일
-  spring-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-      - redis
-
   jenkins:
     container_name: jenkins
     image: jenkins/jenkins:lts
@@ -48,17 +51,6 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
-
-  #  spring-app:
-  #    image: baekjonghyun/cs25-app:latest
-  #    ports:
-  #      - "8080:8080"
-  #    restart: always
-  #    depends_on:
-  #      - mysql
-  #      - redis
-  #    env_file:
-  #      - .env
 
   prometheus:
     image: prom/prometheus
