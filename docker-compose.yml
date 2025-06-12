@@ -21,12 +21,12 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: cs25
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
 
   redis:
-    image: redis:latest
+    image: redis:7.2
     ports:
       - "6379:6379"
     volumes:
