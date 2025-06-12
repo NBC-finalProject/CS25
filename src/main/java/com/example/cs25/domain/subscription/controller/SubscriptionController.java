@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class SubscriptionController {
 
     @PostMapping
     public ApiResponse<Void> createSubscription(
-        @ModelAttribute @Valid SubscriptionRequest request
+        @RequestBody @Valid SubscriptionRequest request
     ) {
         subscriptionService.createSubscription(request);
         return new ApiResponse<>(201);
@@ -53,6 +55,14 @@ public class SubscriptionController {
         @PathVariable(name = "subscriptionId") Long subscriptionId
     ) {
         subscriptionService.cancelSubscription(subscriptionId);
+        return new ApiResponse<>(200);
+    }
+
+    @GetMapping("/email/check")
+    public ApiResponse<Boolean> checkEmail(
+        @RequestParam("email") String email
+    ) {
+        subscriptionService.checkEmail(email);
         return new ApiResponse<>(200);
     }
 }
