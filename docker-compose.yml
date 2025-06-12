@@ -69,8 +69,6 @@ services:
       - prometheus
 
 volumes:
-  mysql-data:
-  redis-data:
   chroma-data:
   grafana-data:
   jenkins_home:

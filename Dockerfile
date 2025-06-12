@@ -8,7 +8,7 @@ WORKDIR /apps
 COPY . /apps
 
 # 테스트 생략하여 Docker 빌드 안정화
-RUN gradle clean build -x test --no-daemon
+RUN gradle clean build -x test
 
 # 실행용 경량 이미지
 FROM openjdk:17
