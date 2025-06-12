@@ -31,7 +31,11 @@ public class RagService {
         return docs;
     }
 
-    public List<Document> searchRelevant(String query) {
-        return vectorStore.similaritySearch(query);
+    public List<Document> searchRelevant(String query, int topK, double similarityThreshold) {
+        return vectorStore.similaritySearch(SearchRequest.builder()
+            .query(query)
+            .topK(topK)
+            .similarityThreshold(similarityThreshold)
+            .build());
     }
 }

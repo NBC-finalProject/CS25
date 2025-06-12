@@ -26,7 +26,7 @@ public class AiQuestionGeneratorService {
 
     @Transactional
     public Quiz generateQuestionFromContext() {
-        List<Document> docs = ragService.searchRelevant("컴퓨터 과학 일반");
+        List<Document> docs = ragService.searchRelevant("컴퓨터 과학 일반", 3, 0.3);
 
         String context = docs.stream()
             .map(doc -> "- 문서 내용: " + doc.getText())

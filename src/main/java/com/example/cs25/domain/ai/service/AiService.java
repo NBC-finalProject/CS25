@@ -27,7 +27,7 @@ public class AiService {
             .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
         var quiz = answer.getQuiz();
-        var docs = ragService.searchRelevant(quiz.getQuestion());
+        var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.1);
 
         String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
         String systemPrompt = promptProvider.getFeedbackSystem();

@@ -108,7 +108,7 @@ public class AiSearchBenchmarkTest {
                 for (int topK : topKs) {
                     for (double threshold : thresholds) {
                         long start = System.currentTimeMillis();
-                        List<Document> results = ragService.searchRelevant(query);
+                        List<Document> results = ragService.searchRelevant(query, topK, threshold);
                         long elapsed = System.currentTimeMillis() - start;
 
                         assertNotNull(results);
