@@ -2,8 +2,10 @@ package com.example.cs25.domain.userQuizAnswer.repository;
 
 import com.example.cs25.domain.quiz.entity.QQuizCategory;
 import com.example.cs25.domain.subscription.entity.QSubscription;
+import com.example.cs25.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25.domain.userQuizAnswer.entity.QUserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -38,5 +40,14 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             .fetch();
     }
 
+    @Override
+    public List<UserAnswerDto> findUserAnswerByQuizId(Long quizId) {
+        QUserQuizAnswer userQuizAnswer = QUserQuizAnswer.userQuizAnswer;
 
+        return queryFactory
+                .select(Projections.constructor(UserAnswerDto.class, userQuizAnswer.userAnswer))
+                .from(userQuizAnswer)
+                .where(userQuizAnswer.quiz.id.eq(quizId))
+                .fetch();
+    }
 }
