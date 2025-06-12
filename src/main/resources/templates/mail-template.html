@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS25 - 오늘의 CS 문제</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-header {
+            background: linear-gradient(135deg, #5B8DEF 0%, #4A7FEB 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .email-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .email-header h2 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .email-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .email-body {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .icon-circle {
+            width: 100px;
+            height: 100px;
+            background-color: #E8F0FE;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+        }
+
+        .icon-circle svg {
+            width: 50px;
+            height: 50px;
+            color: #5B8DEF;
+        }
+
+        .email-body h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        .email-body p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .quiz-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #5B8DEF 0%, #4A7FEB 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 16px 48px;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(91, 141, 239, 0.3);
+        }
+
+        .quiz-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 141, 239, 0.4);
+        }
+
+        .quiz-button span {
+            margin-right: 8px;
+        }
+
+        .footer-section {
+            background-color: #f8f9fa;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background-color: #E8F0FE;
+            color: #5B8DEF;
+        }
+
+        .tab.inactive {
+            background-color: transparent;
+            color: #666;
+        }
+
+        .settings-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 32px;
+            background-color: #f0f2f5;
+            color: #495057;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .settings-button:hover {
+            background-color: #e9ecef;
+        }
+
+        .footer-info {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer-info p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .footer-info .rocket {
+            font-size: 20px;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <!-- Email Header -->
+    <div class="email-header">
+        <h1>CS 25</h1>
+        <h2>오늘의 CS 문제</h2>
+        <p>AI가 준비한 맞춤형 문제를 확인하세요</p>
+    </div>
+
+    <!-- Email Body -->
+    <div class="email-body">
+        <div class="icon-circle">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+
+        <h3>오늘의 문제를 풀어보세요!</h3>
+
+        <p>
+            안녕하세요! CS25에서 오늘의 맞춤형 CS 문제를 보내드립니다.<br>
+            AI가 생성한 문제와 상세한 해설로 CS 지식을 향상시켜보세요.
+        </p>
+
+        <a th:href="${quizLink}" class="quiz-button">
+            <span>🚀</span> 문제 풀러 가기
+        </a>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="footer-section">
+        <button class="settings-button">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+            </svg>
+            구독 설정
+        </button>
+
+        <div class="footer-info">
+            <p>이 메일은 your-email@example.com 계정으로 발송되었습니다.</p>
+            <p>매일 새로운 CS 지식으로 성장하는 개발자가 되어보세요! <span class="rocket">🚀</span></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
