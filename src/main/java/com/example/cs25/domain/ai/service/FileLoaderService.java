@@ -23,6 +23,8 @@ public class FileLoaderService {
     private final VectorStore vectorStore;
 
     public void loadAndSaveFiles(String dirPath) {
+        log.info("VectorStore 타입: {}", vectorStore.getClass().getName());
+        
         try {
             List<Path> files = Files.list(Paths.get(dirPath))
                 .filter(p -> p.toString().endsWith(".md") || p.toString().endsWith(".txt"))

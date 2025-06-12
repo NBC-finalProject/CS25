@@ -23,20 +23,20 @@ services:
       - "8000:8000"
     restart: unless-stopped
     volumes:
-      - ./chroma-data:/data
+      - ./chroma-data:/chroma/chroma
 
   # FIXME: 임시 배포 파일
-  spring-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-      - redis
+  #  spring-app:
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - "8080:8080"
+  #    env_file:
+  #      - .env
+  #    depends_on:
+  #      - mysql
+  #      - redis
 
   jenkins:
     container_name: jenkins

@@ -58,7 +58,6 @@ dependencies {
     // test
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.mockito:mockito-core:5.10.0'
 
     // ai
     implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
