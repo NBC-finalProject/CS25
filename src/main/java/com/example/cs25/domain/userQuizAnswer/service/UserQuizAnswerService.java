@@ -8,13 +8,22 @@ import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
+import com.example.cs25.domain.userQuizAnswer.dto.SelectionRateResponseDto;
+import com.example.cs25.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
+import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerCustomRepository;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,5 +58,28 @@ public class UserQuizAnswerService {
                 .subscription(subscription)
                 .build()
         );
+    }
+
+    public SelectionRateResponseDto getSelectionRateByOption(Long quizId) {
+        List<UserAnswerDto> answers = userQuizAnswerRepository.findUserAnswerByQuizId(quizId);
+
+        //보기별 선택 수 집계
+        Map<String, Long> counts = answers.stream()
+                .map(UserAnswerDto::getUserAnswer)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        // 총 응답 수 계산
+        long total = counts.values().stream().mapToLong(Long::longValue).sum();
+
+        // 선택률 계산
+        Map<String, Double> rates = counts.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (double) e.getValue() / total
+                ));
+
+        return new SelectionRateResponseDto(rates, total);
     }
 }

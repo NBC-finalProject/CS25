@@ -91,7 +91,7 @@ class MailServiceTest {
     @Test
     void generateQuizLink_올바른_문제풀이링크를_반환한다() {
         //given
-        String expectLink = "https://localhost:8080/example?subscriptionId=1&quizId=1";
+        String expectLink = "http://localhost:8080/todayQuiz?subscriptionId=1&quizId=1";
         //when
         String link = mailService.generateQuizLink(subscriptionId, quizId);
         //then
