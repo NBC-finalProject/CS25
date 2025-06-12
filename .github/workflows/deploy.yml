@@ -17,6 +17,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       # ✅ CI: 테스트만 먼저 수행
       - name: Run tests with H2 (CI only)
         run: ./gradlew clean test -Dspring.profiles.active=test
