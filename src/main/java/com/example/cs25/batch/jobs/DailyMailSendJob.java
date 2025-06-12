@@ -2,6 +2,7 @@ package com.example.cs25.batch.jobs;
 
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.mail.service.MailService;
+import com.example.cs25.domain.mail.stream.reader.RedisStreamReader;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
@@ -42,11 +43,13 @@ public class DailyMailSendJob {
     @Bean
     public Job mailJob(JobRepository jobRepository,
         @Qualifier("mailStep") Step mailStep,
-        @Qualifier("mailConsumeStep") Step mailConsumeStep) {
+        @Qualifier("mailConsumeStep") Step mailConsumeStep,
+        @Qualifier("mailRetryStep") Step mailRetryStep ) {
         return new JobBuilder("mailJob", jobRepository)
             .incrementer(new RunIdIncrementer())
             .start(mailStep)
             .next(mailConsumeStep)
+            .next(mailRetryStep)
             .build();
     }
 
@@ -62,7 +65,32 @@ public class DailyMailSendJob {
     @Bean
     public Step mailConsumeStep(
         JobRepository jobRepository,
-        @Qualifier("redisStreamReader") ItemReader<Map<String, String>> reader,
+        @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
+        @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
+        @Qualifier("mailWriter") ItemWriter<MailDto> writer,
+        PlatformTransactionManager transactionManager
+    ) {
+        return new StepBuilder("mailConsumeStep", jobRepository)
+            .<Map<String, String>, MailDto>chunk(10, transactionManager)
+            .reader(reader)
+            .processor(processor)
+            .writer(writer)
+            .build();
+    }
+
+    //테스트용
+    @Bean
+    public Job mailRetryJob(JobRepository jobRepository, Step mailRetryStep) {
+        return new JobBuilder("mailRetryJob", jobRepository)
+            .start(mailRetryStep) // 이 때 mailRetryStep 실행됨 → 그 안에 Reader가 사용됨
+            .build();
+    }
+
+    //실패한 요청 처리
+    @Bean
+    public Step mailRetryStep(
+        JobRepository jobRepository,
+        @Qualifier("redisRetryReader") ItemReader<Map<String, String>> reader,
         @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
         PlatformTransactionManager transactionManager
@@ -104,9 +132,8 @@ public class DailyMailSendJob {
                 log.info("메일 전송 대상: {} -> quiz {}", email, 0);
             }
 
-            log.info("[배치 종료] 메일 발송 완료");
+            log.info("[배치 종료] MQ push 완료");
             return RepeatStatus.FINISHED;
         };
     }
-
 }
