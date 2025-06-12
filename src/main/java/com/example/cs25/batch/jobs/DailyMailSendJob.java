@@ -81,16 +81,16 @@ public class DailyMailSendJob {
         return (contribution, chunkContext) -> {
             log.info("[배치 시작] 구독자 대상 메일 발송");
             // FIXME: Fake Subscription
-            Set<DayOfWeek> fakeDays = EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
-                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
-            SubscriptionRequest fakeRequest = SubscriptionRequest.builder()
-                .period(SubscriptionPeriod.ONE_MONTH)
-                .email("wannabeing@123.123")
-                .isActive(true)
-                .days(fakeDays)
-                .category("BACKEND")
-                .build();
-            subscriptionService.createSubscription(fakeRequest);
+//            Set<DayOfWeek> fakeDays = EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
+//                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+//            SubscriptionRequest fakeRequest = SubscriptionRequest.builder()
+//                .period(SubscriptionPeriod.ONE_MONTH)
+//                .email("wannabeing@123.123")
+//                .isActive(true)
+//                .days(fakeDays)
+//                .category("BACKEND")
+//                .build();
+//            subscriptionService.createSubscription(fakeRequest);
 
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
 

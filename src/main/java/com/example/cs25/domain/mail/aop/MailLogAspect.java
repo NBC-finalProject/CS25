@@ -19,7 +19,7 @@ public class MailLogAspect {
 
     private final MailLogRepository mailLogRepository;
 
-    @Around("execution(* com.example.cs25.domain.mail.service.MailService.sendQuizEmail(..))")
+    //@Around("execution(* com.example.cs25.domain.mail.service.MailService.sendQuizEmail(..))")
     public Object logMailSend(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         

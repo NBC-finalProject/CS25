@@ -9,13 +9,12 @@ import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@Import(TestMailConfig.class)
+@Import(TestMailConfig.class) //제거하면 실제 발송, 주석 처리 시 테스트만
 class DailyMailSendJobTest {
 
     @Autowired

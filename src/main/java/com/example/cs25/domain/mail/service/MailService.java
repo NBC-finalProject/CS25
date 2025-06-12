@@ -60,6 +60,7 @@ public class MailService {
         try {
             Context context = new Context();
             context.setVariable("toEmail", subscription.getEmail());
+            context.setVariable("question", quiz.getQuestion());
             context.setVariable("quizLink", generateQuizLink(subscription.getId(), quiz.getId()));
             String htmlContent = templateEngine.process("today-quiz", context);
 
@@ -71,6 +72,7 @@ public class MailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
+            System.out.println("메일 보냄: " + subscription.getEmail());
         } catch (MessagingException | MailException e) {
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         }
