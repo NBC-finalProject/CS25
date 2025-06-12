@@ -72,7 +72,6 @@ public class MailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            System.out.println("메일 보냄: " + subscription.getEmail());
         } catch (MessagingException | MailException e) {
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         }

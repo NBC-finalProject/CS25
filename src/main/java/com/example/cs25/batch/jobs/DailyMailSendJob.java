@@ -3,7 +3,6 @@ package com.example.cs25.batch.jobs;
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.mail.stream.logger.MailStepLogger;
-import com.example.cs25.domain.mail.stream.reader.RedisStreamReader;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
@@ -76,6 +75,14 @@ public class DailyMailSendJob {
             .build();
     }
 
+    @Bean //테스트용
+    public Job mailConsumeJob(JobRepository jobRepository,
+        Step mailConsumeStep) {
+        return new JobBuilder("mailConsumeJob", jobRepository)
+            .start(mailConsumeStep)
+            .build();
+    }
+
     @Bean
     public Step mailConsumeStep(
         JobRepository jobRepository,
@@ -83,22 +90,23 @@ public class DailyMailSendJob {
         @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
         PlatformTransactionManager transactionManager,
-        MailStepLogger mailStepLogger
+        MailStepLogger mailStepLogger,
+        TaskExecutor taskExecutor
     ) {
         return new StepBuilder("mailConsumeStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)
+            .taskExecutor(taskExecutor)
             .listener(mailStepLogger)
             .build();
     }
 
-    //테스트용
-    @Bean
+    @Bean //테스트용
     public Job mailRetryJob(JobRepository jobRepository, Step mailRetryStep) {
         return new JobBuilder("mailRetryJob", jobRepository)
-            .start(mailRetryStep) // 이 때 mailRetryStep 실행됨 → 그 안에 Reader가 사용됨
+            .start(mailRetryStep)
             .build();
     }
 
