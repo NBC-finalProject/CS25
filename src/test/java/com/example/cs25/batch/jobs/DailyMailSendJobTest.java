@@ -84,7 +84,7 @@ class DailyMailSendJobTest {
         //given
         for (int i = 0; i < 1000; i++) {
             Map<String, String> data = Map.of(
-                "email", "rainbowsubin@naver.com",  // 실제 수신 가능한 테스트 이메일 권장
+                "email", "test@test.com",  // 실제 수신 가능한 테스트 이메일 권장
                 "subscriptionId", "1",                  // 유효한 subscriptionId 필요
                 "quizId", "1"                           // 유효한 quizId 필요
             );
