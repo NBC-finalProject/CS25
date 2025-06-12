@@ -1,3 +1,4 @@
+ition){
         resolve('성공');
     } else {
         reject('실패');

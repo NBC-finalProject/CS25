@@ -14,7 +14,7 @@
 
 <br>
 
-**스프링 부트를 통해 서버 API 역할을 구축**하고, **UI 로직을 React에서 담당**
+**스프링 부트를 통해 서버 API 역할을 구축**하고, **UI 로직을 React에서 담당** 
 ( React는 컴포넌트화가 잘되어있어서 재사용성이 좋고, 수많은 오픈소스 라이브러리 활용 장점 존재)
 
 <br>
@@ -38,7 +38,7 @@
 
 ---
 
-1. VSCode에서 `ctrl-shift-p` 입력 후, spring 검색해서
+1. VSCode에서 `ctrl-shift-p` 입력 후, spring 검색해서 
    `Spring Initalizr: Generate Maven Project Spring` 선택
    <br>
 
@@ -87,9 +87,9 @@ VSCode에서 터미널 창을 열고 `.\mvnw spring-boot:run`을 입력하면 �
 ***************************
 APPLICATION FAILED TO START
 ***************************
-
+ 
 Description:
-
+ 
 The Tomcat connector configured to listen on port 8080 failed to start. The port may already be in use or the connector may be misconfigured.
 ```
 
@@ -145,7 +145,7 @@ npm i @babel/core @babel/preset-env @babel/preset-react babel-loader css-loader 
 
 ```javascript
 var path = require('path');
-
+ 
 module.exports = {
     context: path.resolve(__dirname, 'src/main/jsx'),
     entry: {
@@ -202,10 +202,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
+ 
 @Controller
 public class MyController {
-
+ 
     @GetMapping("/{name}.html")
     public String page(@PathVariable String name, Model model) {
         model.addAttribute("pageName", name);
@@ -234,7 +234,7 @@ webapp 폴더 안에 jsp 폴더와 css 폴더를 생성한다.
 <head>
     <title>${pageName}</title>
 </head>
-
+ 
 <body>
     <div id="root"></div>
     <script src="/js/react/${pageName}.bundle.js"></script>
@@ -247,11 +247,11 @@ webapp 폴더 안에 jsp 폴더와 css 폴더를 생성한다.
 ##### src/main/webapp/css/custom.css
 
 ```css
-.main {
-    font-size: 24px; border-bottom: solid 1px black;
+.main { 
+    font-size: 24px; border-bottom: solid 1px black; 
 }
-.page1 {
-    font-size: 14px; background-color: yellow;
+.page1 { 
+    font-size: 14px; background-color: yellow; 
 }
 ```
 
@@ -266,8 +266,6 @@ webapp 폴더 안에 jsp 폴더와 css 폴더를 생성한다.
 이제 웹페이지에 보여줄 JSX 파일을 만들어보자
 
 src/main에 jsx 폴더를 만들고 MainPage.jsx와 Page1Page.jsx 2가지 jsx 파일을 만들었다.
-
-age.jsx와 Page1Page.jsx 2가지 jsx 파일을 만들었다.
 
 ##### src/main/jsx/MainPage.jsx
 

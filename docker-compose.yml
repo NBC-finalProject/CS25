@@ -23,7 +23,7 @@ services:
       - "8000:8000"
     restart: unless-stopped
     volumes:
-      - chroma-data:/data
+      - ./chroma-data:/data
 
   # FIXME: 임시 배포 파일
   spring-app:

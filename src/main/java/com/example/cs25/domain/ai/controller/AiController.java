@@ -3,6 +3,7 @@ package com.example.cs25.domain.ai.controller;
 import com.example.cs25.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25.domain.ai.service.AiQuestionGeneratorService;
 import com.example.cs25.domain.ai.service.AiService;
+import com.example.cs25.domain.ai.service.FileLoaderService;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class AiController {
 
     private final AiService aiService;
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
+    private final FileLoaderService fileLoaderService;
 
     @GetMapping("/{answerId}/feedback")
     public ResponseEntity<?> getFeedback(@PathVariable Long answerId) {
@@ -30,5 +32,11 @@ public class AiController {
     public ResponseEntity<?> generateQuiz() {
         Quiz quiz = aiQuestionGeneratorService.generateQuestionFromContext();
         return ResponseEntity.ok(new ApiResponse<>(200, quiz));
+    }
+
+    @GetMapping("/load/{dirName}")
+    public String loadFiles(@PathVariable("dirName") String dirName) {
+        fileLoaderService.loadAndSaveFiles("data/" + dirName); // 예: data/markdowns
+        return "파일 적재 완료!";
     }
 }
