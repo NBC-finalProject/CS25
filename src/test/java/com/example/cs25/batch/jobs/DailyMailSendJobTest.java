@@ -111,6 +111,8 @@ class DailyMailSendJobTest {
         System.out.println("배치 종료 상태: " + execution.getExitStatus());
         System.out.println("총 발송 시간(ms): " + totalMillis);
         System.out.println("총 발송 시도) " + count);
+//        System.out.println("평균 시간(ms): " + totalMillis/count);
         System.out.println("평균 시간(ms): " + avgMillis);
+
     }
 }
