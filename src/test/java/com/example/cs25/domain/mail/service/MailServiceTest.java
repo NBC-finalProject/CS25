@@ -105,7 +105,7 @@ class MailServiceTest {
         mailService.sendQuizEmail(subscription, quiz);
         //then
         verify(templateEngine)
-            .process(eq("today-quiz"), any(Context.class));
+            .process(eq("mail-template"), any(Context.class));
         verify(mailSender).send(mimeMessage);
     }
 
