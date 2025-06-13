@@ -4,6 +4,8 @@ import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.quiz.exception.QuizException;
 import com.example.cs25.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
+
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,5 +27,12 @@ public class QuizCategoryService {
 
         QuizCategory quizCategory = new QuizCategory(categoryType);
         quizCategoryRepository.save(quizCategory);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getQuizCategoryList () {
+        return quizCategoryRepository.findAll()
+            .stream().map(QuizCategory::getCategoryType
+            ).toList();
     }
 }

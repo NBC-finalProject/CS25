@@ -20,19 +20,11 @@ public class AiConfig {
         return ChatClient.create(chatModel);
     }
 
-//    @Bean
-//    public EmbeddingModel embeddingModel() {
-//        OpenAiApi openAiApi = OpenAiApi.builder()
-//                .apiKey(openAiKey)
-//                .build();
-//        return new OpenAiEmbeddingModel(openAiApi);
-//    }
-
     @Bean
     public EmbeddingModel embeddingModel() {
         OpenAiApi openAiApi = OpenAiApi.builder()
-            .apiKey(openAiKey)
-            .build();
+                .apiKey(openAiKey)
+                .build();
         return new OpenAiEmbeddingModel(openAiApi);
     }
 }

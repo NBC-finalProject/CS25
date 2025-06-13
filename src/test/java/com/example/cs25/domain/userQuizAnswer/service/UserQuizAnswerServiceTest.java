@@ -10,6 +10,8 @@ import com.example.cs25.domain.subscription.entity.DayOfWeek;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.exception.SubscriptionException;
 import com.example.cs25.domain.subscription.repository.SubscriptionRepository;
+import com.example.cs25.domain.userQuizAnswer.dto.SelectionRateResponseDto;
+import com.example.cs25.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
@@ -25,11 +27,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.EnumSet;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -139,5 +141,43 @@ class UserQuizAnswerServiceTest {
         assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(quizId, requestDto))
                 .isInstanceOf(QuizException.class)
                 .hasMessageContaining("해당 퀴즈를 찾을 수 없습니다");
+    }
+
+    @Test
+    void getSelectionRateByOption_조회_성공(){
+
+        //given
+        Long quizId = 1L;
+        List<UserAnswerDto> answers = List.of(
+                new UserAnswerDto("1"),
+                new UserAnswerDto("1"),
+                new UserAnswerDto("2"),
+                new UserAnswerDto("2"),
+                new UserAnswerDto("2"),
+                new UserAnswerDto("3"),
+                new UserAnswerDto("3"),
+                new UserAnswerDto("3"),
+                new UserAnswerDto("4"),
+                new UserAnswerDto("4")
+        );
+
+        when(userQuizAnswerRepository.findUserAnswerByQuizId(quizId)).thenReturn(answers);
+
+        //when
+        SelectionRateResponseDto selectionRateByOption = userQuizAnswerService.getSelectionRateByOption(quizId);
+
+        //then
+        assertThat(selectionRateByOption.getTotalCount()).isEqualTo(10);
+
+        Map<String, Double> expectedRates = new HashMap<>();
+        expectedRates.put("1", 2/10.0);
+        expectedRates.put("2", 3/10.0);
+        expectedRates.put("3", 3/10.0);
+        expectedRates.put("4", 2/10.0);
+
+        expectedRates.forEach((key, expectedRate) ->
+                assertEquals(expectedRate, selectionRateByOption.getSelectionRates().get(key), 0.0001)
+        );
+
     }
 }
