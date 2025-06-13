@@ -40,6 +40,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
 
+            //프론트 생기면 추가 -> 헤더에 바로 jwt 꼽아넣어서 하나하나 jwt 적용할 필요가 없어짐
+//            ResponseCookie accessTokenCookie =
+//                tokenResponse.getAccessToken();
+//
+//            ResponseCookie refreshTokenCookie =
+//                tokenResponse.getRefreshToken();
+//
+//            response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+//            response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
         } catch (Exception e) {
             log.error("OAuth2 로그인 처리 중 에러 발생", e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 실패");

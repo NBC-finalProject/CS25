@@ -4,7 +4,6 @@ import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
 import com.example.cs25.domain.subscription.service.SubscriptionService;
 import com.example.cs25.global.dto.ApiResponse;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,19 +13,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/subscription")
+@RequestMapping("/subscriptions")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
     @GetMapping("/{subscriptionId}")
     public ApiResponse<SubscriptionInfoDto> getSubscription(
-        @PathVariable Long subscriptionId
-    ){
+        @PathVariable("subscriptionId") Long subscriptionId
+    ) {
         return new ApiResponse<>(
             200,
             subscriptionService.getSubscription(subscriptionId)
@@ -45,7 +45,7 @@ public class SubscriptionController {
     public ApiResponse<Void> updateSubscription(
         @PathVariable(name = "subscriptionId") Long subscriptionId,
         @ModelAttribute @Valid SubscriptionRequest request
-    ){
+    ) {
         subscriptionService.updateSubscription(subscriptionId, request);
         return new ApiResponse<>(200);
     }
@@ -53,8 +53,16 @@ public class SubscriptionController {
     @PatchMapping("/{subscriptionId}/cancel")
     public ApiResponse<Void> cancelSubscription(
         @PathVariable(name = "subscriptionId") Long subscriptionId
-    ){
+    ) {
         subscriptionService.cancelSubscription(subscriptionId);
+        return new ApiResponse<>(200);
+    }
+
+    @GetMapping("/email/check")
+    public ApiResponse<Boolean> checkEmail(
+        @RequestParam("email") String email
+    ) {
+        subscriptionService.checkEmail(email);
         return new ApiResponse<>(200);
     }
 }

@@ -2,6 +2,7 @@ package com.example.cs25.global.jwt.filter;
 
 import com.example.cs25.domain.users.entity.Role;
 import com.example.cs25.global.dto.AuthUser;
+import com.example.cs25.global.exception.ErrorResponseUtil;
 import com.example.cs25.global.jwt.exception.JwtAuthenticationException;
 import com.example.cs25.global.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
@@ -25,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         FilterChain filterChain) throws ServletException, IOException {
 
         String token = resolveToken(request);
+        //System.out.println("[JwtFilter] URI: " + request.getRequestURI() + ", Token: " + token);
 
         if (token != null) {
             try {
@@ -44,9 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             } catch (JwtAuthenticationException e) {
                 // 로그 기록 후 인증 실패 처리
-                logger.warn("JWT 인증 실패", e);
+                logger.info("인증 실패", e);
+                ErrorResponseUtil.writeJsonError(response, e.getHttpStatus().value(),
+                    e.getMessage());
                 // SecurityContext를 설정하지 않고 다음 필터로 진행
                 // 인증이 필요한 엔드포인트에서는 별도 처리됨
+                return;
             }
         }
 
@@ -71,6 +76,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         return null;
     }
-
-
 }

@@ -1,20 +1,4 @@
-version: '3.8'
-
 services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: cs25
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-
-  redis:
-    image: redis:7.2
-    ports:
-      - "6379:6379"
 
   spring-app:
     image: baekjonghyun/cs25-app:latest
@@ -22,10 +6,69 @@ services:
       - "8080:8080"
     restart: always
     depends_on:
-      - mysql
-      - redis
+      - chroma
+      - jenkins
+      - prometheus
+      - grafana
     env_file:
       - .env
 
+#  mysql:
+#    image: mysql:8.0
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+#      MYSQL_DATABASE: cs25
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#
+#  redis:
+#    image: redis:7.2
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - redis-data:/data
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/data
+
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "9000:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 volumes:
-  mysql-data:
+  chroma-data:
+  grafana-data:
+  jenkins_home:

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
-import com.example.cs25.domain.oauth.dto.SocialType;
+import com.example.cs25.domain.oauth2.dto.SocialType;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.subscription.dto.SubscriptionHistoryDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
@@ -95,7 +95,7 @@ class UserServiceTest {
             .build();
 
         SubscriptionInfoDto subscriptionInfoDto = new SubscriptionInfoDto(
-            quizCategory,
+            quizCategory.getCategoryType(),
             30L,
             Set.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
         );

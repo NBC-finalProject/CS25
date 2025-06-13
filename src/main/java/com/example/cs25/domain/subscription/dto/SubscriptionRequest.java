@@ -7,10 +7,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.Set;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class SubscriptionRequest {
 
@@ -29,4 +33,13 @@ public class SubscriptionRequest {
     // 수정하면서 기간을 늘릴수도, 안늘릴수도 있음, 기본값은 0
     @NotNull
     private SubscriptionPeriod period;
+
+    @Builder
+    public SubscriptionRequest(SubscriptionPeriod period, boolean isActive, Set<DayOfWeek> days, String email, String category) {
+        this.period = period;
+        this.isActive = isActive;
+        this.days = days;
+        this.email = email;
+        this.category = category;
+    }
 }
