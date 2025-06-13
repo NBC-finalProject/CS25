@@ -8,13 +8,12 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum UserExceptionCode {
-    //예시임
-    NOT_FOUND_EVENT(false, HttpStatus.NOT_FOUND, "해당 이벤트를 찾을 수 없습니다"),
-    EVENT_OUT_OF_STOCK(false, HttpStatus.GONE, "당첨자가 모두 나왔습니다. 다음 기회에 다시 참여해주세요"),
+    EMAIL_DUPLICATION(false, HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
     EVENT_CRUD_FAILED(false, HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 값을 레디스에 읽기/저장 실패했으요"),
     LOCK_FAILED(false, HttpStatus.CONFLICT, "요청 시간 초과, 락 획득 실패"),
-    INVALID_EVENT(false, HttpStatus.BAD_REQUEST, "지금은 이벤트에 참여할 수 없어요"),
-    DUPLICATED_EVENT_ID(false, HttpStatus.BAD_REQUEST, "중복되는 이벤트 ID 입니다." );
+    INVALID_ROLE(false, HttpStatus.BAD_REQUEST, "역할 값이 잘못되었습니다."),
+    TOKEN_NOT_MATCHED(false, HttpStatus.BAD_REQUEST, "유효한 리프레시 토큰 값이 아닙니다."),
+    NOT_FOUND_USER(false, HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다.");
 
     private final boolean isSuccess;
     private final HttpStatus httpStatus;
