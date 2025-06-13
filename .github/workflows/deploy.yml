@@ -37,16 +37,24 @@ jobs:
           echo "mysql_host=${{ secrets.MYSQL_HOST }}" >> .env
           echo "redis_host=${{ secrets.REDIS_HOST }}" >> .env
 
-      - name: Upload files using rsync (skip existing)
+      - name: Clean EC2 target folder before upload
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           script: |
-            rsync -av --ignore-existing ./docker-compose.yml ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/app/
-            rsync -av --ignore-existing ./.env ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/app/
-            rsync -av --ignore-existing ./prometheus/prometheus.yml ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/app/prometheus/
+            rm -rf /home/ec2-user/app
+            mkdir -p /home/ec2-user/app
+
+      - name: Upload .env and docker-compose.yml and prometheus config to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_KEY }}
+          source: ".env, docker-compose.yml, prometheus/prometheus.yml"
+          target: "/home/ec2-user/app"
 
       - name: Run docker-compose on EC2
         uses: appleboy/ssh-action@v1.2.0
@@ -56,17 +64,14 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ec2-user/app
-            # 중지된 컨테이너 삭제
+
+            # 리소스 정리
             docker container prune -f
-            
-            # 안 쓰는 이미지 삭제
             docker image prune -a -f
-            
-            # 안 쓰는 볼륨 삭제
             docker volume prune -f
-            
-            # 전체 정리
             docker system prune -a --volumes -f
+
+            # 재배포
             docker-compose pull
             docker-compose down
             docker-compose up -d
