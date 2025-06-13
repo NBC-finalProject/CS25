@@ -54,6 +54,17 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ec2-user/app
+            # 중지된 컨테이너 삭제
+            docker container prune -f
+            
+            # 안 쓰는 이미지 삭제
+            docker image prune -a -f
+            
+            # 안 쓰는 볼륨 삭제
+            docker volume prune -f
+            
+            # 전체 정리
+            docker system prune -a --volumes -f
             docker-compose pull
             docker-compose down
             docker-compose up -d
