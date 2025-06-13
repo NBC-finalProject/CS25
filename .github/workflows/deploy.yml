@@ -27,17 +27,17 @@ jobs:
         run: |
           echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-          echo "JWT_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
           echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
-          echo "CLIENT_ID=${{ secrets.GH_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.GH_SECRET }}" >> .env
-          echo "CLIENT_ID=${{ secrets.NAVER_ID }}" >> .env
-          echo "CLIENT_SECRET=${{ secrets.NAVER_SECRET }}" >> .env
+          echo "GH_ID=${{ secrets.GH_ID }}" >> .env
+          echo "GH_SECRET=${{ secrets.GH_SECRET }}" >> .env
+          echo "NAVER_ID=${{ secrets.NAVER_ID }}" >> .env
+          echo "NAVER_SECRET=${{ secrets.NAVER_SECRET }}" >> .env
           echo "GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}" >> .env
-          echo "mysql_host=${{ secrets.MYSQL_HOST }}" >> .env
-          echo "redis_host=${{ secrets.REDIS_HOST }}" >> .env
+          echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
 
       - name: Clean EC2 target folder before upload
         uses: appleboy/ssh-action@v1.2.0
