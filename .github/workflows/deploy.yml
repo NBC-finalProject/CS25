@@ -37,13 +37,13 @@ jobs:
           echo "mysql_host=${{ secrets.MYSQL_HOST }}" >> .env
           echo "redis_host=${{ secrets.REDIS_HOST }}" >> .env
 
-      - name: Upload .env and docker-compose.yml to EC2
+      - name: Upload .env and docker-compose.yml and prometheus to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          source: ".env, docker-compose.yml"
+          source: ".env, docker-compose.yml, /prometheus/prometheus.yml"
           target: "/home/ec2-user/app"
 
       - name: Run docker-compose on EC2
