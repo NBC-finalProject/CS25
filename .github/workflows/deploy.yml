@@ -37,14 +37,16 @@ jobs:
           echo "mysql_host=${{ secrets.MYSQL_HOST }}" >> .env
           echo "redis_host=${{ secrets.REDIS_HOST }}" >> .env
 
-      - name: Upload .env and docker-compose.yml and prometheus to EC2
-        uses: appleboy/scp-action@v0.1.4
+      - name: Upload files using rsync (skip existing)
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          source: ".env, docker-compose.yml, prometheus/prometheus.yml"
-          target: "/home/ec2-user/app"
+          script: |
+            rsync -av --ignore-existing ./docker-compose.yml ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/app/
+            rsync -av --ignore-existing ./.env ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/app/
+            rsync -av --ignore-existing ./prometheus/prometheus.yml ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/app/prometheus/
 
       - name: Run docker-compose on EC2
         uses: appleboy/ssh-action@v1.2.0
