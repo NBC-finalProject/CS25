@@ -53,7 +53,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
-          source: ".env, docker-compose.yml, prometheus/prometheus.yml"
+          source: ".env, docker-compose.yml, /prometheus/prometheus.yml"
           target: "/home/ec2-user/app"
 
       - name: Run docker-compose on EC2
