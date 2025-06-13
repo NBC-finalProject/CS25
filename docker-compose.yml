@@ -1,20 +1,74 @@
-version: '3.8'
 services:
-  cs25-mysql:
-    image: mysql:8.0.35
 
-    platform: linux/amd64
-    volumes:
-      - cs25_mysql_volume:/var/lib/mysql
+  spring-app:
+    image: baekjonghyun/cs25-app:latest
     ports:
-      - '3306:3306'
-    environment:
-      MYSQL_ROOT_PASSWORD: mysqlpassword
-      MYSQL_DATABASE: cs25
-    command:
-      [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--lower_case_table_names=1' ]
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - chroma
+      - jenkins
+      - prometheus
+      - grafana
+    env_file:
+      - .env
+
+#  mysql:
+#    image: mysql:8.0
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+#      MYSQL_DATABASE: cs25
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#
+#  redis:
+#    image: redis:7.2
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - redis-data:/data
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/data
+
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "9000:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
 
 volumes:
-  cs25_mysql_volume:
-
-# mysql 만 일단 추가해놨고 나중에 배포에 피룡한 CI/CD 생기면 그때 추가하던지...
+  chroma-data:
+  grafana-data:
+  jenkins_home:
