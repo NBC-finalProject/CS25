@@ -1,20 +1,34 @@
 services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: cs25
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
 
-  redis:
-    image: redis:latest
+  spring-app:
+    image: baekjonghyun/cs25-app:latest
     ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - chroma
+      - jenkins
+      - prometheus
+      - grafana
+    env_file:
+      - .env
+
+#  mysql:
+#    image: mysql:8.0
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+#      MYSQL_DATABASE: cs25
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - mysql-data:/var/lib/mysql
+#
+#  redis:
+#    image: redis:7.2
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - redis-data:/data
 
   chroma:
     image: ghcr.io/chroma-core/chroma
@@ -23,19 +37,6 @@ services:
     restart: unless-stopped
     volumes:
       - chroma-data:/data
-
-  # FIXME: 임시 배포 파일
-  spring-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-      - redis
 
   jenkins:
     container_name: jenkins
@@ -49,22 +50,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
 
-  #  spring-app:
-  #    image: baekjonghyun/cs25-app:latest
-  #    ports:
-  #      - "8080:8080"
-  #    restart: always
-  #    depends_on:
-  #      - mysql
-  #      - redis
-  #    env_file:
-  #      - .env
-
   prometheus:
     image: prom/prometheus
     container_name: prometheus
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/etc/prometheus
     ports:
       - "9090:9090"
 
@@ -79,8 +69,6 @@ services:
       - prometheus
 
 volumes:
-  mysql-data:
-  redis-data:
   chroma-data:
   grafana-data:
   jenkins_home:
