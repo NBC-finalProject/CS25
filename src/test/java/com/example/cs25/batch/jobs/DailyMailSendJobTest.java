@@ -81,6 +81,10 @@ class DailyMailSendJobTest {
 
     @Test
     void 대량메일발송_MQ비동기_성능측정() throws Exception {
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("mailJob");
+
         //given
         for (int i = 0; i < 1000; i++) {
             Map<String, String> data = Map.of(
@@ -96,9 +100,6 @@ class DailyMailSendJobTest {
             .addLong("timestamp", System.currentTimeMillis())
             .toJobParameters();
 
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start("mailJob");
-
         JobExecution execution = jobLauncher.run(mailJob, params);
         stopWatch.stop();
 
@@ -106,9 +107,10 @@ class DailyMailSendJobTest {
         long totalMillis = stopWatch.getTotalTimeMillis();
         long count = execution.getStepExecutions().stream()
             .mapToLong(StepExecution::getWriteCount).sum();
+        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
         System.out.println("배치 종료 상태: " + execution.getExitStatus());
         System.out.println("총 발송 시간(ms): " + totalMillis);
         System.out.println("총 발송 시도) " + count);
-        System.out.println("평균 시간(ms): " + totalMillis/count);
+        System.out.println("평균 시간(ms): " + avgMillis);
     }
 }
