@@ -5,16 +5,9 @@ import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.mail.stream.logger.MailStepLogger;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
-import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
-import com.example.cs25.domain.subscription.entity.DayOfWeek;
-import com.example.cs25.domain.subscription.entity.SubscriptionPeriod;
 import com.example.cs25.domain.subscription.service.SubscriptionService;
-
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -27,12 +20,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -47,6 +38,47 @@ public class DailyMailSendJob {
     private final MailService mailService;
 
     @Bean
+    public Job mailProducerJob(JobRepository jobRepository,
+        @Qualifier("mailProduceStep") Step mailStep) {
+        return new JobBuilder("mailProducerJob", jobRepository)
+            .incrementer(new RunIdIncrementer())
+            .start(mailStep)
+            .build();
+    }
+
+    @Bean
+    public Step mailProduceStep(JobRepository jobRepository,
+        @Qualifier("mailTasklet") Tasklet mailTasklet,
+        PlatformTransactionManager transactionManager) {
+        return new StepBuilder("mailProduceStep", jobRepository)
+            .tasklet(mailTasklet, transactionManager)
+            .build();
+    }
+
+    // TODO: Chunk 방식 고려
+    @Bean
+    public Tasklet mailTasklet() {
+        return (contribution, chunkContext) -> {
+            log.info("[배치 시작] 구독자 대상 메일 발송");
+
+            List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
+
+            for (SubscriptionMailTargetDto sub : subscriptions) {
+                Long subscriptionId = sub.getSubscriptionId();
+                String email = sub.getEmail();
+
+                // Today 퀴즈 발송
+                todayQuizService.issueTodayQuiz(subscriptionId);
+
+                log.info("메일 전송 대상: {} -> quiz {}", email, 0);
+            }
+
+            log.info("[배치 종료] MQ push 완료");
+            return RepeatStatus.FINISHED;
+        };
+    }
+
+    @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
@@ -58,30 +90,8 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public Job mailJob(JobRepository jobRepository,
-        @Qualifier("mailStep") Step mailStep,
-        @Qualifier("mailConsumeStep") Step mailConsumeStep,
-        @Qualifier("mailRetryStep") Step mailRetryStep ) {
-        return new JobBuilder("mailJob", jobRepository)
-            .incrementer(new RunIdIncrementer())
-            .start(mailStep)
-            .next(mailConsumeStep)
-            .next(mailRetryStep)
-            .build();
-    }
-
-    @Bean
-    public Step mailStep(JobRepository jobRepository,
-        @Qualifier("mailTasklet") Tasklet mailTasklet,
-        PlatformTransactionManager transactionManager) {
-        return new StepBuilder("mailStep", jobRepository)
-            .tasklet(mailTasklet, transactionManager)
-            .build();
-    }
-
-    @Bean //테스트용
     public Job mailConsumeJob(JobRepository jobRepository,
-        Step mailConsumeStep) {
+        @Qualifier("mailConsumeStep") Step mailConsumeStep) {
         return new JobBuilder("mailConsumeJob", jobRepository)
             .start(mailConsumeStep)
             .build();
@@ -95,7 +105,7 @@ public class DailyMailSendJob {
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
         PlatformTransactionManager transactionManager,
         MailStepLogger mailStepLogger,
-        TaskExecutor taskExecutor
+        @Qualifier("taskExecutor") TaskExecutor taskExecutor
     ) {
         return new StepBuilder("mailConsumeStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)
@@ -107,7 +117,7 @@ public class DailyMailSendJob {
             .build();
     }
 
-    @Bean //테스트용
+    @Bean
     public Job mailRetryJob(JobRepository jobRepository, Step mailRetryStep) {
         return new JobBuilder("mailRetryJob", jobRepository)
             .start(mailRetryStep)
@@ -133,37 +143,4 @@ public class DailyMailSendJob {
             .build();
     }
 
-    // TODO: Chunk 방식 고려
-    @Bean
-    public Tasklet mailTasklet() {
-        return (contribution, chunkContext) -> {
-            log.info("[배치 시작] 구독자 대상 메일 발송");
-            // FIXME: Fake Subscription
-//            Set<DayOfWeek> fakeDays = EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
-//                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
-//            SubscriptionRequest fakeRequest = SubscriptionRequest.builder()
-//                .period(SubscriptionPeriod.ONE_MONTH)
-//                .email("wannabeing@123.123")
-//                .isActive(true)
-//                .days(fakeDays)
-//                .category("BACKEND")
-//                .build();
-//            subscriptionService.createSubscription(fakeRequest);
-
-            List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
-
-            for (SubscriptionMailTargetDto sub : subscriptions) {
-                Long subscriptionId = sub.getSubscriptionId();
-                String email = sub.getEmail();
-
-                // Today 퀴즈 발송
-                todayQuizService.issueTodayQuiz(subscriptionId);
-
-                log.info("메일 전송 대상: {} -> quiz {}", email, 0);
-            }
-
-            log.info("[배치 종료] MQ push 완료");
-            return RepeatStatus.FINISHED;
-        };
-    }
 }
