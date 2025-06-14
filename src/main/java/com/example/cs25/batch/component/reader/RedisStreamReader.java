@@ -28,7 +28,7 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
     public Map<String, String> read() {
         List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
             Consumer.from(GROUP, CONSUMER),
-            StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)), // 메시지 없으면 2초 대기
+            StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
             StreamOffset.create(STREAM, ReadOffset.lastConsumed())
         );
 

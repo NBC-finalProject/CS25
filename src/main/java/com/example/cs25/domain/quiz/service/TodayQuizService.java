@@ -100,17 +100,6 @@ public class TodayQuizService {
     }
 
     @Transactional
-    public void issueTodayQuiz(Long subscriptionId) {
-        //해당 구독자의 문제 구독 카테고리 확인
-        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
-        //문제 발급
-        Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
-        //메일 발송
-        //mailService.sendQuizEmail(subscription, selectedQuiz);
-        mailService.enqueueQuizEmail(subscription, selectedQuiz);
-    }
-
-    @Transactional
     public QuizDto getTodayQuizNew(Long subscriptionId) {
         //1. 해당 구독자의 문제 구독 카테고리 확인
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);

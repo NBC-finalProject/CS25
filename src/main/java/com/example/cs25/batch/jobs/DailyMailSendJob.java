@@ -59,21 +59,16 @@ public class DailyMailSendJob {
     @Bean
     public Tasklet mailTasklet() {
         return (contribution, chunkContext) -> {
-            log.info("[배치 시작] 구독자 대상 메일 발송");
-
+            log.info("[배치 시작] 메일 발송 대상 구독자 선별");
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
 
             for (SubscriptionMailTargetDto sub : subscriptions) {
                 Long subscriptionId = sub.getSubscriptionId();
-                String email = sub.getEmail();
-
-                // Today 퀴즈 발송
-                todayQuizService.issueTodayQuiz(subscriptionId);
-
-                log.info("메일 전송 대상: {} -> quiz {}", email, 0);
+                //메일을 발송해야 할 구독자 정보를 MessageQueue 에 넣음
+                mailService.enqueueQuizEmail(subscriptionId);
             }
 
-            log.info("[배치 종료] MQ push 완료");
+            log.info("[배치 종료] MessageQueue push 완료");
             return RepeatStatus.FINISHED;
         };
     }
