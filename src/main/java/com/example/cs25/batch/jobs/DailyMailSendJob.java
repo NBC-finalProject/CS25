@@ -2,7 +2,7 @@ package com.example.cs25.batch.jobs;
 
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.mail.service.MailService;
-import com.example.cs25.domain.mail.stream.logger.MailStepLogger;
+import com.example.cs25.batch.component.logger.MailStepLogger;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25.domain.subscription.service.SubscriptionService;

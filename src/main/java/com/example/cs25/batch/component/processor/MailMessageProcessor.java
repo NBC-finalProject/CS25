@@ -1,4 +1,4 @@
-package com.example.cs25.domain.mail.stream.processor;
+package com.example.cs25.batch.component.processor;
 
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.quiz.entity.Quiz;

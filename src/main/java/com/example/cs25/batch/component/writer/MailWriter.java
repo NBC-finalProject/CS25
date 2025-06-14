@@ -1,4 +1,4 @@
-package com.example.cs25.domain.mail.stream.writer;
+package com.example.cs25.batch.component.writer;
 
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.mail.service.MailService;
