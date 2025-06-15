@@ -31,11 +31,4 @@ public class QuizTestController {
         return new ApiResponse<>(200, accuracyService.getTodayQuizNew(1L));
     }
 
-    @PostMapping("/emails/getTodayQuiz")
-    public ApiResponse<String> sendTodayQuiz(
-        @RequestParam("subscriptionId") Long subscriptionId
-    ){
-        accuracyService.issueTodayQuiz(subscriptionId);
-        return new ApiResponse<>(200, "문제 발송 성공");
-    }
 }

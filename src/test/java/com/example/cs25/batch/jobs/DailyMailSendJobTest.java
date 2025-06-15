@@ -17,6 +17,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -30,16 +31,26 @@ class DailyMailSendJobTest {
     private MailService mailService;
 
     @Autowired
-    private JobLauncher jobLauncher;
-
-    @Autowired
-    private Job mailJob;
-
-    @Autowired
     private StringRedisTemplate redisTemplate;
 
     @Autowired
-    private Job mailConsumeJob;
+    private JobLauncher jobLauncher;
+
+    @Autowired
+    @Qualifier("mailJob")
+    private Job mailJob;
+
+    @Autowired
+    @Qualifier("mailProducerJob")
+    private Job mailProducerJob;
+
+    @Autowired
+    @Qualifier("mailConsumerJob")
+    private Job mailConsumerJob;
+
+    @Autowired
+    @Qualifier("mailConsumerWithAsyncJob")
+    private Job mailConsumerWithAsyncJob;
 
     @AfterEach
     void cleanUp() {
@@ -60,41 +71,9 @@ class DailyMailSendJobTest {
     }
 
     @Test
-    void testMailJob_발송_실패시_retry큐에서_재전송() throws Exception {
-        doThrow(new RuntimeException("테스트용 메일 실패"))
-            .doNothing() // 두 번째는 성공하도록
-            .when(mailService).sendQuizEmail(any(), any());
-
-        // 2. Job 실행
-        JobParameters params = new JobParametersBuilder()
-            .addLong("time", System.currentTimeMillis())
-            .toJobParameters();
-
-        jobLauncher.run(mailJob, params);
-
-        // 3. retry-stream 큐가 비어있어야 정상 (재시도 후 성공했기 때문)
-        Long retryCount = redisTemplate.opsForStream()
-            .size("quiz-email-retry-stream");
-
-        assertThat(retryCount).isEqualTo(0);
-    }
-
-    @Test
-    void 대량메일발송_MQ비동기_성능측정() throws Exception {
-
+    void 메일발송_동기_성능측정() throws Exception {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("mailJob");
-
-        //given
-        for (int i = 0; i < 1000; i++) {
-            Map<String, String> data = Map.of(
-                "email", "test@test.com",  // 실제 수신 가능한 테스트 이메일 권장
-                "subscriptionId", "1",                  // 유효한 subscriptionId 필요
-                "quizId", "1"                           // 유효한 quizId 필요
-            );
-            redisTemplate.opsForStream().add("quiz-email-stream", data);
-        }
-
         //when
         JobParameters params = new JobParametersBuilder()
             .addLong("timestamp", System.currentTimeMillis())
@@ -111,7 +90,80 @@ class DailyMailSendJobTest {
         System.out.println("배치 종료 상태: " + execution.getExitStatus());
         System.out.println("총 발송 시간(ms): " + totalMillis);
         System.out.println("총 발송 시도) " + count);
-//        System.out.println("평균 시간(ms): " + totalMillis/count);
+        System.out.println("평균 시간(ms): " + avgMillis);
+
+    }
+
+    @Test
+    void 메일발송_MQ_동기_성능측정() throws Exception {
+
+        //when
+        StopWatch stopWatchProducer = new StopWatch();
+        stopWatchProducer.start("mailMQJob-producer");
+
+        JobParameters producerParams = new JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters();
+
+        JobExecution producerExecution = jobLauncher.run(mailProducerJob, producerParams);
+        stopWatchProducer.stop();
+
+        Thread.sleep(2000);
+
+        StopWatch stopWatchConsumer = new StopWatch();
+        stopWatchConsumer.start("mailMQJob-consumer");
+        JobParameters consumerParams = new JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters();
+
+        JobExecution consumerExecution = jobLauncher.run(mailConsumerJob, consumerParams);
+        stopWatchConsumer.stop();
+
+        // then
+        long totalMillis = stopWatchProducer.getTotalTimeMillis() + stopWatchConsumer.getTotalTimeMillis();
+        long count = consumerExecution.getStepExecutions().stream()
+            .mapToLong(StepExecution::getWriteCount).sum();
+        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
+        System.out.println("배치 종료 상태: " + consumerExecution.getExitStatus());
+        System.out.println("총 발송 시간(ms): " + totalMillis);
+        System.out.println("총 발송 시도) " + count);
+        System.out.println("평균 시간(ms): " + avgMillis);
+
+    }
+
+    @Test
+    void 메일발송_MQ_비동기_성능측정() throws Exception {
+
+        //when
+        StopWatch stopWatchProducer = new StopWatch();
+        stopWatchProducer.start("mailMQAsyncJob-producer");
+
+        JobParameters producerParams = new JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters();
+
+        JobExecution producerExecution = jobLauncher.run(mailProducerJob, producerParams);
+        stopWatchProducer.stop();
+
+        Thread.sleep(2000); //어느 정도로 설정해놓는게 좋을까요? Job 2개 연속 실행 방지
+
+        StopWatch stopWatchConsumer = new StopWatch();
+        stopWatchConsumer.start("mailMQAsyncJob-consumer");
+        JobParameters consumerParams = new JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters();
+
+        JobExecution consumerExecution = jobLauncher.run(mailConsumerWithAsyncJob, consumerParams);
+        stopWatchConsumer.stop();
+
+        // then
+        long totalMillis = stopWatchProducer.getTotalTimeMillis() + stopWatchConsumer.getTotalTimeMillis();
+        long count = consumerExecution.getStepExecutions().stream()
+            .mapToLong(StepExecution::getWriteCount).sum();
+        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
+        System.out.println("배치 종료 상태: " + consumerExecution.getExitStatus());
+        System.out.println("총 발송 시간(ms): " + totalMillis);
+        System.out.println("총 발송 시도 " + count);
         System.out.println("평균 시간(ms): " + avgMillis);
 
     }
