@@ -26,16 +26,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class SubscriptionServiceTest {
 
+    private final Long subscriptionId = 1L;
     @InjectMocks
     private SubscriptionService subscriptionService;
-
     @Mock
     private SubscriptionRepository subscriptionRepository;
     @Mock
     private SubscriptionHistoryRepository subscriptionHistoryRepository;
-
-
-    private final Long subscriptionId = 1L;
     private Subscription subscription;
 
     @BeforeEach
@@ -78,6 +75,7 @@ class SubscriptionServiceTest {
 
         // then
         verify(spy).cancel(); // cancel() 호출되었는지 검증
-        verify(subscriptionHistoryRepository).save(any(SubscriptionHistory.class)); // 히스토리 저장 호출 검증
+        verify(subscriptionHistoryRepository).save(
+            any(SubscriptionHistory.class)); // 히스토리 저장 호출 검증
     }
 }

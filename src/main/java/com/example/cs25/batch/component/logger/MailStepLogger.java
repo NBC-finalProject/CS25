@@ -1,4 +1,4 @@
-package com.example.cs25.domain.mail.stream.logger;
+package com.example.cs25.batch.component.logger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

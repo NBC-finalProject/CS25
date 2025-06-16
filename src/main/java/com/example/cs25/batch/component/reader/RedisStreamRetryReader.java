@@ -1,4 +1,4 @@
-package com.example.cs25.domain.mail.stream.reader;
+package com.example.cs25.batch.component.reader;
 
 import java.util.HashMap;
 import java.util.List;
