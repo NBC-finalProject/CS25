@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext {
+    set('queryDslVersion', "5.0.0")
+}
+
+dependencies {
+    implementation project(':cs25-common')
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // ai
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma:1.0.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    //queryDSL
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // Jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6' //service
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6' //service
+    runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.12.6' //service
+
+    //Monitoring
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+bootJar {
+    enabled = true
+}
+jar {
+    enabled = false
+}

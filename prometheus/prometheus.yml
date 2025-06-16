@@ -12,8 +12,12 @@ scrape_configs:
     static_configs:
       - targets: [ 'prometheus:9090' ]
 
-  - job_name: "spring-actuator"
+  - job_name: 'cs25-service'
     metrics_path: '/actuator/prometheus'
-    scrape_interval: 1m
     static_configs:
-      - targets: [ 'host.docker.internal:9292' ]
+      - targets: [ 'cs25-service:8080' ]
+
+  - job_name: 'cs25-batch'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'cs25-batch:8080' ]

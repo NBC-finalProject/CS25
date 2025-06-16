@@ -1,0 +1,26 @@
+package com.example.cs25service.domain.users.repository;
+
+import com.example.cs25common.global.domain.subscription.entity.Subscription;
+import com.example.cs25common.global.domain.user.entity.SocialType;
+import com.example.cs25common.global.domain.user.entity.User;
+import com.example.cs25common.global.domain.user.exception.UserException;
+import com.example.cs25common.global.domain.user.exception.UserExceptionCode;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String email);
+
+    default void validateSocialJoinEmail(String email, SocialType socialType) {
+        findByEmail(email).ifPresent(existingUser -> {
+            if (!existingUser.getSocialType().equals(socialType)) {
+                throw new UserException(UserExceptionCode.EMAIL_DUPLICATION);
+            }
+        });
+    }
+
+    User findBySubscription(Subscription subscription);
+}
