@@ -48,13 +48,15 @@ public class AiSearchBenchmarkTest {
         // 정답 문서 집합 (실제 파일명으로 지정)
         groundTruth = Map.of(
             "Spring", Set.of(
-                ("Web-Spring-Spring MVC.txt"),
-                ("Web-Spring-[Spring Boot] SpringApplication.txt"),
-                ("Web-Spring-JPA.txt"),
-                ("Web-Spring-[Spring Boot] Test Code.txt"),
-                ("Web-Spring-[Spring] Bean Scope.txt"),
-                ("Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt"),
-                ("Web-Spring-Spring Security - Authentication and Authorization.txt")
+                "f291de2f-bd1f-45a6-84d1-0bbd32bd6aad", // Web-Spring-Spring MVC.txt
+                "febaf124-e63c-46d1-989e-03cc24fcf293", // Web-Spring-JPA.txt
+                "972f08ad-d9e6-4122-95a1-1c47993edb9c", // Web-Spring-[Spring] Bean Scope.txt
+                "a8179223-3f17-4c46-bb23-b10330591e4c", // Web-Spring-[Spring Boot] Test Code.txt
+                "6ed06a82-1bcb-4fbe-bf90-f2d6342bc6be", // Web-Spring-[Spring] Bean Scope.txt
+                "94901dfc-0b75-421b-99ea-4a5fa06717e6",
+                // Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt
+                "a3cd2faf-1848-4216-8f87-3bb10b6c1c95"
+                // Web-Spring-Spring Security - Authentication and Authorization.txt
             )
         );
     }
@@ -78,8 +80,8 @@ public class AiSearchBenchmarkTest {
 
     @Test
     public void benchmarkSearch() throws Exception {
-        int[] topKs = {3, 5, 10};
-        double[] thresholds = {0.5, 0.7, 0.9};
+        int[] topKs = {3, 5, 7, 10};
+        double[] thresholds = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
 
         try (PrintWriter writer = new PrintWriter("spring_benchmark_results.csv")) {
             writer.println("query,topK,threshold,result_count,elapsed_ms,precision,recall");
@@ -96,6 +98,12 @@ public class AiSearchBenchmarkTest {
                             .map(Document::getId)
                             .collect(Collectors.toSet());
                         Set<String> truth = groundTruth.getOrDefault(query, Set.of());
+
+                        // 디버깅용
+                        System.out.println("retrieved: " + retrieved);
+                        System.out.println("truth: " + truth);
+                        System.out.println(
+                            "교집합 개수: " + truth.stream().filter(retrieved::contains).count());
 
                         double precision = calculatePrecision(truth, retrieved);
                         double recall = calculateRecall(truth, retrieved);
