@@ -5,16 +5,9 @@ import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.mail.stream.logger.MailStepLogger;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
-import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
-import com.example.cs25.domain.subscription.entity.DayOfWeek;
-import com.example.cs25.domain.subscription.entity.SubscriptionPeriod;
 import com.example.cs25.domain.subscription.service.SubscriptionService;
-
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -27,12 +20,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -61,7 +52,7 @@ public class DailyMailSendJob {
     public Job mailJob(JobRepository jobRepository,
         @Qualifier("mailStep") Step mailStep,
         @Qualifier("mailConsumeStep") Step mailConsumeStep,
-        @Qualifier("mailRetryStep") Step mailRetryStep ) {
+        @Qualifier("mailRetryStep") Step mailRetryStep) {
         return new JobBuilder("mailJob", jobRepository)
             .incrementer(new RunIdIncrementer())
             .start(mailStep)
@@ -81,7 +72,7 @@ public class DailyMailSendJob {
 
     @Bean //테스트용
     public Job mailConsumeJob(JobRepository jobRepository,
-        Step mailConsumeStep) {
+        @Qualifier("mailConsumeStep") Step mailConsumeStep) {
         return new JobBuilder("mailConsumeJob", jobRepository)
             .start(mailConsumeStep)
             .build();
@@ -93,9 +84,10 @@ public class DailyMailSendJob {
         @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
         @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
+
         PlatformTransactionManager transactionManager,
         MailStepLogger mailStepLogger,
-        TaskExecutor taskExecutor
+        @Qualifier("taskExecutor") TaskExecutor taskExecutor
     ) {
         return new StepBuilder("mailConsumeStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)
@@ -108,7 +100,8 @@ public class DailyMailSendJob {
     }
 
     @Bean //테스트용
-    public Job mailRetryJob(JobRepository jobRepository, Step mailRetryStep) {
+    public Job mailRetryJob(JobRepository jobRepository,
+        @Qualifier("mailRetryStep") Step mailRetryStep) {
         return new JobBuilder("mailRetryJob", jobRepository)
             .start(mailRetryStep)
             .build();
