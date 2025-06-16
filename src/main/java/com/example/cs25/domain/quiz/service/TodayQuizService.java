@@ -182,4 +182,14 @@ public class TodayQuizService {
         log.info("총 {}개의 정답률 캐싱 완료", accuracyList.size());
         quizAccuracyRedisRepository.saveAll(accuracyList);
     }
+
+    @Transactional
+    public void issueTodayQuiz(Long subscriptionId) {
+        //해당 구독자의 문제 구독 카테고리 확인
+        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+        //문제 발급
+        Quiz selectedQuiz = getTodayQuizBySubscription(subscription);
+        //메일 발송
+        mailService.sendQuizEmail(subscription, selectedQuiz);
+    }
 }
