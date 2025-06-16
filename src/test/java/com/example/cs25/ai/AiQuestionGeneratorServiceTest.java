@@ -11,8 +11,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,38 +39,45 @@ class AiQuestionGeneratorServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 벡터 검색에 사용되는 카테고리 목록 등록
         quizCategoryRepository.saveAll(List.of(
-                new QuizCategory(null, "운영체제"),
-                new QuizCategory(null, "컴퓨터구조"),
-                new QuizCategory(null, "자료구조"),
-                new QuizCategory(null, "네트워크"),
-                new QuizCategory(null, "DB"),
-                new QuizCategory(null, "보안")
-        ));
-
-        vectorStore.add(List.of(
-                new Document("운영체제는 프로세스 관리, 메모리 관리, 파일 시스템 등 컴퓨터의 자원을 관리한다."),
-                new Document("컴퓨터 네트워크는 데이터를 주고받기 위한 여러 컴퓨터 간의 연결이다."),
-                new Document("자료구조는 데이터를 효율적으로 저장하고 관리하는 방법이다.")
+            new QuizCategory(null, "운영체제"),
+            new QuizCategory(null, "컴퓨터구조"),
+            new QuizCategory(null, "자료구조"),
+            new QuizCategory(null, "네트워크"),
+            new QuizCategory(null, "DB"),
+            new QuizCategory(null, "보안")
         ));
     }
 
     @Test
+    @DisplayName("RAG 문서를 기반으로 문제를 생성하고 DB에 저장한다")
     void generateQuestionFromContextTest() {
+        // when
         Quiz quiz = aiQuestionGeneratorService.generateQuestionFromContext();
 
+        // then
         assertThat(quiz).isNotNull();
         assertThat(quiz.getQuestion()).isNotBlank();
         assertThat(quiz.getAnswer()).isNotBlank();
         assertThat(quiz.getCommentary()).isNotBlank();
         assertThat(quiz.getCategory()).isNotNull();
 
-        System.out.println("생성된 문제: " + quiz.getQuestion());
-        System.out.println("생성된 정답: " + quiz.getAnswer());
-        System.out.println("생성된 해설: " + quiz.getCommentary());
-        System.out.println("선택된 카테고리: " + quiz.getCategory().getCategoryType());
-
         Quiz persistedQuiz = quizRepository.findById(quiz.getId()).orElseThrow();
         assertThat(persistedQuiz.getQuestion()).isEqualTo(quiz.getQuestion());
+
+        // info
+        System.out.println("""
+                ✅ 생성된 문제 정보
+                - 문제: %s
+                - 정답: %s
+                - 해설: %s
+                - 카테고리: %s
+            """.formatted(
+            quiz.getQuestion(),
+            quiz.getAnswer(),
+            quiz.getCommentary(),
+            quiz.getCategory().getCategoryType()
+        ));
     }
 }

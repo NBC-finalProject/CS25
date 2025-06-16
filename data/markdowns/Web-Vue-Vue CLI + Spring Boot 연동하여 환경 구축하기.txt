@@ -1,0 +1,57 @@
+있지 못하는 것이다. 현재는 어떤 데이터베이스를 지정할 지 결정이 되있는 상태가 아니기 때문에 스프링 부트의 메인 클래스에서 어노테이션을 추가해주자
+
+<br>
+
+
+ ```
+
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+
+@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+
+ ```
+
+이를 추가한 메인 클래스는 아래와 같이 된다.
+
+<br>
+
+```java
+package com.example.mvc;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+
+@SpringBootApplication
+@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+public class MvcApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MvcApplication.class, args);
+    }
+
+}
+```
+
+<br>
+
+이제 다시 스프링 부트 메인 애플리케이션을 실행하면, 디버깅 창에서 에러가 없어진 걸 확인할 수 있다.
+
+<br>
+
+이제 localhost:8080/으로 접속하면, Vue에서 만든 화면이 잘 나오는 것을 확인할 수 있다.
+
+<br>
+
+ <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fk.kakaocdn.net%2Fdn%2FHGlD8%2Fbtqwr6biQpm%2FXeCKMJsUr0HbcXiWa3S98K%2Fimg.png">
+
+<br>
+
+Vue.js에서 View에 필요한 템플릿을 구성하고, 스프링 부트에 번들링하는 과정을 통해 연동하는 과정을 완료했다!
+
+<br>
+
+<br>
+
