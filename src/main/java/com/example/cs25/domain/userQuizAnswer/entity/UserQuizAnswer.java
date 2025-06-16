@@ -4,6 +4,7 @@ import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.users.entity.User;
 import com.example.cs25.global.entity.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,6 +31,7 @@ public class UserQuizAnswer extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String aiFeedback;
+
     private Boolean isCorrect;
 
     @ManyToOne(fetch = FetchType.LAZY)
