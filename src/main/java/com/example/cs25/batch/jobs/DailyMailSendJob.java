@@ -1,8 +1,8 @@
 package com.example.cs25.batch.jobs;
 
+import com.example.cs25.batch.component.logger.MailStepLogger;
 import com.example.cs25.domain.mail.dto.MailDto;
 import com.example.cs25.domain.mail.service.MailService;
-import com.example.cs25.batch.component.logger.MailStepLogger;
 import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.service.TodayQuizService;
 import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
@@ -69,18 +69,19 @@ public class DailyMailSendJob {
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
             //long searchEnd = System.currentTimeMillis();
 
-            //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd-searchStart);
+            //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd - searchStart);
 
             for (SubscriptionMailTargetDto sub : subscriptions) {
                 Long subscriptionId = sub.getSubscriptionId();
 
                 //long getStart = System.currentTimeMillis();
-                Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+                Subscription subscription = subscriptionRepository.findByIdOrElseThrow(
+                    subscriptionId);
                 //long getEnd = System.currentTimeMillis();
                 //log.info("[2. 구독 정보 조회] Id : {}, eamil : {}, {}ms", subscriptionId, subscription
-                //    .getEmail(),  getEnd-getStart);
+                //    .getEmail(), getEnd - getStart);
 
-                if(subscription.isActive() && subscription.isTodaySubscribed()){
+                if (subscription.isActive() && subscription.isTodaySubscribed()) {
                     //long quizStart = System.currentTimeMillis();
                     Quiz quiz = todayQuizService.getTodayQuizBySubscription(subscription);
                     //long quizEnd = System.currentTimeMillis();
@@ -89,7 +90,7 @@ public class DailyMailSendJob {
                     //long mailStart = System.currentTimeMillis();
                     mailService.sendQuizEmail(subscription, quiz);
                     //long mailEnd = System.currentTimeMillis();
-                   // log.info("[4. 메일 발송] {}ms", mailEnd-mailStart);
+                    //log.info("[4. 메일 발송] {}ms", mailEnd - mailStart);
                 }
             }
 
@@ -127,7 +128,7 @@ public class DailyMailSendJob {
             //long searchStart = System.currentTimeMillis();
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
             //long searchEnd = System.currentTimeMillis();
-            //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd-searchStart);
+            //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd - searchStart);
 
             for (SubscriptionMailTargetDto sub : subscriptions) {
                 Long subscriptionId = sub.getSubscriptionId();

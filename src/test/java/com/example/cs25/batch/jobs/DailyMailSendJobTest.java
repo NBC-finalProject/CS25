@@ -1,13 +1,10 @@
 package com.example.cs25.batch.jobs;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import com.example.cs25.domain.mail.service.MailService;
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.Job;
@@ -165,6 +162,5 @@ class DailyMailSendJobTest {
         System.out.println("총 발송 시간(ms): " + totalMillis);
         System.out.println("총 발송 시도 " + count);
         System.out.println("평균 시간(ms): " + avgMillis);
-
     }
 }
