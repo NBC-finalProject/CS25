@@ -9,13 +9,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class BatchService {
 
     private final JobLauncher jobLauncher;
 
-    @Qualifier("mailJob")
     private final Job mailJob;
+
+    public BatchService(
+        JobLauncher jobLauncher,
+        @Qualifier("mailJob") Job mailJob
+    ) {
+        this.jobLauncher = jobLauncher;
+        this.mailJob = mailJob;
+    }
 
     public void activeBatch(){
         try {
