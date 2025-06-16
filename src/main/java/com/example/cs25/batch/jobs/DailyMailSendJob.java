@@ -210,7 +210,8 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public Job mailRetryJob(JobRepository jobRepository, Step mailRetryStep) {
+    public Job mailRetryJob(JobRepository jobRepository,
+        @Qualifier("mailRetryStep") Step mailRetryStep) {
         return new JobBuilder("mailRetryJob", jobRepository)
             .start(mailRetryStep)
             .build();

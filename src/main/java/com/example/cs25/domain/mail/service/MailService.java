@@ -31,7 +31,7 @@ public class MailService {
     }
 
     protected String generateQuizLink(Long subscriptionId, Long quizId) {
-        String domain = "http://localhost:8080/todayQuiz";
+        String domain = "https://cs25.co.kr/todayQuiz";
         return String.format("%s?subscriptionId=%d&quizId=%d", domain, subscriptionId, quizId);
     }
 
