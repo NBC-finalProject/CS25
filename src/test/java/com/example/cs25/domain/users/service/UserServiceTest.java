@@ -95,7 +95,7 @@ class UserServiceTest {
             .build();
 
         SubscriptionInfoDto subscriptionInfoDto = new SubscriptionInfoDto(
-            quizCategory,
+            quizCategory.getCategoryType(),
             30L,
             Set.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
         );

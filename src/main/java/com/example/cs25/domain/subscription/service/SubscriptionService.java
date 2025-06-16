@@ -4,6 +4,7 @@ import com.example.cs25.domain.mail.service.MailService;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25.domain.subscription.dto.SubscriptionInfoDto;
+import com.example.cs25.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25.domain.subscription.dto.SubscriptionRequest;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import com.example.cs25.domain.subscription.entity.SubscriptionHistory;
@@ -15,6 +16,7 @@ import com.example.cs25.domain.verification.service.VerificationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,6 +33,15 @@ public class SubscriptionService {
     private final MailService mailService;
 
     private final QuizCategoryRepository quizCategoryRepository;
+
+    @Transactional(readOnly = true)
+    public List<SubscriptionMailTargetDto> getTodaySubscriptions() {
+        LocalDate today = LocalDate.now();
+        int dayIndex = today.getDayOfWeek().getValue() % 7;
+        int todayBit = 1 << dayIndex;
+
+        return subscriptionRepository.findAllTodaySubscriptions(today, todayBit);
+    }
 
     /**
      * 구독아이디로 구독정보를 조회하는 메서드
@@ -61,10 +72,7 @@ public class SubscriptionService {
      */
     @Transactional
     public void createSubscription(SubscriptionRequest request) {
-        if (subscriptionRepository.existsByEmail(request.getEmail())) {
-            throw new SubscriptionException(
-                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
-        }
+        this.checkEmail(request.getEmail());
 
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             request.getCategory());
@@ -135,4 +143,15 @@ public class SubscriptionService {
         );
     }
 
+    /**
+     * 이미 구독하고 있는 이메일인지 확인하는 메서드
+     *
+     * @param email 이메일
+     */
+    public void checkEmail(String email) {
+        if (subscriptionRepository.existsByEmail(email)) {
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+        }
+    }
 }
