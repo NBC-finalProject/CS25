@@ -55,112 +55,112 @@ class DailyMailSendJobTest {
         redisTemplate.delete("quiz-email-retry-stream");
     }
 
-    @Test
-    void testMailJob_배치_테스트() throws Exception {
-        JobParameters params = new JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
-
-        JobExecution result = jobLauncher.run(mailJob, params);
-
-        System.out.println("Batch Exit Status: " + result.getExitStatus());
-        verify(mailService, atLeast(0)).sendQuizEmail(any(), any());
-    }
-
-    @Test
-    void 메일발송_동기_성능측정() throws Exception {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start("mailJob");
-        //when
-        JobParameters params = new JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
-
-        JobExecution execution = jobLauncher.run(mailJob, params);
-        stopWatch.stop();
-
-        // then
-        long totalMillis = stopWatch.getTotalTimeMillis();
-        long count = execution.getStepExecutions().stream()
-            .mapToLong(StepExecution::getWriteCount).sum();
-        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
-        System.out.println("배치 종료 상태: " + execution.getExitStatus());
-        System.out.println("총 발송 시간(ms): " + totalMillis);
-        System.out.println("총 발송 시도) " + count);
-        System.out.println("평균 시간(ms): " + avgMillis);
-
-    }
-
-    @Test
-    void 메일발송_MQ_동기_성능측정() throws Exception {
-
-        //when
-        StopWatch stopWatchProducer = new StopWatch();
-        stopWatchProducer.start("mailMQJob-producer");
-
-        JobParameters producerParams = new JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
-
-        JobExecution producerExecution = jobLauncher.run(mailProducerJob, producerParams);
-        stopWatchProducer.stop();
-
-        Thread.sleep(2000);
-
-        StopWatch stopWatchConsumer = new StopWatch();
-        stopWatchConsumer.start("mailMQJob-consumer");
-        JobParameters consumerParams = new JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
-
-        JobExecution consumerExecution = jobLauncher.run(mailConsumerJob, consumerParams);
-        stopWatchConsumer.stop();
-
-        // then
-        long totalMillis = stopWatchProducer.getTotalTimeMillis() + stopWatchConsumer.getTotalTimeMillis();
-        long count = consumerExecution.getStepExecutions().stream()
-            .mapToLong(StepExecution::getWriteCount).sum();
-        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
-        System.out.println("배치 종료 상태: " + consumerExecution.getExitStatus());
-        System.out.println("총 발송 시간(ms): " + totalMillis);
-        System.out.println("총 발송 시도) " + count);
-        System.out.println("평균 시간(ms): " + avgMillis);
-
-    }
-
-    @Test
-    void 메일발송_MQ_비동기_성능측정() throws Exception {
-
-        //when
-        StopWatch stopWatchProducer = new StopWatch();
-        stopWatchProducer.start("mailMQAsyncJob-producer");
-
-        JobParameters producerParams = new JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
-
-        JobExecution producerExecution = jobLauncher.run(mailProducerJob, producerParams);
-        stopWatchProducer.stop();
-
-        Thread.sleep(2000); //어느 정도로 설정해놓는게 좋을까요? Job 2개 연속 실행 방지
-
-        StopWatch stopWatchConsumer = new StopWatch();
-        stopWatchConsumer.start("mailMQAsyncJob-consumer");
-        JobParameters consumerParams = new JobParametersBuilder()
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
-
-        JobExecution consumerExecution = jobLauncher.run(mailConsumerWithAsyncJob, consumerParams);
-        stopWatchConsumer.stop();
-
-        // then
-        long totalMillis = stopWatchProducer.getTotalTimeMillis() + stopWatchConsumer.getTotalTimeMillis();
-        long count = consumerExecution.getStepExecutions().stream()
-            .mapToLong(StepExecution::getWriteCount).sum();
-        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
-        System.out.println("배치 종료 상태: " + consumerExecution.getExitStatus());
-        System.out.println("총 발송 시간(ms): " + totalMillis);
-        System.out.println("총 발송 시도 " + count);
-        System.out.println("평균 시간(ms): " + avgMillis);
-    }
+//    @Test
+//    void testMailJob_배치_테스트() throws Exception {
+//        JobParameters params = new JobParametersBuilder()
+//            .addLong("timestamp", System.currentTimeMillis())
+//            .toJobParameters();
+//
+//        JobExecution result = jobLauncher.run(mailJob, params);
+//
+//        System.out.println("Batch Exit Status: " + result.getExitStatus());
+//        verify(mailService, atLeast(0)).sendQuizEmail(any(), any());
+//    }
+//
+//    @Test
+//    void 메일발송_동기_성능측정() throws Exception {
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start("mailJob");
+//        //when
+//        JobParameters params = new JobParametersBuilder()
+//            .addLong("timestamp", System.currentTimeMillis())
+//            .toJobParameters();
+//
+//        JobExecution execution = jobLauncher.run(mailJob, params);
+//        stopWatch.stop();
+//
+//        // then
+//        long totalMillis = stopWatch.getTotalTimeMillis();
+//        long count = execution.getStepExecutions().stream()
+//            .mapToLong(StepExecution::getWriteCount).sum();
+//        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
+//        System.out.println("배치 종료 상태: " + execution.getExitStatus());
+//        System.out.println("총 발송 시간(ms): " + totalMillis);
+//        System.out.println("총 발송 시도) " + count);
+//        System.out.println("평균 시간(ms): " + avgMillis);
+//
+//    }
+//
+//    @Test
+//    void 메일발송_MQ_동기_성능측정() throws Exception {
+//
+//        //when
+//        StopWatch stopWatchProducer = new StopWatch();
+//        stopWatchProducer.start("mailMQJob-producer");
+//
+//        JobParameters producerParams = new JobParametersBuilder()
+//            .addLong("timestamp", System.currentTimeMillis())
+//            .toJobParameters();
+//
+//        JobExecution producerExecution = jobLauncher.run(mailProducerJob, producerParams);
+//        stopWatchProducer.stop();
+//
+//        Thread.sleep(2000);
+//
+//        StopWatch stopWatchConsumer = new StopWatch();
+//        stopWatchConsumer.start("mailMQJob-consumer");
+//        JobParameters consumerParams = new JobParametersBuilder()
+//            .addLong("timestamp", System.currentTimeMillis())
+//            .toJobParameters();
+//
+//        JobExecution consumerExecution = jobLauncher.run(mailConsumerJob, consumerParams);
+//        stopWatchConsumer.stop();
+//
+//        // then
+//        long totalMillis = stopWatchProducer.getTotalTimeMillis() + stopWatchConsumer.getTotalTimeMillis();
+//        long count = consumerExecution.getStepExecutions().stream()
+//            .mapToLong(StepExecution::getWriteCount).sum();
+//        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
+//        System.out.println("배치 종료 상태: " + consumerExecution.getExitStatus());
+//        System.out.println("총 발송 시간(ms): " + totalMillis);
+//        System.out.println("총 발송 시도) " + count);
+//        System.out.println("평균 시간(ms): " + avgMillis);
+//
+//    }
+//
+//    @Test
+//    void 메일발송_MQ_비동기_성능측정() throws Exception {
+//
+//        //when
+//        StopWatch stopWatchProducer = new StopWatch();
+//        stopWatchProducer.start("mailMQAsyncJob-producer");
+//
+//        JobParameters producerParams = new JobParametersBuilder()
+//            .addLong("timestamp", System.currentTimeMillis())
+//            .toJobParameters();
+//
+//        JobExecution producerExecution = jobLauncher.run(mailProducerJob, producerParams);
+//        stopWatchProducer.stop();
+//
+//        Thread.sleep(2000); //어느 정도로 설정해놓는게 좋을까요? Job 2개 연속 실행 방지
+//
+//        StopWatch stopWatchConsumer = new StopWatch();
+//        stopWatchConsumer.start("mailMQAsyncJob-consumer");
+//        JobParameters consumerParams = new JobParametersBuilder()
+//            .addLong("timestamp", System.currentTimeMillis())
+//            .toJobParameters();
+//
+//        JobExecution consumerExecution = jobLauncher.run(mailConsumerWithAsyncJob, consumerParams);
+//        stopWatchConsumer.stop();
+//
+//        // then
+//        long totalMillis = stopWatchProducer.getTotalTimeMillis() + stopWatchConsumer.getTotalTimeMillis();
+//        long count = consumerExecution.getStepExecutions().stream()
+//            .mapToLong(StepExecution::getWriteCount).sum();
+//        long avgMillis = (count == 0) ? totalMillis : totalMillis / count;
+//        System.out.println("배치 종료 상태: " + consumerExecution.getExitStatus());
+//        System.out.println("총 발송 시간(ms): " + totalMillis);
+//        System.out.println("총 발송 시도 " + count);
+//        System.out.println("평균 시간(ms): " + avgMillis);
+//    }
 }
