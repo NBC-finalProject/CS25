@@ -48,14 +48,15 @@ public class AiSearchBenchmarkTest {
         // 정답 문서 집합 (실제 파일명으로 지정)
         groundTruth = Map.of(
             "Spring", Set.of(
-                "f291de2f-bd1f-45a6-84d1-0bbd32bd6aad", // Web-Spring-Spring MVC.txt
-                "febaf124-e63c-46d1-989e-03cc24fcf293", // Web-Spring-JPA.txt
-                "972f08ad-d9e6-4122-95a1-1c47993edb9c", // Web-Spring-[Spring] Bean Scope.txt
-                "a8179223-3f17-4c46-bb23-b10330591e4c", // Web-Spring-[Spring Boot] Test Code.txt
-                "6ed06a82-1bcb-4fbe-bf90-f2d6342bc6be", // Web-Spring-[Spring] Bean Scope.txt
-                "94901dfc-0b75-421b-99ea-4a5fa06717e6",
+                ("249387ff-8136-4c87-a4a5-3b3effa2b2b8"), // Web-Spring-Spring MVC.txt
+                ("8ced8aaa-b171-4bea-a75b-d209b2cfdaa5"),
+                // Web-Spring-[Spring Boot] SpringApplication.txt
+                ("b0465385-62c2-4483-9c7f-74eb77e53fab"), // Web-Spring-JPA.txt
+                ("cfb8169c-600d-405e-adfd-4972b4f670f7"), // Web-Spring-[Spring Boot] Test Code.txt
+                ("a5567f5a-6c1d-40da-af97-0ae262e680a5"), // Web-Spring-[Spring] Bean Scope.txt
+                ("8e79a167-6909-4e10-a4d7-be87c07079c5"),
                 // Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt
-                "a3cd2faf-1848-4216-8f87-3bb10b6c1c95"
+                ("8dfffd84-247d-4d1e-abc3-0326c515d895")
                 // Web-Spring-Spring Security - Authentication and Authorization.txt
             )
         );
@@ -80,8 +81,8 @@ public class AiSearchBenchmarkTest {
 
     @Test
     public void benchmarkSearch() throws Exception {
-        int[] topKs = {3, 5, 7, 10};
-        double[] thresholds = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
+        int[] topKs = {10, 20, 30};
+        double[] thresholds = {0.5, 0.7, 0.9};
 
         try (PrintWriter writer = new PrintWriter("spring_benchmark_results.csv")) {
             writer.println("query,topK,threshold,result_count,elapsed_ms,precision,recall");
