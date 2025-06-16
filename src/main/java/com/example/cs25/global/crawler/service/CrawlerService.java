@@ -46,7 +46,8 @@ public class CrawlerService {
             repoInfo.getRepo(), repoInfo.getPath());
 
         //List 에 저장된 문서 ChromaVectorDB에 저장
-        ragService.saveDocumentsToVectorStore(documentList);
+        //ragService.saveDocumentsToVectorStore(documentList);
+        saveToFile(documentList);
     }
 
     private List<Document> crawlOnlyFolderMarkdowns(String owner, String repo, String path) {

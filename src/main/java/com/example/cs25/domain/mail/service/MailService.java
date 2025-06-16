@@ -6,7 +6,6 @@ import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.subscription.entity.Subscription;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -26,17 +25,13 @@ public class MailService {
     private final StringRedisTemplate redisTemplate;
 
     //producer
-    public void enqueueQuizEmail(Subscription subscription, Quiz quiz) {
-        Map<String, String> data = new HashMap<>();
-        data.put("email", subscription.getEmail());
-        data.put("subscriptionId", subscription.getId().toString());
-        data.put("quizId", quiz.getId().toString());
-
-        redisTemplate.opsForStream().add("quiz-email-stream", data);
+    public void enqueueQuizEmail(Long subscriptionId) {
+        redisTemplate.opsForStream()
+            .add("quiz-email-stream", Map.of("subscriptionId", subscriptionId.toString()));
     }
 
     protected String generateQuizLink(Long subscriptionId, Long quizId) {
-        String domain = "http://localhost:8080/todayQuiz";
+        String domain = "https://cs25.co.kr/todayQuiz";
         return String.format("%s?subscriptionId=%d&quizId=%d", domain, subscriptionId, quizId);
     }
 

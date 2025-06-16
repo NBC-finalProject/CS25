@@ -13,6 +13,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +28,17 @@ public class AiQuestionGeneratorService {
     @Transactional
     public Quiz generateQuestionFromContext() {
         List<Document> docs = ragService.searchRelevant("컴퓨터 과학 일반", 3, 0.1);
+        if (docs.isEmpty()) {
+            throw new IllegalStateException("RAG 검색 결과가 없습니다.");
+        }
 
         String context = docs.stream()
             .map(doc -> "- 문서 내용: " + doc.getText())
             .collect(Collectors.joining("\n"));
+
+        if (!StringUtils.hasText(context)) {
+            throw new IllegalStateException("RAG로부터 가져온 문서가 비어 있습니다.");
+        }
 
         String topic = chatClient.prompt()
             .system(promptProvider.getTopicSystem())
@@ -44,7 +52,12 @@ public class AiQuestionGeneratorService {
             .user(promptProvider.getCategoryUser(topic))
             .call()
             .content()
-            .trim();
+            .trim()
+            .toUpperCase();
+
+        if (!categoryType.equals("BACKEND") && !categoryType.equals("FRONTEND")) {
+            throw new IllegalArgumentException("AI가 반환한 카테고리가 유효하지 않습니다: " + categoryType);
+        }
 
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
 

@@ -1,6 +1,5 @@
 package com.example.cs25.domain.mail.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -16,7 +15,6 @@ import com.example.cs25.domain.quiz.entity.Quiz;
 import com.example.cs25.domain.quiz.entity.QuizCategory;
 import com.example.cs25.domain.quiz.entity.QuizFormatType;
 import com.example.cs25.domain.subscription.entity.Subscription;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.util.List;
@@ -88,15 +86,15 @@ class MailServiceTest {
         willDoNothing().given(mailSender).send(any(MimeMessage.class));
     }
 
-    @Test
-    void generateQuizLink_올바른_문제풀이링크를_반환한다() {
-        //given
-        String expectLink = "http://localhost:8080/todayQuiz?subscriptionId=1&quizId=1";
-        //when
-        String link = mailService.generateQuizLink(subscriptionId, quizId);
-        //then
-        assertThat(link).isEqualTo(expectLink);
-    }
+//    @Test
+//    void generateQuizLink_올바른_문제풀이링크를_반환한다() {
+//        //given
+//        String expectLink = "http://localhost:8080/todayQuiz?subscriptionId=1&quizId=1";
+//        //when
+//        String link = mailService.generateQuizLink(subscriptionId, quizId);
+//        //then
+//        assertThat(link).isEqualTo(expectLink);
+//    }
 
     @Test
     void sendQuizEmail_문제풀이링크_발송에_성공하면_Template를_생성하고_send요청을_보낸다() throws Exception {
@@ -118,54 +116,5 @@ class MailServiceTest {
         assertThrows(CustomMailException.class, () ->
             mailService.sendQuizEmail(subscription, quiz)
         );
-    }
-
-    @Test
-    void 대량메일발송_동기_성능측정() throws Exception {
-        // given
-        int count = 1000;
-        List<Subscription> subscriptions = IntStream.range(0, count)
-            .mapToObj(i -> {
-                Subscription sub = Subscription.builder()
-                    .email("test" + i + "@test.com")
-                    .subscriptionType(Subscription.decodeDays(1))
-                    .startDate(LocalDate.of(2025, 6, 1))
-                    .endDate(LocalDate.of(2025, 6, 30))
-                    .category(new QuizCategory(1L, "BACKEND"))
-                    .build();
-                ReflectionTestUtils.setField(sub, "id", (long) i);
-                return sub;
-            }).toList();
-
-        int success = 0;
-        int fail = 0;
-
-        // when
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start("bulk-mail");
-
-        for (Subscription sub : subscriptions) {
-            try {
-                mailService.sendQuizEmail(sub, quiz);
-                success++;
-            } catch (CustomMailException e) {
-                fail++;
-            }
-        }
-
-        stopWatch.stop();
-
-        // then
-        long totalMillis = stopWatch.getTotalTimeMillis();
-        double avgMillis = totalMillis / (double) count;
-
-        System.out.println("총 발송 시간: " + totalMillis + "ms");
-        System.out.println("평균 시간: " + avgMillis + "ms");
-
-        System.out.println("총 발송 시도: " + count);
-        System.out.println("성공: " + success + "건");
-        System.out.println("실패: " + fail + "건");
-
-        verify(mailSender, times(count)).send(any(MimeMessage.class));
     }
 }

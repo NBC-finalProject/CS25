@@ -23,7 +23,7 @@ public class AiController {
     private final FileLoaderService fileLoaderService;
 
     @GetMapping("/{answerId}/feedback")
-    public ResponseEntity<?> getFeedback(@PathVariable Long answerId) {
+    public ResponseEntity<?> getFeedback(@PathVariable(name = "answerId") Long answerId) {
         AiFeedbackResponse response = aiService.getFeedback(answerId);
         return ResponseEntity.ok(new ApiResponse<>(200, response));
     }
