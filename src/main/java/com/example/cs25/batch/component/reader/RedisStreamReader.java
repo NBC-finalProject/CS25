@@ -1,10 +1,11 @@
-package com.example.cs25.domain.mail.stream.reader;
+package com.example.cs25.batch.component.reader;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
@@ -14,6 +15,7 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component("redisConsumeReader")
 @RequiredArgsConstructor
 public class RedisStreamReader implements ItemReader<Map<String, String>> {
@@ -26,9 +28,11 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
 
     @Override
     public Map<String, String> read() {
+        //long start = System.currentTimeMillis();
+
         List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
             Consumer.from(GROUP, CONSUMER),
-            StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)), // 메시지 없으면 2초 대기
+            StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
             StreamOffset.create(STREAM, ReadOffset.lastConsumed())
         );
 
@@ -41,6 +45,10 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
 
         Map<String, String> data = new HashMap<>();
         msg.getValue().forEach((k, v) -> data.put(k.toString(), v.toString()));
+
+        //long end = System.currentTimeMillis();
+        //log.info("[3. Queue에서 꺼내기] {}ms", end - start);
+
         return data;
     }
 }

@@ -77,6 +77,12 @@ public class Subscription extends BaseEntity {
         return result;
     }
 
+    public boolean isTodaySubscribed() {
+        int todayIndex = LocalDate.now().getDayOfWeek().getValue() % 7;
+        int todayBit = 1 << todayIndex;
+        return (this.subscriptionType & todayBit) > 0;
+    }
+
     /**
      * 사용자가 입력한 값으로 구독정보를 업데이트하는 메서드
      *
