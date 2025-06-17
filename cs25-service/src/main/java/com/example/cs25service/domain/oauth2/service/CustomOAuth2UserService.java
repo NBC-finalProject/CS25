@@ -1,5 +1,7 @@
 package com.example.cs25service.domain.oauth2.service;
 
+import com.example.cs25entity.domain.subscription.entity.Subscription;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.entity.SocialType;
 import com.example.cs25entity.domain.user.entity.User;
@@ -13,6 +15,7 @@ import com.example.cs25service.domain.oauth2.exception.OAuth2ExceptionCode;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -24,6 +27,8 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final EntityManagerFactoryInfo entityManagerFactoryInfo;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -77,12 +82,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_REQUIRED_FIELDS_MISSING);
         }
 
+        Subscription subscription = subscriptionRepository.findByEmail(email).orElseThrow();
+
         return userRepository.findByEmail(email).orElseGet(() ->
             userRepository.save(User.builder()
                 .email(email)
                 .name(name)
                 .socialType(provider)
                 .role(Role.USER)
+                .subscription(subscription)
                 .build()));
     }
 }

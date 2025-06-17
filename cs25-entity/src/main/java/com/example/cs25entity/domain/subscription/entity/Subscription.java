@@ -1,8 +1,8 @@
 package com.example.cs25entity.domain.subscription.entity;
 
+
 import com.example.cs25common.global.entity.BaseEntity;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
-import com.example.cs25entity.domain.subscription.dto.SubscriptionRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Set;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "subscription")
 public class Subscription extends BaseEntity {
 
@@ -86,13 +88,13 @@ public class Subscription extends BaseEntity {
     /**
      * 사용자가 입력한 값으로 구독정보를 업데이트하는 메서드
      *
-     * @param request 사용자를 통해 받은 구독 정보
+     * @param subscription 사용자를 통해 받은 구독 정보
      */
-    public void update(SubscriptionRequest request) {
-        this.category = new QuizCategory(request.getCategory());
-        this.subscriptionType = encodeDays(request.getDays());
-        this.isActive = request.isActive();
-        this.endDate = endDate.plusMonths(request.getPeriod().getMonths());
+    public void update(Subscription subscription) {
+        this.category = subscription.getCategory();
+        this.subscriptionType = subscription.subscriptionType;
+        this.isActive = subscription.isActive;
+        this.endDate = subscription.endDate;
     }
 
     /**

@@ -33,7 +33,7 @@ public class TokenService {
 
     public ResponseCookie createAccessTokenCookie(String accessToken) {
         return ResponseCookie.from("accessToken", accessToken)
-            .httpOnly(false) //프론트 생기면 true
+            .httpOnly(true) //프론트 생기면 true
             .secure(false) //https 적용되면 true
             .path("/")
             .maxAge(Duration.ofMinutes(60))

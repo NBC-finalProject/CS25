@@ -1,11 +1,14 @@
 package com.example.cs25service.domain.subscription.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
-import com.example.cs25entity.domain.subscription.dto.SubscriptionRequest;
+import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
+import com.example.cs25service.domain.subscription.dto.SubscriptionRequest;
+import com.example.cs25service.domain.subscription.dto.SubscriptionResponseDto;
 import com.example.cs25service.domain.subscription.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,11 +37,20 @@ public class SubscriptionController {
     }
 
     @PostMapping
-    public ApiResponse<Void> createSubscription(
-        @RequestBody @Valid SubscriptionRequest request
+    public ApiResponse<SubscriptionResponseDto> createSubscription(
+        @RequestBody @Valid SubscriptionRequest request,
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        subscriptionService.createSubscription(request);
-        return new ApiResponse<>(201);
+        SubscriptionResponseDto subscription = subscriptionService.createSubscription(request,
+            authUser);
+        return new ApiResponse<>(201,
+            new SubscriptionResponseDto(
+                subscription.getId(),
+                subscription.getCategory(),
+                subscription.getStartDate(),
+                subscription.getEndDate(),
+                subscription.getSubscriptionType()
+            ));
     }
 
     @PatchMapping("/{subscriptionId}")

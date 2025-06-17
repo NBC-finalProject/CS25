@@ -55,13 +55,12 @@ services:
       - monitoring
 
   chroma:
-    container_name: chroma
     image: ghcr.io/chroma-core/chroma
     ports:
       - "8000:8000"
     restart: unless-stopped
     volumes:
-      - chroma-data:/data
+      - ./service/chroma-data:/data
     networks:
       - monitoring
 

@@ -87,4 +87,8 @@ public class User extends BaseEntity {
     public void updateEnableUser() {
         this.isActive = true;
     }
+
+    public void updateSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
 }

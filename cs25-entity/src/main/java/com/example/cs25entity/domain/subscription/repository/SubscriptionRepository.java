@@ -41,4 +41,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     List<SubscriptionMailTargetDto> findAllTodaySubscriptions(
         @Param("today") LocalDate today,
         @Param("todayBit") int todayBit);
+
+    Optional<Subscription> findByEmail(String email);
 }
