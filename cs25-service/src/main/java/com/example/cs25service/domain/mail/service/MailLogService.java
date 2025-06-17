@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MailLogService {
+
     private final MailLogRepository mailLogRepository;
     private final MailLogCustomRepositoryImpl mailLogCustomRepository;
 
@@ -35,13 +36,17 @@ public class MailLogService {
 
     //단일 로그 조회
     @Transactional(readOnly = true)
-    public MailLogResponse getMailLog(Long id){
+    public MailLogResponse getMailLog(Long id) {
         MailLog mailLog = mailLogRepository.findByIdOrElseThrow(id);
         return MailLogResponse.from(mailLog);
     }
 
     @Transactional
-    public void deleteMailLogs(List<Long> ids){
+    public void deleteMailLogs(List<Long> ids) {
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("삭제할 로그 데이터가 없습니다.");
+        }
+
         mailLogRepository.deleteAllByIdIn(ids);
     }
 }
