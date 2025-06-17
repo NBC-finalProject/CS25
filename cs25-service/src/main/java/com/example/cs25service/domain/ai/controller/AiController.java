@@ -1,7 +1,7 @@
 package com.example.cs25service.domain.ai.controller;
 
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25service.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25service.domain.ai.service.AiQuestionGeneratorService;
 import com.example.cs25service.domain.ai.service.AiService;

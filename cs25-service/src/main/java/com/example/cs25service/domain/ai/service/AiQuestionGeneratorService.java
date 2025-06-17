@@ -1,10 +1,10 @@
 package com.example.cs25service.domain.ai.service;
 
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
-import com.example.cs25common.global.domain.quiz.entity.QuizCategory;
-import com.example.cs25common.global.domain.quiz.entity.QuizFormatType;
-import com.example.cs25common.global.domain.quiz.repository.QuizCategoryRepository;
-import com.example.cs25common.global.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.entity.QuizCategory;
+import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
+import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
