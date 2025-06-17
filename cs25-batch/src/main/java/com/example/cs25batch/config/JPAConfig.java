@@ -1,13 +1,9 @@
 package com.example.cs25batch.config;
 
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@Configuration// 공통 모듈의 entity, repository, component를 인식하기 위한 스캔 설정
-@EntityScan(basePackages = "com.example.cs25entity.domain")
-@EnableJpaRepositories(basePackages = "com.example.cs25entity.domain")
+@Configuration("jpaConfigFromBatch")// 공통 모듈의 entity, repository, component를 인식하기 위한 스캔 설정
 @ComponentScan(basePackages = {
     "com.example.cs25batch",          // 자기 자신
     "com.example.cs25common",            // 공통 모듈

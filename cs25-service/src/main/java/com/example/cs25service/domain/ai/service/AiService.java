@@ -1,8 +1,8 @@
 package com.example.cs25service.domain.ai.service;
 
-import com.example.cs25common.global.domain.quiz.repository.QuizRepository;
-import com.example.cs25common.global.domain.subscription.repository.SubscriptionRepository;
-import com.example.cs25common.global.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
+import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25service.domain.ai.exception.AiException;
 import com.example.cs25service.domain.ai.exception.AiExceptionCode;

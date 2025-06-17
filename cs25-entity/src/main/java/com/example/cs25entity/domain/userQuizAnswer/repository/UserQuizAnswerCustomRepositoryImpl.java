@@ -9,9 +9,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomRepository {
 
     private final EntityManager entityManager;

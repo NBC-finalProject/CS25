@@ -1,9 +1,8 @@
 package com.example.cs25service.domain.userQuizAnswer.controller;
 
-
-import com.example.cs25common.global.domain.userQuizAnswer.dto.SelectionRateResponseDto;
-import com.example.cs25common.global.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25service.domain.userQuizAnswer.service.UserQuizAnswerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
