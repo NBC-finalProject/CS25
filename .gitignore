@@ -38,4 +38,7 @@ out/
 
 .env
 
+### Mac ###
+.DS_Store
+
 

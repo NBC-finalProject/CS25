@@ -1,0 +1,29 @@
+package com.example.cs25entity.domain.user.repository;
+
+
+import com.example.cs25entity.domain.subscription.entity.Subscription;
+import com.example.cs25entity.domain.user.entity.SocialType;
+import com.example.cs25entity.domain.user.entity.User;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Query("SELECT u FROM User u JOIN FETCH u.subscription WHERE u.email = :email")
+    Optional<User> findByEmail(String email);
+
+    default void validateSocialJoinEmail(String email, SocialType socialType) {
+        findByEmail(email).ifPresent(existingUser -> {
+            if (!existingUser.getSocialType().equals(socialType)) {
+                throw new UserException(UserExceptionCode.EMAIL_DUPLICATION);
+            }
+        });
+    }
+
+    User findBySubscription(Subscription subscription);
+}
