@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: cs25-service/Dockerfile
+    env_file:
+      - .env
     depends_on:
       - mysql
       - redis
@@ -19,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: cs25-batch/Dockerfile
+    env_file:
+      - .env
     depends_on:
       - mysql
       - redis
