@@ -1,17 +1,20 @@
 package com.example.cs25service.domain.users.service;
 
-import com.example.cs25common.global.domain.user.entity.Role;
-import com.example.cs25common.global.domain.user.exception.UserException;
-import com.example.cs25common.global.domain.user.exception.UserExceptionCode;
+
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25service.domain.security.jwt.dto.ReissueRequestDto;
 import com.example.cs25service.domain.security.jwt.dto.TokenResponseDto;
 import com.example.cs25service.domain.security.jwt.exception.JwtAuthenticationException;
 import com.example.cs25service.domain.security.jwt.provider.JwtTokenProvider;
 import com.example.cs25service.domain.security.jwt.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {

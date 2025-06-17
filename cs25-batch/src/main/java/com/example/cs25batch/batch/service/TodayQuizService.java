@@ -1,20 +1,18 @@
 package com.example.cs25batch.batch.service;
 
-import com.example.cs25common.global.domain.mail.service.MailService;
-import com.example.cs25common.global.domain.quiz.dto.QuizDto;
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
-import com.example.cs25common.global.domain.quiz.entity.QuizAccuracy;
-import com.example.cs25common.global.domain.quiz.exception.QuizException;
-import com.example.cs25common.global.domain.quiz.exception.QuizExceptionCode;
-import com.example.cs25common.global.domain.quiz.repository.QuizAccuracyRedisRepository;
-import com.example.cs25common.global.domain.quiz.repository.QuizRepository;
-import com.example.cs25common.global.domain.subscription.entity.Subscription;
-import com.example.cs25common.global.domain.subscription.repository.SubscriptionRepository;
-import com.example.cs25common.global.domain.userQuizAnswer.entity.UserQuizAnswer;
-import com.example.cs25common.global.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import com.example.cs25batch.batch.dto.QuizDto;
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.entity.QuizAccuracy;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
+import com.example.cs25entity.domain.quiz.repository.QuizAccuracyRedisRepository;
+import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.subscription.entity.Subscription;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
+import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
+import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +35,7 @@ public class TodayQuizService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
     private final QuizAccuracyRedisRepository quizAccuracyRedisRepository;
-    private final MailService mailService;
+    private final BatchMailService mailService;
 
     @Transactional
     public QuizDto getTodayQuiz(Long subscriptionId) {
@@ -159,29 +157,6 @@ public class TodayQuizService {
         return ((double) totalCorrect / answers.size()) * 100.0;
     }
 
-    public void calculateAndCacheAllQuizAccuracies() {
-        List<Quiz> quizzes = quizRepository.findAll();
-
-        List<QuizAccuracy> accuracyList = new ArrayList<>();
-        for (Quiz quiz : quizzes) {
-
-            List<UserQuizAnswer> answers = userQuizAnswerRepository.findAllByQuizId(quiz.getId());
-            long total = answers.size();
-            long correct = answers.stream().filter(UserQuizAnswer::getIsCorrect).count();
-            double accuracy = total == 0 ? 100.0 : ((double) correct / total) * 100.0;
-
-            QuizAccuracy qa = QuizAccuracy.builder()
-                .id("quiz:" + quiz.getId())
-                .quizId(quiz.getId())
-                .categoryId(quiz.getCategory().getId())
-                .accuracy(accuracy)
-                .build();
-
-            accuracyList.add(qa);
-        }
-        log.info("총 {}개의 정답률 캐싱 완료", accuracyList.size());
-        quizAccuracyRedisRepository.saveAll(accuracyList);
-    }
 
     @Transactional
     public void issueTodayQuiz(Long subscriptionId) {

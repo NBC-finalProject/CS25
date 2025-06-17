@@ -1,8 +1,9 @@
 package com.example.cs25service.domain.verification.service;
 
-import com.example.cs25common.global.domain.mail.exception.CustomMailException;
-import com.example.cs25common.global.domain.mail.exception.MailExceptionCode;
-import com.example.cs25common.global.domain.mail.service.MailService;
+
+import com.example.cs25entity.domain.mail.exception.CustomMailException;
+import com.example.cs25entity.domain.mail.exception.MailExceptionCode;
+import com.example.cs25service.domain.mail.service.MailService;
 import com.example.cs25service.domain.verification.exception.VerificationException;
 import com.example.cs25service.domain.verification.exception.VerificationExceptionCode;
 import jakarta.mail.MessagingException;
@@ -11,10 +12,12 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VerificationService {

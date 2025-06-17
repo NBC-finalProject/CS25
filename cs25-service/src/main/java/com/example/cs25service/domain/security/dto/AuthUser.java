@@ -1,7 +1,7 @@
 package com.example.cs25service.domain.security.dto;
 
-import com.example.cs25common.global.domain.user.entity.Role;
-import com.example.cs25common.global.domain.user.entity.User;
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.entity.User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

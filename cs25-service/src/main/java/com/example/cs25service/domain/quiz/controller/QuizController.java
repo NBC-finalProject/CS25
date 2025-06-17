@@ -1,8 +1,8 @@
 package com.example.cs25service.domain.quiz.controller;
 
-import com.example.cs25common.global.domain.quiz.dto.QuizResponseDto;
-import com.example.cs25common.global.domain.quiz.entity.QuizFormatType;
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.example.cs25service.domain.quiz.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

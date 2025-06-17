@@ -1,15 +1,17 @@
 package com.example.cs25service.domain.quiz.service;
 
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
-import com.example.cs25common.global.domain.quiz.exception.QuizException;
-import com.example.cs25common.global.domain.quiz.exception.QuizExceptionCode;
-import com.example.cs25common.global.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
+import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuizPageService {

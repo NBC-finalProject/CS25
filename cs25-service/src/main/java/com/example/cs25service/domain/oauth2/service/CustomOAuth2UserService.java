@@ -1,8 +1,9 @@
 package com.example.cs25service.domain.oauth2.service;
 
-import com.example.cs25common.global.domain.user.entity.Role;
-import com.example.cs25common.global.domain.user.entity.SocialType;
-import com.example.cs25common.global.domain.user.entity.User;
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.entity.SocialType;
+import com.example.cs25entity.domain.user.entity.User;
+import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.oauth2.dto.OAuth2GithubResponse;
 import com.example.cs25service.domain.oauth2.dto.OAuth2KakaoResponse;
 import com.example.cs25service.domain.oauth2.dto.OAuth2NaverResponse;
@@ -10,7 +11,6 @@ import com.example.cs25service.domain.oauth2.dto.OAuth2Response;
 import com.example.cs25service.domain.oauth2.exception.OAuth2Exception;
 import com.example.cs25service.domain.oauth2.exception.OAuth2ExceptionCode;
 import com.example.cs25service.domain.security.dto.AuthUser;
-import com.example.cs25service.domain.users.repository.UserRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

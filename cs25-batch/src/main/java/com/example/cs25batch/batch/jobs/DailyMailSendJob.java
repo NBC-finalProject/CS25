@@ -1,14 +1,14 @@
 package com.example.cs25batch.batch.jobs;
 
 import com.example.cs25batch.batch.component.logger.MailStepLogger;
+import com.example.cs25batch.batch.dto.MailDto;
+import com.example.cs25batch.batch.service.BatchMailService;
+import com.example.cs25batch.batch.service.BatchSubscriptionService;
 import com.example.cs25batch.batch.service.TodayQuizService;
-import com.example.cs25common.global.domain.mail.dto.MailDto;
-import com.example.cs25common.global.domain.mail.service.MailService;
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionMailTargetDto;
-import com.example.cs25common.global.domain.subscription.entity.Subscription;
-import com.example.cs25common.global.domain.subscription.repository.SubscriptionRepository;
-import com.example.cs25common.global.domain.subscription.service.SubscriptionService;
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.subscription.dto.SubscriptionMailTargetDto;
+import com.example.cs25entity.domain.subscription.entity.Subscription;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +36,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class DailyMailSendJob {
 
-    private final SubscriptionService subscriptionService;
+    private final BatchSubscriptionService subscriptionService;
     private final TodayQuizService todayQuizService;
-    private final MailService mailService;
+    private final BatchMailService mailService;
 
     //Message Queue 적용 후
     @Bean

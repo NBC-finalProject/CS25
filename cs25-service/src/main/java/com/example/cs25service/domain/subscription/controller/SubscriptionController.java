@@ -1,10 +1,9 @@
 package com.example.cs25service.domain.subscription.controller;
 
-
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionInfoDto;
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionRequest;
-import com.example.cs25common.global.domain.subscription.service.SubscriptionService;
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25entity.domain.subscription.dto.SubscriptionRequest;
+import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
+import com.example.cs25service.domain.subscription.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

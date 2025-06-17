@@ -1,7 +1,7 @@
 package com.example.cs25service.domain.users.dto;
 
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionHistoryDto;
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionInfoDto;
+import com.example.cs25service.domain.subscription.dto.SubscriptionHistoryDto;
+import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;

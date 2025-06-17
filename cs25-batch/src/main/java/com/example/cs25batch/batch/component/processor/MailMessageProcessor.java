@@ -1,10 +1,10 @@
 package com.example.cs25batch.batch.component.processor;
 
+import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.TodayQuizService;
-import com.example.cs25common.global.domain.mail.dto.MailDto;
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
-import com.example.cs25common.global.domain.subscription.entity.Subscription;
-import com.example.cs25common.global.domain.subscription.repository.SubscriptionRepository;
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.subscription.entity.Subscription;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ public class MailMessageProcessor implements ItemProcessor<Map<String, String>, 
 
     private final SubscriptionRepository subscriptionRepository;
     private final TodayQuizService todayQuizService;
-    
 
     @Override
     public MailDto process(Map<String, String> message) throws Exception {

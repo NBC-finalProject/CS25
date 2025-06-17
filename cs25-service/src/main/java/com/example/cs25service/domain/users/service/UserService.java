@@ -1,21 +1,23 @@
 package com.example.cs25service.domain.users.service;
 
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionHistoryDto;
-import com.example.cs25common.global.domain.subscription.dto.SubscriptionInfoDto;
-import com.example.cs25common.global.domain.subscription.entity.SubscriptionHistory;
-import com.example.cs25common.global.domain.subscription.repository.SubscriptionHistoryRepository;
-import com.example.cs25common.global.domain.subscription.service.SubscriptionService;
-import com.example.cs25common.global.domain.user.entity.User;
-import com.example.cs25common.global.domain.user.exception.UserException;
-import com.example.cs25common.global.domain.user.exception.UserExceptionCode;
+import com.example.cs25entity.domain.subscription.entity.SubscriptionHistory;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionHistoryRepository;
+import com.example.cs25entity.domain.user.entity.User;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
+import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.security.dto.AuthUser;
+import com.example.cs25service.domain.subscription.dto.SubscriptionHistoryDto;
+import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
+import com.example.cs25service.domain.subscription.service.SubscriptionService;
 import com.example.cs25service.domain.users.dto.UserProfileResponse;
-import com.example.cs25service.domain.users.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {

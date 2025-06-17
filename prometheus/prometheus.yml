@@ -15,9 +15,9 @@ scrape_configs:
   - job_name: 'cs25-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'cs25-service:8080' ]
+      - targets: [ 'cs25-service:8080' ] # 추후 해당 백엔드가 올라가는 ec2 인스턴스의 프라이빗 ip로 변경
 
   - job_name: 'cs25-batch'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'cs25-batch:8080' ]
+      - targets: [ 'cs25-batch:8080' ] # 추후 해당 배치가 올라가는 ec2 인스턴스의 프라이빗 ip로 변경

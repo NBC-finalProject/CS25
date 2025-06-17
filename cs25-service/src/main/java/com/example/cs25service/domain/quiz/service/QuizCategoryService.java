@@ -1,16 +1,18 @@
 package com.example.cs25service.domain.quiz.service;
 
 
-import com.example.cs25common.global.domain.quiz.entity.QuizCategory;
-import com.example.cs25common.global.domain.quiz.exception.QuizException;
-import com.example.cs25common.global.domain.quiz.exception.QuizExceptionCode;
-import com.example.cs25common.global.domain.quiz.repository.QuizCategoryRepository;
+import com.example.cs25entity.domain.quiz.entity.QuizCategory;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
+import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuizCategoryService {

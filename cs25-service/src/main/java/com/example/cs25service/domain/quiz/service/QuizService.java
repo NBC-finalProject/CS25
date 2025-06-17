@@ -1,16 +1,16 @@
 package com.example.cs25service.domain.quiz.service;
 
-import com.example.cs25common.global.domain.mail.service.MailService;
-import com.example.cs25common.global.domain.quiz.dto.QuizResponseDto;
-import com.example.cs25common.global.domain.quiz.entity.Quiz;
-import com.example.cs25common.global.domain.quiz.entity.QuizCategory;
-import com.example.cs25common.global.domain.quiz.entity.QuizFormatType;
-import com.example.cs25common.global.domain.quiz.exception.QuizException;
-import com.example.cs25common.global.domain.quiz.exception.QuizExceptionCode;
-import com.example.cs25common.global.domain.quiz.repository.QuizCategoryRepository;
-import com.example.cs25common.global.domain.quiz.repository.QuizRepository;
-import com.example.cs25common.global.domain.subscription.repository.SubscriptionRepository;
+
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.entity.QuizCategory;
+import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
+import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
+import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
+import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -20,10 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuizService {
@@ -33,7 +35,6 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizCategoryRepository quizCategoryRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final MailService mailService;
 
     @Transactional
     public void uploadQuizJson(MultipartFile file, String categoryType,

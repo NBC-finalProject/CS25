@@ -1,6 +1,6 @@
 package com.example.cs25service.domain.security.jwt.provider;
 
-import com.example.cs25common.global.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25service.domain.security.jwt.dto.TokenResponseDto;
 import com.example.cs25service.domain.security.jwt.exception.JwtAuthenticationException;
 import com.example.cs25service.domain.security.jwt.exception.JwtExceptionCode;

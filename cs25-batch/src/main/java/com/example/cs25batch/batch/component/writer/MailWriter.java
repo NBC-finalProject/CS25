@@ -1,7 +1,7 @@
 package com.example.cs25batch.batch.component.writer;
 
-import com.example.cs25common.global.domain.mail.dto.MailDto;
-import com.example.cs25common.global.domain.mail.service.MailService;
+import com.example.cs25batch.batch.dto.MailDto;
+import com.example.cs25batch.batch.service.BatchMailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MailWriter implements ItemWriter<MailDto> {
 
-    private final MailService mailService;
+    private final BatchMailService mailService;
 
     @Override
     public void write(Chunk<? extends MailDto> items) throws Exception {

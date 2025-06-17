@@ -1,7 +1,7 @@
 package com.example.cs25batch.batch.controller;
 
+import com.example.cs25batch.batch.dto.QuizDto;
 import com.example.cs25batch.batch.service.TodayQuizService;
-import com.example.cs25common.global.domain.quiz.dto.QuizDto;
 import com.example.cs25common.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,12 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuizTestController {
 
     private final TodayQuizService accuracyService;
-
-    @GetMapping("/accuracyTest")
-    public ApiResponse<Void> accuracyTest() {
-        accuracyService.calculateAndCacheAllQuizAccuracies();
-        return new ApiResponse<>(200);
-    }
 
     @GetMapping("/accuracyTest/getTodayQuiz")
     public ApiResponse<QuizDto> getTodayQuiz() {
