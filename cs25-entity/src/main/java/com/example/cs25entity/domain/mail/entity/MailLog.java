@@ -4,6 +4,8 @@ import com.example.cs25entity.domain.mail.enums.MailStatus;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,6 +38,7 @@ public class MailLog {
 
     private LocalDateTime sendDate;
 
+    //@Enumerated(EnumType.STRING)
     private MailStatus status;
 
     /**
