@@ -21,6 +21,14 @@ public class MailLogService {
     //전체 로그 페이징 조회
     @Transactional(readOnly = true)
     public Page<MailLogResponse> getMailLogs(MailLogSearchDto condition, Pageable pageable) {
+
+        //시작일과 종료일 모두 설정했을 때
+        if (condition.getStartDate() != null && condition.getEndDate() != null) {
+            if (condition.getStartDate().isAfter(condition.getEndDate())) {
+                throw new IllegalArgumentException("시작일은 종료일보다 이후일 수 없습니다.");
+            }
+        }
+
         return mailLogCustomRepository.search(condition, pageable)
             .map(MailLogResponse::from);
     }
