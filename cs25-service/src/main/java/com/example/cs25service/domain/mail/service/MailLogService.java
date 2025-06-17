@@ -4,6 +4,7 @@ import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.repository.MailLogCustomRepositoryImpl;
 import com.example.cs25entity.domain.mail.repository.MailLogRepository;
+import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +17,14 @@ public class MailLogService {
     private final MailLogCustomRepositoryImpl mailLogCustomRepository;
 
     //전체 로그 페이징 조회
-    public Page<MailLog> getMailLogs(MailLogSearchDto condition, Pageable pageable) {
-        return mailLogCustomRepository.search(condition, pageable);
+    public Page<MailLogResponse> getMailLogs(MailLogSearchDto condition, Pageable pageable) {
+        return mailLogCustomRepository.search(condition, pageable)
+            .map(MailLogResponse::from);
     }
 
     //단일 로그 조회
+    public MailLogResponse getMailLog(Long id){
+        MailLog mailLog = mailLogRepository.findByIdOrElseThrow(id);
+        return MailLogResponse.from(mailLog);
+    }
 }
