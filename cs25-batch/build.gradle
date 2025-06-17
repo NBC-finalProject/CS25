@@ -14,6 +14,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'  // 롬복 의존성
     annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
