@@ -41,4 +41,6 @@ out/
 ### Mac ###
 .DS_Store
 
+# Chroma 벡터 DB 데이터 (Docker 볼륨과 연동됨)
+cs25-service/chroma-data/
 
