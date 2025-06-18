@@ -5,6 +5,7 @@ import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
+import com.example.cs25service.domain.quiz.dto.CreateQuizCategoryDto;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +21,24 @@ public class QuizCategoryService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void createQuizCategory(String categoryType) {
-        Optional<QuizCategory> existCategory = quizCategoryRepository.findByCategoryType(
-            categoryType);
-        if (existCategory.isPresent()) {
-            throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
-        }
+    public void createQuizCategory(CreateQuizCategoryDto request) {
+        quizCategoryRepository.findByCategoryType(request.getCategory())
+            .ifPresent(c -> {
+                throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
+            });
 
-        QuizCategory quizCategory = new QuizCategory(categoryType);
+        QuizCategory parent = null;
+        if (request.getParentId() != null) {
+            parent = quizCategoryRepository.findById(request.getParentId())
+                .orElseThrow(() ->
+                    new QuizException(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR));
+        };
+
+        QuizCategory quizCategory = QuizCategory.builder()
+            .categoryType(request.getCategory())
+            .parent(parent)
+            .build();
+
         quizCategoryRepository.save(quizCategory);
     }
 

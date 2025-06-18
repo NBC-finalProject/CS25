@@ -39,7 +39,7 @@ public class QuizCategory extends BaseEntity {
     private List<QuizCategory> children = new ArrayList<>();
 
     @Builder
-    public QuizCategory(String categoryType) {
+    public QuizCategory(String categoryType, QuizCategory parent) {
         this.categoryType = categoryType;
         this.parent = parent;
     }
