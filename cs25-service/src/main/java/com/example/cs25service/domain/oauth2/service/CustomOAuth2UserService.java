@@ -82,7 +82,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_REQUIRED_FIELDS_MISSING);
         }
 
-        Subscription subscription = subscriptionRepository.findByEmail(email).orElseThrow();
+        Subscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
 
         return userRepository.findByEmail(email).orElseGet(() ->
             userRepository.save(User.builder()

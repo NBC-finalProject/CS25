@@ -26,6 +26,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - chroma
     ports:
       - "8081:8080"
     networks:
