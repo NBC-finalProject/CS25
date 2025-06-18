@@ -1,33 +1,29 @@
 package com.example.cs25service.domain.ai.config;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Getter
-@Configuration
 @ConfigurationProperties(prefix = "ai.prompt")
+@Getter
+@Setter
+@Configuration
 public class AiPromptProperties {
 
     private Feedback feedback = new Feedback();
     private Generation generation = new Generation();
 
     @Getter
+    @Setter
     public static class Feedback {
 
         private String system;
         private String user;
-
-        public void setSystem(String system) {
-            this.system = system;
-        }
-
-        public void setUser(String user) {
-            this.user = user;
-        }
     }
 
     @Getter
+    @Setter
     public static class Generation {
 
         private String topicSystem;
@@ -36,47 +32,5 @@ public class AiPromptProperties {
         private String categoryUser;
         private String generateSystem;
         private String generateUser;
-        private String randomKeywordSystem;
-        private String randomKeywordUser;
-
-        public void setTopicSystem(String s) {
-            this.topicSystem = s;
-        }
-
-        public void setTopicUser(String s) {
-            this.topicUser = s;
-        }
-
-        public void setCategorySystem(String s) {
-            this.categorySystem = s;
-        }
-
-        public void setCategoryUser(String s) {
-            this.categoryUser = s;
-        }
-
-        public void setGenerateSystem(String s) {
-            this.generateSystem = s;
-        }
-
-        public void setGenerateUser(String s) {
-            this.generateUser = s;
-        }
-
-        public void setRandomKeywordSystem(String s) {
-            this.randomKeywordSystem = s;
-        }
-
-        public void setRandomKeywordUser(String s) {
-            this.randomKeywordUser = s;
-        }
-    }
-
-    public void setFeedback(Feedback feedback) {
-        this.feedback = feedback;
-    }
-
-    public void setGeneration(Generation generation) {
-        this.generation = generation;
     }
 }

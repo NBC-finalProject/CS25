@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.ai.prompt;
 
-
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25service.domain.ai.config.AiPromptProperties;
@@ -16,7 +15,6 @@ public class AiPromptProvider {
 
     private final AiPromptProperties props;
 
-    // === [Feedback] ===
     public String getFeedbackSystem() {
         return props.getFeedback().getSystem();
     }
@@ -32,14 +30,12 @@ public class AiPromptProvider {
             .replace("{userAnswer}", answer.getUserAnswer());
     }
 
-    // === [Generation] ===
     public String getTopicSystem() {
         return props.getGeneration().getTopicSystem();
     }
 
     public String getTopicUser(String context) {
-        return props.getGeneration().getTopicUser()
-            .replace("{context}", context);
+        return props.getGeneration().getTopicUser().replace("{context}", context);
     }
 
     public String getCategorySystem() {
@@ -47,8 +43,7 @@ public class AiPromptProvider {
     }
 
     public String getCategoryUser(String topic) {
-        return props.getGeneration().getCategoryUser()
-            .replace("{topic}", topic);
+        return props.getGeneration().getCategoryUser().replace("{topic}", topic);
     }
 
     public String getGenerateSystem() {
@@ -56,7 +51,14 @@ public class AiPromptProvider {
     }
 
     public String getGenerateUser(String context) {
-        return props.getGeneration().getGenerateUser()
-            .replace("{context}", context);
+        return props.getGeneration().getGenerateUser().replace("{context}", context);
+    }
+
+    public String getRandomKeywordSystem() {
+        return props.getGeneration().getRandomKeywordSystem();
+    }
+
+    public String getRandomKeywordUser() {
+        return props.getGeneration().getRandomKeywordUser();
     }
 }
