@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.ai.service;
 
-
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
@@ -28,7 +27,16 @@ public class AiQuestionGeneratorService {
 
     @Transactional
     public Quiz generateQuestionFromContext() {
-        List<Document> docs = ragService.searchRelevant("컴퓨터 과학 일반", 3, 0.1);
+        // 1. GPT에게 랜덤 키워드 요청
+        String keyword = chatClient.prompt()
+            .system(promptProvider.getRandomKeywordSystem())
+            .user(promptProvider.getRandomKeywordUser())
+            .call()
+            .content()
+            .trim();
+
+        // 2. 해당 키워드로 RAG 검색
+        List<Document> docs = ragService.searchRelevant(keyword, 3, 0.1);
         if (docs.isEmpty()) {
             throw new IllegalStateException("RAG 검색 결과가 없습니다.");
         }
@@ -41,6 +49,7 @@ public class AiQuestionGeneratorService {
             throw new IllegalStateException("RAG로부터 가져온 문서가 비어 있습니다.");
         }
 
+        // 3. 중심 주제 추출
         String topic = chatClient.prompt()
             .system(promptProvider.getTopicSystem())
             .user(promptProvider.getTopicUser(context))
@@ -48,6 +57,7 @@ public class AiQuestionGeneratorService {
             .content()
             .trim();
 
+        // 4. 카테고리 분류
         String categoryType = chatClient.prompt()
             .system(promptProvider.getCategorySystem())
             .user(promptProvider.getCategoryUser(topic))
@@ -62,6 +72,7 @@ public class AiQuestionGeneratorService {
 
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
 
+        // 5. 문제 생성
         String output = chatClient.prompt()
             .system(promptProvider.getGenerateSystem())
             .user(promptProvider.getGenerateUser(context))

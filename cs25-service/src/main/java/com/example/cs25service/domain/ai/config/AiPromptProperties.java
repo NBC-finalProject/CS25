@@ -5,10 +5,10 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties(prefix = "ai.prompt")
 @Getter
 @Setter
 @Configuration
+@ConfigurationProperties(prefix = "ai.prompt")
 public class AiPromptProperties {
 
     private Feedback feedback = new Feedback();
@@ -20,6 +20,7 @@ public class AiPromptProperties {
 
         private String system;
         private String user;
+
     }
 
     @Getter
@@ -32,5 +33,11 @@ public class AiPromptProperties {
         private String categoryUser;
         private String generateSystem;
         private String generateUser;
+        private String randomKeywordSystem;
+        private String randomKeywordUser;
+
+    }
+
+    public void setFeedback(Feedback feedback) {
     }
 }
