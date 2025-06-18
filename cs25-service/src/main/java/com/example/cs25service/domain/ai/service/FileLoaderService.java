@@ -18,16 +18,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FileLoaderService {
 
-    private static final int MAX_CHUNK_SIZE = 2000;
+    private static final int MAX_CHUNK_SIZE = 2000; // 문자 기준. 토큰과 대략 1:1~1.3 비율
 
     private final VectorStore vectorStore;
 
-    public void loadAndSaveFiles(String dirName) {
-        String baseDir = "data/" + dirName;
+    public void loadAndSaveFiles(String dirPath) {
         log.info("VectorStore 타입: {}", vectorStore.getClass().getName());
 
         try {
-            List<Path> files = Files.list(Paths.get(baseDir))
+            List<Path> files = Files.list(Paths.get(dirPath))
                 .filter(p -> p.toString().endsWith(".md") || p.toString().endsWith(".txt"))
                 .toList();
 

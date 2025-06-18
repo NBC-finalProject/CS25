@@ -35,10 +35,10 @@ public class AiController {
         return ResponseEntity.ok(new ApiResponse<>(200, quiz));
     }
 
-
-    @GetMapping("/{dirName}")
+    @GetMapping("/load/{dirName}")
     public String loadFiles(@PathVariable("dirName") String dirName) {
-        fileLoaderService.loadAndSaveFiles(dirName);
+        String basePath = "cs25-service/data/";
+        fileLoaderService.loadAndSaveFiles(basePath + dirName);
         return "파일 적재 완료!";
     }
 }
