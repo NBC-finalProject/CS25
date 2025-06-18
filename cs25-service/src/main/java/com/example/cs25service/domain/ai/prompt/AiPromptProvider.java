@@ -15,6 +15,16 @@ public class AiPromptProvider {
 
     private final AiPromptProperties props;
 
+    // === [Keyword] ===
+    public String getKeywordSystem() {
+        return props.getKeyword().getSystem();
+    }
+
+    public String getKeywordUser() {
+        return props.getKeyword().getUser();
+    }
+
+    // === [Feedback] ===
     public String getFeedbackSystem() {
         return props.getFeedback().getSystem();
     }
@@ -30,12 +40,14 @@ public class AiPromptProvider {
             .replace("{userAnswer}", answer.getUserAnswer());
     }
 
+    // === [Generation] ===
     public String getTopicSystem() {
         return props.getGeneration().getTopicSystem();
     }
 
     public String getTopicUser(String context) {
-        return props.getGeneration().getTopicUser().replace("{context}", context);
+        return props.getGeneration().getTopicUser()
+            .replace("{context}", context);
     }
 
     public String getCategorySystem() {
@@ -43,7 +55,8 @@ public class AiPromptProvider {
     }
 
     public String getCategoryUser(String topic) {
-        return props.getGeneration().getCategoryUser().replace("{topic}", topic);
+        return props.getGeneration().getCategoryUser()
+            .replace("{topic}", topic);
     }
 
     public String getGenerateSystem() {
@@ -51,14 +64,7 @@ public class AiPromptProvider {
     }
 
     public String getGenerateUser(String context) {
-        return props.getGeneration().getGenerateUser().replace("{context}", context);
-    }
-
-    public String getRandomKeywordSystem() {
-        return props.getGeneration().getRandomKeywordSystem();
-    }
-
-    public String getRandomKeywordUser() {
-        return props.getGeneration().getRandomKeywordUser();
+        return props.getGeneration().getGenerateUser()
+            .replace("{context}", context);
     }
 }

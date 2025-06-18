@@ -13,6 +13,7 @@ public class AiPromptProperties {
 
     private Feedback feedback = new Feedback();
     private Generation generation = new Generation();
+    private Keyword keyword = new Keyword();
 
     @Getter
     @Setter
@@ -20,7 +21,6 @@ public class AiPromptProperties {
 
         private String system;
         private String user;
-
     }
 
     @Getter
@@ -33,11 +33,13 @@ public class AiPromptProperties {
         private String categoryUser;
         private String generateSystem;
         private String generateUser;
-        private String randomKeywordSystem;
-        private String randomKeywordUser;
-
     }
 
-    public void setFeedback(Feedback feedback) {
+    @Getter
+    @Setter
+    public static class Keyword {
+
+        private String system;
+        private String user;
     }
 }

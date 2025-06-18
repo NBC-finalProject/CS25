@@ -27,18 +27,22 @@ public class AiQuestionGeneratorService {
 
     @Transactional
     public Quiz generateQuestionFromContext() {
-        // 1. GPT에게 랜덤 키워드 요청
+        // 1. LLM으로부터 CS 키워드 동적 생성
         String keyword = chatClient.prompt()
-            .system(promptProvider.getRandomKeywordSystem())
-            .user(promptProvider.getRandomKeywordUser())
+            .system(promptProvider.getKeywordSystem())
+            .user(promptProvider.getKeywordUser())
             .call()
             .content()
             .trim();
 
-        // 2. 해당 키워드로 RAG 검색
+        if (!StringUtils.hasText(keyword)) {
+            throw new IllegalStateException("AI가 반환한 키워드가 비어 있습니다.");
+        }
+
+        // 2. 해당 키워드 기반 문서 검색 (RAG)
         List<Document> docs = ragService.searchRelevant(keyword, 3, 0.1);
         if (docs.isEmpty()) {
-            throw new IllegalStateException("RAG 검색 결과가 없습니다.");
+            throw new IllegalStateException("RAG 검색 결과가 없습니다. 키워드: " + keyword);
         }
 
         String context = docs.stream()
@@ -46,10 +50,10 @@ public class AiQuestionGeneratorService {
             .collect(Collectors.joining("\n"));
 
         if (!StringUtils.hasText(context)) {
-            throw new IllegalStateException("RAG로부터 가져온 문서가 비어 있습니다.");
+            throw new IllegalStateException("RAG 문서가 비어 있습니다.");
         }
 
-        // 3. 중심 주제 추출
+        // 3. 중심 토픽 추출
         String topic = chatClient.prompt()
             .system(promptProvider.getTopicSystem())
             .user(promptProvider.getTopicUser(context))
@@ -57,7 +61,7 @@ public class AiQuestionGeneratorService {
             .content()
             .trim();
 
-        // 4. 카테고리 분류
+        // 4. 카테고리 분류 (BACKEND / FRONTEND)
         String categoryType = chatClient.prompt()
             .system(promptProvider.getCategorySystem())
             .user(promptProvider.getCategoryUser(topic))
@@ -72,7 +76,7 @@ public class AiQuestionGeneratorService {
 
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
 
-        // 5. 문제 생성
+        // 5. 문제 생성 (문제, 정답, 해설)
         String output = chatClient.prompt()
             .system(promptProvider.getGenerateSystem())
             .user(promptProvider.getGenerateUser(context))
