@@ -36,6 +36,8 @@ public class AiPromptProperties {
         private String categoryUser;
         private String generateSystem;
         private String generateUser;
+        private String randomKeywordSystem;
+        private String randomKeywordUser;
 
         public void setTopicSystem(String s) {
             this.topicSystem = s;
@@ -59,6 +61,14 @@ public class AiPromptProperties {
 
         public void setGenerateUser(String s) {
             this.generateUser = s;
+        }
+
+        public void setRandomKeywordSystem(String s) {
+            this.randomKeywordSystem = s;
+        }
+
+        public void setRandomKeywordUser(String s) {
+            this.randomKeywordUser = s;
         }
     }
 
