@@ -51,12 +51,12 @@ public class MailLogCustomRepositoryImpl implements MailLogCustomRepository{
             .orderBy(mailLog.sendDate.desc())
             .fetch();
 
-        long total = queryFactory
+        Long total = queryFactory
             .select(mailLog.count())
             .from(mailLog)
             .where(builder)
             .fetchOne();
 
-        return new PageImpl<>(content, pageable, total);
+        return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }
 }

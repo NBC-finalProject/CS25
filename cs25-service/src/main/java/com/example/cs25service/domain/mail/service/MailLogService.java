@@ -2,7 +2,7 @@ package com.example.cs25service.domain.mail.service;
 
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
-import com.example.cs25entity.domain.mail.repository.MailLogCustomRepositoryImpl;
+import com.example.cs25entity.domain.mail.repository.MailLogCustomRepository;
 import com.example.cs25entity.domain.mail.repository.MailLogRepository;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import java.util.List;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MailLogService {
 
     private final MailLogRepository mailLogRepository;
-    private final MailLogCustomRepositoryImpl mailLogCustomRepository;
+    private final MailLogCustomRepository mailLogCustomRepository;
 
     //전체 로그 페이징 조회
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class MailLogService {
 
     @Transactional
     public void deleteMailLogs(List<Long> ids) {
-        if (ids.isEmpty()) {
+        if (ids == null || ids.isEmpty()) {
             throw new IllegalArgumentException("삭제할 로그 데이터가 없습니다.");
         }
 
