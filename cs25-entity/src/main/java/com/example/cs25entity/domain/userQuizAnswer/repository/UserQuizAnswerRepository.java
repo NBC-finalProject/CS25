@@ -1,5 +1,6 @@
 package com.example.cs25entity.domain.userQuizAnswer.repository;
 
+import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import java.util.List;
 import java.util.Optional;
@@ -14,4 +15,5 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
         Long subscriptionId);
 
     List<UserQuizAnswer> findAllByQuizId(Long quizId);
+    List<UserQuizAnswer> findAllByUserId(Long id);
 }

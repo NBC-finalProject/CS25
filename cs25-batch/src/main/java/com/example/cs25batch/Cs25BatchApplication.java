@@ -13,7 +13,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(
+        scanBasePackages = {
+                "com.example"
+        }
+)
 public class Cs25BatchApplication {
 
     public static void main(String[] args) {
