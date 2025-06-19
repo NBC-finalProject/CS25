@@ -1,4 +1,4 @@
-package com.example.cs25service.domain.admin.dto;
+package com.example.cs25service.domain.admin.dto.response;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ public class QuizDetailDto {
 
     private final LocalDateTime updatedAt;
 
-    private final long solvedCnt;
+    private final Long solvedCnt;
 
     @Builder
     public QuizDetailDto(Long quizId, String question, String answer, String commentary,
@@ -45,7 +45,7 @@ public class QuizDetailDto {
         this.solvedCnt = solvedCnt;
     }
 
-    public QuizDetailDto(Quiz quiz, int solvedCnt) {
+    public QuizDetailDto(Quiz quiz, long solvedCnt) {
         this.quizId = quiz.getId();
         this.question = quiz.getQuestion();
         this.answer = quiz.getAnswer();
