@@ -4,6 +4,8 @@ import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25service.domain.quiz.dto.TodayQuizResponseDto;
+
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ public class QuizPageService {
 
     private final QuizRepository quizRepository;
 
-    public void setTodayQuizPage(Long quizId, Model model) {
+    public TodayQuizResponseDto setTodayQuizPage(Long quizId, Model model) {
 
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
@@ -27,11 +29,16 @@ public class QuizPageService {
             .filter(s -> !s.isBlank())
             .map(String::trim)
             .toList();
+        String answerNumber = quiz.getAnswer().split("\\.")[0];
 
-        model.addAttribute("quizQuestion", quiz.getQuestion());
-        model.addAttribute("choice1", choices.get(0));
-        model.addAttribute("choice2", choices.get(1));
-        model.addAttribute("choice3", choices.get(2));
-        model.addAttribute("choice4", choices.get(3));
+        return TodayQuizResponseDto.builder()
+            .question(quiz.getQuestion())
+            .choice1(choices.get(0))
+            .choice2(choices.get(1))
+            .choice3(choices.get(2))
+            .choice4(choices.get(3))
+            .answerNumber(answerNumber)
+            .commentary(quiz.getCommentary())
+            .build();
     }
 }

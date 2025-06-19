@@ -12,6 +12,8 @@ import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
@@ -33,6 +35,11 @@ public class UserQuizAnswerService {
     private final SubscriptionRepository subscriptionRepository;
 
     public void answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
+        // 중복 답변 제출 막음
+        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, requestDto.getSubscriptionId());
+        if (isDuplicate) {
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
+        }
 
         // 구독 정보 조회
         Subscription subscription = subscriptionRepository.findById(requestDto.getSubscriptionId())
