@@ -9,4 +9,6 @@ public interface UserQuizAnswerCustomRepository {
     List<UserQuizAnswer> findByUserIdAndCategoryId(Long userId, Long categoryId);
 
     List<UserAnswerDto> findUserAnswerByQuizId(Long quizId);
+
+    List<UserQuizAnswer> findByUserIdAndQuizCategoryId(Long userId, Long quizCategoryId);
 }

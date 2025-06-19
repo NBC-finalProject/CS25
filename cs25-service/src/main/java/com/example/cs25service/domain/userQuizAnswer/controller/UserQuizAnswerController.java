@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.userQuizAnswer.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
 import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25service.domain.userQuizAnswer.service.UserQuizAnswerService;
@@ -34,5 +35,12 @@ public class UserQuizAnswerController {
     public ApiResponse<SelectionRateResponseDto> getSelectionRateByOption(
         @PathVariable Long quizId) {
         return new ApiResponse<>(200, userQuizAnswerService.getSelectionRateByOption(quizId));
+    }
+
+    @GetMapping("/{userId}/correct-rate")
+    public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
+        @PathVariable Long userId
+    ){
+        return new ApiResponse<>(200, userQuizAnswerService.getUserQuizAnswerCorrectRate(userId));
     }
 }
