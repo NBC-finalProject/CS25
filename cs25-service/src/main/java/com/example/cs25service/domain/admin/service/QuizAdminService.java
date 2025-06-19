@@ -89,6 +89,7 @@ public class QuizAdminService {
         return quizRepository.save(newQuiz).getId();
     }
 
+    //PATCH	관리자 문제 수정	/admin/quizzes/{quizId}
     @Transactional
     public QuizDetailDto updateQuiz(@Positive Long quizId, QuizUpdateRequestDto requestDto) {
         Quiz quiz = quizRepository.findById(quizId)
@@ -152,7 +153,6 @@ public class QuizAdminService {
             .build();
     }
 
-    //PATCH	관리자 문제 수정	/admin/quizzes/{quizId}
     //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
 
 }
