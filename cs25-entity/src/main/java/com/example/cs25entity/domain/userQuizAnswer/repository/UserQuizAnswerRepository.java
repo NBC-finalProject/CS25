@@ -15,5 +15,8 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
         Long subscriptionId);
 
     List<UserQuizAnswer> findAllByQuizId(Long quizId);
+
+    boolean existsByQuizIdAndSubscriptionId(Long quizId, Long subscriptionId);
+
     List<UserQuizAnswer> findAllByUserId(Long id);
 }
