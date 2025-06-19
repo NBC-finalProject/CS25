@@ -88,13 +88,17 @@ public class Subscription extends BaseEntity {
     /**
      * 사용자가 입력한 값으로 구독정보를 업데이트하는 메서드
      *
-     * @param subscription 사용자를 통해 받은 구독 정보
+     * @param category 퀴즈 카테고리
+     * @param days 구독 요일 정보
+     * @param isActive 활성화 상태
+     * @param period 기간 연장 정보
      */
-    public void update(Subscription subscription) {
-        this.category = subscription.getCategory();
-        this.subscriptionType = subscription.subscriptionType;
-        this.isActive = subscription.isActive;
-        this.endDate = subscription.endDate;
+    public void update(QuizCategory category, Set<DayOfWeek> days,
+                                 boolean isActive, SubscriptionPeriod period) {
+        this.category = category;
+        this.subscriptionType = encodeDays(days);
+        this.isActive = isActive;
+        this.endDate = this.endDate.plusMonths(period.getMonths());
     }
 
     /**
