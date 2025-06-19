@@ -3,6 +3,7 @@ package com.example.cs25batch.batch.service;
 import com.example.cs25batch.batch.dto.QuizDto;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizAccuracy;
+import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizAccuracyRedisRepository;
@@ -13,10 +14,7 @@ import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,12 +40,21 @@ public class TodayQuizService {
         //해당 구독자의 문제 구독 카테고리 확인
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
+        //대분류 및 중분류 탐색
+
+        List<QuizCategory> childCategories = subscription.getCategory().getChildren();
+        List<Long> categoryIds = childCategories.stream()
+                .map(QuizCategory::getId)
+                .toList();
+
+        categoryIds.add(subscription.getCategory().getId());
+
+
         //id 순으로 정렬
-        List<Quiz> quizList = quizRepository.findAllByCategoryId(
-                subscription.getCategory().getId())
-            .stream()
-            .sorted(Comparator.comparing(Quiz::getId))
-            .toList();
+        List<Quiz> quizList = quizRepository.findAllByCategoryIdIn(categoryIds)
+                .stream()
+                .sorted(Comparator.comparing(Quiz::getId))  // id 순으로 정렬
+                .toList();
 
         if (quizList.isEmpty()) {
             throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
