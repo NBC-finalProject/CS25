@@ -43,4 +43,8 @@ public class QuizCategory extends BaseEntity {
         this.categoryType = categoryType;
         this.parent = parent;
     }
+
+    public boolean isParentCategory(){
+        return parent == null;
+    }
 }

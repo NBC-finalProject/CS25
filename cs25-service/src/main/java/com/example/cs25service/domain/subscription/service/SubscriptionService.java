@@ -1,6 +1,8 @@
 package com.example.cs25service.domain.subscription.service;
 
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.entity.SubscriptionHistory;
@@ -70,6 +72,11 @@ public class SubscriptionService {
         // 퀴즈 카테고리 불러오기
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             request.getCategory());
+
+        //퀴즈 카테고리가 대분류인지 검증
+        if(!quizCategory.isParentCategory()){
+            throw new QuizException(QuizExceptionCode.PARENT_CATEGORY_REQUIRED_ERROR);
+        }
 
         // 로그인 한 경우
         if (authUser != null) {

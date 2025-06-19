@@ -29,6 +29,13 @@ public interface QuizCategoryRepository extends JpaRepository<QuizCategory, Long
                 new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
     }
 
+    //대분류 QuizCategory만 조회
+    List<QuizCategory> findByParentIdIsNull();
+
+    //대분류의 Id만 조회
+    @Query("SELECT q.id FROM QuizCategory q WHERE q.parent IS NULL")
+    List<Long> findParentCategoryIds();
+
     @Query("SELECT q.id FROM QuizCategory q")
     List<Long> selectAllCategoryId();
 }
