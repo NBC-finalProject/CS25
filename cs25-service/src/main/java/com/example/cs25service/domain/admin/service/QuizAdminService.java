@@ -154,5 +154,8 @@ public class QuizAdminService {
     }
 
     //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
-
+    @Transactional
+    public void deleteQuiz(@Positive Long quizId) {
+        
+    }
 }
