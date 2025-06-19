@@ -9,6 +9,7 @@ import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExce
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.profile.dto.ProfileResponseDto;
+import com.example.cs25service.domain.profile.dto.WrongQuizResponseDto;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
@@ -27,12 +28,16 @@ public class ProfileService {
     // 유저 틀린 문제 다시보기
     public ProfileResponseDto getWrongQuiz(AuthUser authUser) {
 
-        List<QuizResponseDto> wrongQuizList = userQuizAnswerRepository
+        List<WrongQuizResponseDto> wrongQuizList = userQuizAnswerRepository
                 // 유저 아이디로 내가 푼 문제 조회
                 .findAllByUserId(authUser.getId()).stream()
                 .filter(answer -> !answer.getIsCorrect()) // 틀린 문제
-                .map(UserQuizAnswer::getQuiz)          // Quiz 객체 추출
-                .map(quiz -> new QuizResponseDto(quiz.getQuestion(), quiz.getAnswer(), quiz.getCommentary()))
+                .map(answer -> new WrongQuizResponseDto(
+                        answer.getQuiz().getQuestion(),
+                        answer.getUserAnswer(),
+                        answer.getQuiz().getAnswer(),
+                        answer.getQuiz().getCommentary()
+                ))
                 .collect(Collectors.toList());
 
         return new ProfileResponseDto(authUser.getId(), wrongQuizList);

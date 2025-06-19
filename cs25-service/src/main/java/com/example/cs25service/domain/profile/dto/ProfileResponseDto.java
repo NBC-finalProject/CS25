@@ -10,9 +10,9 @@ import java.util.List;
 public class ProfileResponseDto {
     private final Long userId;
 
-    private final List<QuizResponseDto> wrongQuizList;
+    private final List<WrongQuizResponseDto> wrongQuizList;
 
-    public ProfileResponseDto(Long userId, List<QuizResponseDto> wrongQuizList) {
+    public ProfileResponseDto(Long userId, List<WrongQuizResponseDto> wrongQuizList) {
         this.userId = userId;
         this.wrongQuizList = wrongQuizList;
     }
