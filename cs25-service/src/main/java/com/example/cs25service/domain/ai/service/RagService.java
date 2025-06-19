@@ -1,9 +1,7 @@
 package com.example.cs25service.domain.ai.service;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,56 +27,68 @@ public class RagService {
 //    }
 
     public void saveMarkdownChunksToVectorStore() throws IOException {
-        // 1. 폴더 경로 지정
+        // 현재 작업 디렉터리와 폴더 절대 경로 출력
+        System.out.println("현재 작업 디렉터리: " + System.getProperty("user.dir"));
         File folder = new File("data/markdowns");
+        System.out.println("폴더 절대 경로: " + folder.getAbsolutePath());
+
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".txt"));
         if (files == null) {
             log.error("폴더 또는 파일이 존재하지 않습니다.");
             return;
         }
 
-        // 2. 청크 분할 및 Document 생성
-        List<Document> allDocs = new ArrayList<>();
+        int totalChunks = 0;
         for (File file : files) {
-            String text = Files.readString(file.toPath(), StandardCharsets.UTF_8);
-            List<String> chunks = splitByLength(text, 500, 100); // 청크 500자, 오버랩 100자
-            for (int i = 0; i < chunks.size(); i++) {
-                Map<String, Object> metadata = new HashMap<>();
-                metadata.put("fileName", file.getName());
-                metadata.put("chunkIndex", i);
-                allDocs.add(new Document(
-                        file.getName() + "_chunk" + i, // id
-                        chunks.get(i),                 // content
-                        metadata                       // metadata
-                ));
+            int chunkSize = 1000;
+            int overlap = 100;
+            int chunkIndex = 0;
+            List<Document> docs = new ArrayList<>();
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+                StringBuilder chunkBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    chunkBuilder.append(line).append("\n");
+                    while (chunkBuilder.length() >= chunkSize) {
+                        String chunk = chunkBuilder.substring(0, chunkSize);
+                        Map<String, Object> metadata = new HashMap<>();
+                        metadata.put("fileName", file.getName());
+                        metadata.put("chunkIndex", chunkIndex);
+                        docs.add(new Document(file.getName() + "_chunk" + chunkIndex, chunk, metadata));
+                        chunkIndex++;
+                        if (docs.size() == 100) {
+                            vectorStore.add(docs);
+                            docs.clear();
+                        }
+                        // 오버랩 처리
+                        chunkBuilder.delete(0, chunkSize - overlap);
+                    }
+                }
+                // 남은 데이터 저장
+                if (chunkBuilder.length() > 0) {
+                    Map<String, Object> metadata = new HashMap<>();
+                    metadata.put("fileName", file.getName());
+                    metadata.put("chunkIndex", chunkIndex);
+                    docs.add(new Document(file.getName() + "_chunk" + chunkIndex, chunkBuilder.toString(), metadata));
+                }
+                if (!docs.isEmpty()) {
+                    vectorStore.add(docs);
+                }
             }
+            totalChunks += chunkIndex + 1; // 마지막 청크 인덱스 + 1 (0부터 시작)
         }
-
-        // 3. 벡터DB에 저장
-        vectorStore.add(allDocs);
-        log.info("{}개 청크 저장 완료", allDocs.size());
-    }
-
-    /**
-     * 텍스트를 청크와 오버랩으로 분할
-     */
-    private List<String> splitByLength(String text, int chunkSize, int overlap) {
-        List<String> chunks = new ArrayList<>();
-        int start = 0;
-        while (start < text.length()) {
-            int end = Math.min(start + chunkSize, text.length());
-            chunks.add(text.substring(start, end));
-            start = end - overlap;
-            if (start < 0) start = 0;
-        }
-        return chunks;
+        log.info("{}개 청크 저장 완료", totalChunks);
     }
 
     public List<Document> searchRelevant(String query, int topK, double similarityThreshold) {
-        return vectorStore.similaritySearch(SearchRequest.builder()
-                .query(query)
-                .topK(topK)
-                .similarityThreshold(similarityThreshold)
-                .build());
+        return vectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query(query)
+                        .topK(topK)
+                        .similarityThreshold(similarityThreshold)
+                        .build()
+        );
     }
 }

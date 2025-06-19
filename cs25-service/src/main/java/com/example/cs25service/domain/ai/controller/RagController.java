@@ -39,12 +39,13 @@ public class RagController {
                         .build()
         );
         List<String> allIds = allDocs.stream().map(Document::getId).toList();
-
+        if (allIds.isEmpty()) {
+            return "벡터DB가 이미 비어 있습니다";
+        }
         // 2. id 리스트로 일괄 삭제
         vectorStore.delete(allIds);
         return "벡터DB 전체 삭제 완료";
     }
-
 
     // data/markdowns의 txt 파일 임베딩
     @PostMapping("vector/embed")
