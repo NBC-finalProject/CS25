@@ -9,33 +9,31 @@ import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
-public class SubscriptionRequest {
+public class SubscriptionRequestDto {
 
-    @NotNull(message = "기술 분야 선택은 필수입니다.")
+    @NotNull(message = "분야 선택은 필수입니다.")
     private String category;
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     private String email;
 
-    @NotEmpty(message = "구독주기는 한 개 이상 선택해야 합니다.")
+    @NotEmpty(message = "요일은 반드시 한 개 이상 선택해야 합니다.")
     private Set<DayOfWeek> days;
 
-    private boolean isActive;
+    private boolean active;
 
     // 수정하면서 기간을 늘릴수도, 안늘릴수도 있음, 기본값은 0
-    @NotNull
+    @NotNull(message = "구독기간연장 값이 올바르지 않습니다.")
     private SubscriptionPeriod period;
 
     @Builder
-    public SubscriptionRequest(SubscriptionPeriod period, boolean isActive, Set<DayOfWeek> days,
+    public SubscriptionRequestDto(SubscriptionPeriod period, boolean active, Set<DayOfWeek> days,
         String email, String category) {
         this.period = period;
-        this.isActive = isActive;
+        this.active = active;
         this.days = days;
         this.email = email;
         this.category = category;
