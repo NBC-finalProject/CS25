@@ -23,6 +23,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final TokenService tokenService;
 
+    private boolean cookieSecure = true; //배포시에는 true로 변경해야함
+
     //@Value("${FRONT_END_URI:http://localhost:5173}")
     private String frontEndUri = "http://localhost:8080";
 
@@ -54,7 +56,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken",
                     tokenResponse.getAccessToken())
                 .httpOnly(true)
-                .secure(true) // HTTPS가 아닐 경우 false
+                .secure(cookieSecure) // HTTPS가 아닐 경우 false
                 .path("/")
                 .maxAge(Duration.ofMillis(accessTokenExpiration)) // 원하는 만료 시간
                 .sameSite("None") // 필요에 따라 "Lax", "None"
@@ -63,11 +65,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken",
                     tokenResponse.getRefreshToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(Duration.ofMillis(refreshTokenExpiration)) // 원하는 만료 시간
                 .sameSite("None")
                 .build();
+
+            log.error("OAuth2 로그인 완료 핸들러에서 쿠키넣기");
 
             // 응답 헤더에 쿠키 추가
             response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
