@@ -113,6 +113,10 @@ public class UserAdminService {
             throw new UserException(UserExceptionCode.INACTIVE_USER);
         }
 
+        if (user.getSubscription() != null) {
+            user.getSubscription().updateDisable(); //구독도 취소
+        }
+
         user.updateDisableUser();
     }
 
@@ -121,11 +125,19 @@ public class UserAdminService {
         @Valid SubscriptionRequestDto request) {
         User user = userRepository.findByIdOrElseThrow(userId);
 
+        if (user.getSubscription() == null) {
+            throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
+        }
+
         subscriptionService.updateSubscription(user.getSubscription().getId(), request);
     }
 
     public void cancelSubscription(@Positive Long userId) {
         User user = userRepository.findByIdOrElseThrow(userId);
+
+        if (user.getSubscription() == null) {
+            throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
+        }
 
         subscriptionService.cancelSubscription(user.getSubscription().getId());
     }
