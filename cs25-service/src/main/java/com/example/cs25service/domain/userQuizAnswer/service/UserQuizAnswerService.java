@@ -34,7 +34,7 @@ public class UserQuizAnswerService {
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
 
-    public void answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
+    public Long answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
         // 중복 답변 제출 막음
         boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, requestDto.getSubscriptionId());
         if (isDuplicate) {
@@ -56,7 +56,7 @@ public class UserQuizAnswerService {
         // 정답 체크
         boolean isCorrect = requestDto.getAnswer().equals(quiz.getAnswer().substring(0, 1));
 
-        userQuizAnswerRepository.save(
+        UserQuizAnswer answer = userQuizAnswerRepository.save(
             UserQuizAnswer.builder()
                 .userAnswer(requestDto.getAnswer())
                 .isCorrect(isCorrect)
@@ -65,6 +65,7 @@ public class UserQuizAnswerService {
                 .subscription(subscription)
                 .build()
         );
+        return answer.getId();
     }
 
     public SelectionRateResponseDto getSelectionRateByOption(Long quizId) {

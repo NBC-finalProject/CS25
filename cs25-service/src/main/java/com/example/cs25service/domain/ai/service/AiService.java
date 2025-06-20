@@ -51,6 +51,11 @@ public class AiService {
         answer.updateAiFeedback(feedback);
         userQuizAnswerRepository.save(answer);
 
-        return new AiFeedbackResponse(quiz.getId(), isCorrect, feedback, answer.getId());
+        return AiFeedbackResponse.builder()
+            .quizId(quiz.getId())
+            .quizAnswerId(answer.getId())
+            .isCorrect(isCorrect)
+            .aiFeedback(feedback)
+            .build();
     }
 }
