@@ -19,7 +19,9 @@ public class TodayQuizResponseDto {
 
 	private final String answerNumber; // 객관식 정답 번호
 	private final String answer; // 주관식 모범답안
-	private final String commentary; // 객관식/주관식 해설
+	private final String commentary; // 객관식 & 주관식 해설
 
-	private final String quizType;
+	private final QuizCategoryResponseDto category; // 문제 카테고리 (main, sub)
+	private final String quizType; // 객관식 & 주관식 구분
+	private final String quizLevel; // 난이도 (HARD, NORMAL, EASY)
 }
