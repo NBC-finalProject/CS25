@@ -53,7 +53,7 @@ public class Quiz extends BaseEntity {
 
     @Builder
     public Quiz(QuizFormatType type, String question, String answer, String commentary,
-        String choice, QuizCategory category, QuizLevel level, boolean isDeleted) {
+        String choice, QuizCategory category, QuizLevel level) {
         this.type = type;
         this.question = question;
         this.choice = choice;
@@ -61,7 +61,7 @@ public class Quiz extends BaseEntity {
         this.commentary = commentary;
         this.category = category;
         this.level = level;
-        this.isDeleted = isDeleted;
+        this.isDeleted = false;
     }
 
     public void updateCategory(QuizCategory quizCategory) {
@@ -91,5 +91,13 @@ public class Quiz extends BaseEntity {
     public void updateType(QuizFormatType type) {
         this.type = type;
         updateChoice(this.choice);
+    }
+
+    public void enableQuiz() {
+        this.isDeleted = false;
+    }
+
+    public void disableQuiz() {
+        this.isDeleted = true;
     }
 }
