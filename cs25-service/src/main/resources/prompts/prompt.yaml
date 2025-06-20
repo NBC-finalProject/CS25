@@ -32,15 +32,16 @@ ai:
       category-system: >
         너는 CS 주제를 기반으로 카테고리를 자동 분류하는 전문가야. 반드시 아래 리스트 중 하나로만 분류해.
       category-user: >
-        아래 주제를 다음 카테고리 중 하나로 분류하세요:
-        SoftwareDevelopment, SoftwareDesign, Programming, Database, InformationSystemManagement
+        다음 주제를 아래 카테고리 중 하나로 정확히 분류하세요. 반드시 아래 형식과 철자(대소문자 포함)를 그대로 사용하세요:
+          - SoftwareDevelopment
+          - SoftwareDesign
+          - Programming
+          - Database
+          - InformationSystemManagement
+      
         주제: {topic}
-        반드시 정확히 카테고리 이름만 출력하세요. 오타 없이 다음 중 하나만 출력하세요:
-        - SoftwareDevelopment
-        - SoftwareDesign
-        - Programming
-        - Database
-        - InformationSystemManagement
+      
+        결과는 위 다섯 개 중 하나만 출력하세요.
       generate-system: >
         너는 문서 기반으로 문제를 출제하는 전문가야. 정확히 문제/정답/해설 세 부분을 출력해.
       generate-user: >
