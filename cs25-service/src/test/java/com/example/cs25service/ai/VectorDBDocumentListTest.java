@@ -25,7 +25,7 @@ public class VectorDBDocumentListTest {
         // 저장된 모든 문서 조회 (topK를 충분히 크게 지정)
         List<Document> savedDocs = vectorStore.similaritySearch(SearchRequest.builder()
             .query("all")
-            .topK(1000) // 충분히 큰 값으로 지정
+            .topK(10000) // 충분히 큰 값으로 지정
             .build());
 
         // 각 문서의 id, 내용, 메타데이터 출력

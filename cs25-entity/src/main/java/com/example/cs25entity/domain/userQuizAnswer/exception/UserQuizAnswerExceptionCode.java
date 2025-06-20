@@ -13,6 +13,7 @@ public enum UserQuizAnswerExceptionCode {
     EVENT_CRUD_FAILED(false, HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 값을 레디스에 읽기/저장 실패했으요"),
     LOCK_FAILED(false, HttpStatus.CONFLICT, "요청 시간 초과, 락 획득 실패"),
     INVALID_EVENT(false, HttpStatus.BAD_REQUEST, "지금은 이벤트에 참여할 수 없어요"),
+    DUPLICATED_ANSWER(false, HttpStatus.BAD_REQUEST, "이미 제출한 문제입니다."),
     DUPLICATED_EVENT_ID(false, HttpStatus.BAD_REQUEST, "중복되는 이벤트 ID 입니다.");
 
     private final boolean isSuccess;
