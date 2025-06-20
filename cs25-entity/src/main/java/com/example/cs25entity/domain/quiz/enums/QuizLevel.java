@@ -1,9 +1,9 @@
 package com.example.cs25entity.domain.quiz.enums;
 
 public enum QuizLevel {
-    EASY(30),
-    NORMAL(50),
-    HARD(100);
+    EASY(3),
+    NORMAL(5),
+    HARD(10);
 
     private final int exp;
 

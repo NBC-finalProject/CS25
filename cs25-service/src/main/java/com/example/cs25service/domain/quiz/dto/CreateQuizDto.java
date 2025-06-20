@@ -3,13 +3,37 @@ package com.example.cs25service.domain.quiz.dto;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public record CreateQuizDto(
-    @NotBlank String question,
-    @NotBlank String choice,
-    @NotBlank String answer,
-    String commentary,
-    @NotBlank QuizCategory category,
-    @NotBlank QuizLevel level
-) {
+@Getter
+@NoArgsConstructor
+public class CreateQuizDto {
+    @NotBlank(message = "문제는 필수입니다.")
+    private String question;
+
+    private String choice; //객관식이 아니면 보기는 null
+
+    @NotBlank(message = "답안은 필수입니다.")
+    private String answer;
+
+    private String commentary; //해석이 없으면 null
+
+    @NotBlank(message = "카테고리 설정은 필수입니다.")
+    private QuizCategory category;
+
+    @NotBlank(message = "난이도 선택은 필수입니다.")
+    private QuizLevel level;
+
+    @Builder
+    public CreateQuizDto(String question, String choice, String answer, String commentary,
+        QuizCategory category, QuizLevel level) {
+        this.question = question;
+        this.choice = choice;
+        this.answer = answer;
+        this.commentary = commentary;
+        this.category = category;
+        this.level = level;
+    }
 }

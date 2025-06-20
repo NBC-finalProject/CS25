@@ -2,7 +2,7 @@ package com.example.cs25service.domain.quiz.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
-import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
@@ -57,7 +57,7 @@ public class QuizService {
                     throw new ConstraintViolationException("유효성 검증 실패", violations);
                 }
 
-                if (!childCategory.contains(dto.category())) {
+                if (!childCategory.contains(dto.getCategory())) {
                     throw new IllegalArgumentException("소분류 카테고리가 존재하지 않습니다.");
                 }
             }
@@ -65,12 +65,12 @@ public class QuizService {
             List<Quiz> quizzes = Arrays.stream(quizArray)
                 .map(dto -> Quiz.builder()
                     .type(formatType)
-                    .question(dto.question())
-                    .choice(dto.choice())
-                    .answer(dto.answer())
-                    .commentary(dto.commentary())
+                    .question(dto.getQuestion())
+                    .choice(dto.getChoice())
+                    .answer(dto.getAnswer())
+                    .commentary(dto.getCommentary())
                     .category(category)
-                    .level(dto.level())
+                    .level(dto.getLevel())
                     .isDeleted(true)
                     .build())
                 .toList();

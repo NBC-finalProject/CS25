@@ -1,6 +1,6 @@
 package com.example.cs25batch.batch.dto;
 
-import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,7 @@
 package com.example.cs25entity.domain.quiz.entity;
 
 import com.example.cs25common.global.entity.BaseEntity;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
