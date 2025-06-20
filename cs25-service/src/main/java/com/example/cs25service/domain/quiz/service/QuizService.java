@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.quiz.service;
 
-
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
@@ -8,7 +7,6 @@ import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
-import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,24 +32,33 @@ public class QuizService {
     private final Validator validator;
     private final QuizRepository quizRepository;
     private final QuizCategoryRepository quizCategoryRepository;
-    private final SubscriptionRepository subscriptionRepository;
 
     @Transactional
     public void uploadQuizJson(MultipartFile file, String categoryType,
         QuizFormatType formatType) {
         try {
+            //대분류 확인
             QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)
                 .orElseThrow(
                     () -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
 
+            //소분류 조회하기
+            List<QuizCategory> childCategory = category.getChildren();
+
+            //file 내용을 읽어 Dto 로 만들기
             CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(),
                 CreateQuizDto[].class);
 
+            //유효성 검증
             for (CreateQuizDto dto : quizArray) {
-                //유효성 검증에 실패한 데이터를 Set에 저장
+                //유효성 검증에 실패한 데이터를 Set 에 저장
                 Set<ConstraintViolation<CreateQuizDto>> violations = validator.validate(dto);
                 if (!violations.isEmpty()) {
                     throw new ConstraintViolationException("유효성 검증 실패", violations);
+                }
+
+                if (!childCategory.contains(dto.category())) {
+                    throw new IllegalArgumentException("소분류 카테고리가 존재하지 않습니다.");
                 }
             }
 
@@ -63,6 +70,8 @@ public class QuizService {
                     .answer(dto.answer())
                     .commentary(dto.commentary())
                     .category(category)
+                    .level(dto.level())
+                    .isDeleted(true)
                     .build())
                 .toList();
 

@@ -48,9 +48,11 @@ public class Quiz extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private QuizLevel level;
 
+    private boolean isDeleted;
+
     @Builder
     public Quiz(QuizFormatType type, String question, String answer, String commentary,
-        String choice, QuizCategory category, QuizLevel level) {
+        String choice, QuizCategory category, QuizLevel level, boolean isDeleted) {
         this.type = type;
         this.question = question;
         this.choice = choice;
@@ -58,5 +60,6 @@ public class Quiz extends BaseEntity {
         this.commentary = commentary;
         this.category = category;
         this.level = level;
+        this.isDeleted = isDeleted;
     }
 }
