@@ -1,5 +1,7 @@
 package com.example.cs25service.domain.subscription.service;
 
+import static com.example.cs25entity.domain.subscription.entity.Subscription.*;
+
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
@@ -16,7 +18,7 @@ import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
-import com.example.cs25service.domain.subscription.dto.SubscriptionRequest;
+import com.example.cs25service.domain.subscription.dto.SubscriptionRequestDto;
 import com.example.cs25service.domain.subscription.dto.SubscriptionResponseDto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,9 +54,12 @@ public class SubscriptionService {
         long period = ChronoUnit.DAYS.between(start, end);
 
         return SubscriptionInfoDto.builder()
-            .subscriptionType(Subscription.decodeDays(
-                subscription.getSubscriptionType()))
             .category(subscription.getCategory().getCategoryType())
+            .email(subscription.getEmail())
+            .days(decodeDays(subscription.getSubscriptionType()))
+            .active(subscription.isActive())
+            .startDate(subscription.getStartDate())
+            .endDate(subscription.getEndDate())
             .period(period)
             .build();
     }
@@ -66,7 +71,7 @@ public class SubscriptionService {
      */
     @Transactional
     public SubscriptionResponseDto createSubscription(
-        SubscriptionRequest request,
+        SubscriptionRequestDto request,
         AuthUser authUser) {
 
         // 퀴즈 카테고리 불러오기
@@ -149,14 +154,28 @@ public class SubscriptionService {
      * 구독정보를 업데이트하는 메서드
      *
      * @param subscriptionId 구독 아이디
-     * @param request        사용자로부터 받은 업데이트할 구독정보
+     * @param requestDto 사용자로부터 받은 업데이트할 구독정보
      */
     @Transactional
     public void updateSubscription(Long subscriptionId,
-        SubscriptionRequest request) {
+        SubscriptionRequestDto requestDto) {
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+        QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
+            requestDto.getCategory());
 
-        subscription.update(subscription);
+        LocalDate requestDate = subscription.getEndDate().plusMonths(requestDto.getPeriod().getMonths());
+        LocalDate maxSubscriptionDate = subscription.getStartDate().plusYears(1);
+        if(requestDate.isAfter(maxSubscriptionDate)){
+            throw new SubscriptionException(SubscriptionExceptionCode.ILLEGAL_SUBSCRIPTION_PERIOD_ERROR);
+        }
+
+        subscription.update(
+            quizCategory,
+            requestDto.getDays(),
+            requestDto.isActive(),
+            requestDto.getPeriod()
+        );
+
         createSubscriptionHistory(subscription);
     }
 

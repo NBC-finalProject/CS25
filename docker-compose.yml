@@ -3,8 +3,8 @@ services:
   cs25-service:
     container_name: cs25-service
     build:
-      context: ./cs25-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: cs25-service/Dockerfile
     env_file:
       - .env
     depends_on:
@@ -26,6 +26,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - chroma
     ports:
       - "8081:8080"
     networks:
