@@ -39,6 +39,7 @@ jobs:
           echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
           echo "CHROMA_HOST=${{ secrets.CHROMA_HOST }}" >> .env
+          echo "FRONT_END_URI=${{ secrets.FRONT_END_URI }}" >> .env
 
       - name: Clean EC2 target folder before upload
         uses: appleboy/ssh-action@v1.2.0
