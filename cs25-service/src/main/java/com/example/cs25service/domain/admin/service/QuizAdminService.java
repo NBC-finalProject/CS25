@@ -2,7 +2,7 @@ package com.example.cs25service.domain.admin.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
-import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;

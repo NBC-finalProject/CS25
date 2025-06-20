@@ -1,7 +1,6 @@
 package com.example.cs25service.domain.quiz.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
-import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
