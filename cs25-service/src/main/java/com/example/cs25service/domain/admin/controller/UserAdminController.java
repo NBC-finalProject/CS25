@@ -43,7 +43,7 @@ public class UserAdminController {
     }
 
     //DELETE	관리자 사용자(회원) 탈퇴	/admin/users/{userId}
-    @DeleteMapping("/{userId}/cancel")
+    @DeleteMapping("/{userId}")
     public ApiResponse<Void> disableUser(
         @Positive @PathVariable(name = "userId") Long userId
     ) {
