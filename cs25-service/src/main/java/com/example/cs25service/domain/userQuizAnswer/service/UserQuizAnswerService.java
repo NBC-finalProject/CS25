@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 public class UserQuizAnswerService {
 
     private final UserQuizAnswerRepository userQuizAnswerRepository;
-    private final UserQuizAnswerCustomRepository userQuizAnswerCustomRepository;
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
@@ -108,7 +107,7 @@ public class UserQuizAnswerService {
         Map<String, Double> rates = new HashMap<>();
         //유저가 푼 문제들 중, 소분류에 속하는 로그 다 가져와
         for(QuizCategory child : childCategories){
-            List<UserQuizAnswer> answers = userQuizAnswerCustomRepository.findByUserIdAndQuizCategoryId(userId, child.getId());
+            List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndQuizCategoryId(userId, child.getId());
 
             if (answers.isEmpty()) {
                 rates.put(child.getCategoryType(), 0.0);
