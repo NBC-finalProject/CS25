@@ -94,10 +94,10 @@ public class Quiz extends BaseEntity {
     }
 
     public void enableQuiz() {
-        this.isDeleted = true;
+        this.isDeleted = false;
     }
 
     public void disableQuiz() {
-        this.isDeleted = false;
+        this.isDeleted = true;
     }
 }

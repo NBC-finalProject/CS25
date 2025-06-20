@@ -132,6 +132,7 @@ public class UserAdminService {
         subscriptionService.updateSubscription(user.getSubscription().getId(), request);
     }
 
+    @Transactional
     public void cancelSubscription(@Positive Long userId) {
         User user = userRepository.findByIdOrElseThrow(userId);
 
