@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAdminController {
 
     private final UserAdminService userAdminService;
-    
+
     //GET	관리자 사용자(회원) 목록 조회	/admin/users
     @GetMapping
     public ApiResponse<Page<UserPageResponseDto>> getUserLists(
@@ -43,7 +43,7 @@ public class UserAdminController {
     }
 
     //DELETE	관리자 사용자(회원) 탈퇴	/admin/users/{userId}
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{userId}/cancel")
     public ApiResponse<Void> disableUser(
         @Positive @PathVariable(name = "userId") Long userId
     ) {
@@ -53,7 +53,7 @@ public class UserAdminController {
     }
 
     //PATCH	관리자 사용자(회원) 구독 상태 변경	/admin/users/{userId}/subscriptions
-    @PatchMapping("/{userId}")
+    @PatchMapping("/{userId}/subscriptions")
     public ApiResponse<String> updateAdminSubscription(
         @Positive @PathVariable(name = "userId") Long userId,
         @RequestBody @Valid SubscriptionRequestDto request
@@ -63,7 +63,7 @@ public class UserAdminController {
     }
 
     //DELETE	관리자 사용자(회원) 구독 취소 	/admin/users/{userId}/subscriptions
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{userId}/subscriptions")
     public ApiResponse<Void> cancelSubscription(
         @Positive @PathVariable(name = "userId") Long userId
     ) {

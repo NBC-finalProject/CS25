@@ -39,7 +39,7 @@ public class UserAdminService {
     public Page<UserPageResponseDto> getAdminUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<User> userPage = userRepository.findAllOrderById(pageable);
+        Page<User> userPage = userRepository.findAllByOrderByIdAsc(pageable);
 
         return userPage.map(user ->
             UserPageResponseDto.builder()
@@ -66,33 +66,43 @@ public class UserAdminService {
             .build();
 
         Subscription subscription = user.getSubscription();
-        //구독 시작, 구독 종료 날짜 기반으로 구독 기간 계산
-        LocalDate start = subscription.getStartDate();
-        LocalDate end = subscription.getEndDate();
-        long period = ChronoUnit.DAYS.between(start, end);
 
-        SubscriptionInfoDto subscriptionInfo = SubscriptionInfoDto.builder()
-            .category(subscription.getCategory().getCategoryType())
-            .email(subscription.getEmail())
-            .days(decodeDays(subscription.getSubscriptionType()))
-            .active(subscription.isActive())
-            .startDate(subscription.getStartDate())
-            .endDate(subscription.getEndDate())
-            .period(period)
-            .build();
+        if (subscription == null) {
+            return UserDetailResponseDto.builder()
+                .subscriptionInfo(null)
+                .subscriptionLog(null)
+                .userInfo(userInfo)
+                .build();
+        } else {
 
-        //로그 다 모아와서 리스트로 만들기
-        List<SubscriptionHistory> subLogs = subscriptionHistoryRepository
-            .findAllBySubscriptionId(subscription.getId());
-        List<SubscriptionHistoryDto> dtoList = subLogs.stream()
-            .map(SubscriptionHistoryDto::fromEntity)
-            .toList();
+            //구독 시작, 구독 종료 날짜 기반으로 구독 기간 계산
+            LocalDate start = subscription.getStartDate();
+            LocalDate end = subscription.getEndDate();
+            long period = ChronoUnit.DAYS.between(start, end);
 
-        return UserDetailResponseDto.builder()
-            .subscriptionInfo(subscriptionInfo)
-            .subscriptionLog(dtoList)
-            .userInfo(userInfo)
-            .build();
+            SubscriptionInfoDto subscriptionInfo = SubscriptionInfoDto.builder()
+                .category(subscription.getCategory().getCategoryType())
+                .email(subscription.getEmail())
+                .days(decodeDays(subscription.getSubscriptionType()))
+                .active(subscription.isActive())
+                .startDate(subscription.getStartDate())
+                .endDate(subscription.getEndDate())
+                .period(period)
+                .build();
+
+            //로그 다 모아와서 리스트로 만들기
+            List<SubscriptionHistory> subLogs = subscriptionHistoryRepository
+                .findAllBySubscriptionId(subscription.getId());
+            List<SubscriptionHistoryDto> dtoList = subLogs.stream()
+                .map(SubscriptionHistoryDto::fromEntity)
+                .toList();
+
+            return UserDetailResponseDto.builder()
+                .subscriptionInfo(subscriptionInfo)
+                .subscriptionLog(dtoList)
+                .userInfo(userInfo)
+                .build();
+        }
     }
 
     @Transactional

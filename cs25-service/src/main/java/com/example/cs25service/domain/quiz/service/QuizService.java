@@ -85,7 +85,6 @@ public class QuizService {
                         .commentary(dto.getCommentary())
                         .category(subCategory)
                         .level(dto.getLevel())
-                        .isDeleted(true)
                         .build();
                 })
                 .toList();
