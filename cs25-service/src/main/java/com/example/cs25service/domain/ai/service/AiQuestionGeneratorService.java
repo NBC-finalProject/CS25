@@ -70,7 +70,9 @@ public class AiQuestionGeneratorService {
             .trim()
             .toUpperCase();
 
-        if (!categoryType.equals("BACKEND") && !categoryType.equals("FRONTEND")) {
+        if (!categoryType.equals("SoftwareDevelopment") && !categoryType.equals("SoftwareDesign")
+            && !categoryType.equals("Programming") && !categoryType.equals("Database")
+            && !categoryType.equals("InformationSystemManagement") ) {
             throw new IllegalArgumentException("AI가 반환한 카테고리가 유효하지 않습니다: " + categoryType);
         }
 
