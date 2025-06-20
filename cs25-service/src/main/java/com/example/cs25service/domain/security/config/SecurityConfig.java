@@ -76,6 +76,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
                 .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
                 .requestMatchers(HttpMethod.POST, "/auth/**").hasAnyRole(PERMITTED_ROLES)
+                .requestMatchers("/admin/**").hasRole("ADMIN")
 
                 .anyRequest().permitAll()
             )

@@ -63,4 +63,33 @@ public class Quiz extends BaseEntity {
         this.level = level;
         this.isDeleted = isDeleted;
     }
+
+    public void updateCategory(QuizCategory quizCategory) {
+        this.category = quizCategory;
+    }
+
+    public void updateChoice(String choice) {
+        if (this.type == QuizFormatType.MULTIPLE_CHOICE) {
+            this.choice = choice;
+        } else {
+            this.choice = null;
+        }
+    }
+
+    public void updateQuestion(String question) {
+        this.question = question;
+    }
+
+    public void updateAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public void updateCommentary(String commentary) {
+        this.commentary = commentary;
+    }
+
+    public void updateType(QuizFormatType type) {
+        this.type = type;
+        updateChoice(this.choice);
+    }
 }
