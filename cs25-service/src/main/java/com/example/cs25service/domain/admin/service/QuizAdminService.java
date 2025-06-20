@@ -122,15 +122,11 @@ public class QuizAdminService {
             QuizFormatType newType = requestDto.getQuizType();
 
             if (newType == QuizFormatType.MULTIPLE_CHOICE) {
-                if (!StringUtils.hasText(requestDto.getChoice()) || !StringUtils.hasText(
-                    requestDto.getAnswer())) {
-                    throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
+                if (!StringUtils.hasText(requestDto.getChoice())) {
+                    throw new QuizException(QuizExceptionCode.MULTIPLE_CHOICE_REQUIRE_ERROR);
                 }
                 quiz.updateChoice(requestDto.getChoice());
-            } else {
-                quiz.updateChoice(null); // 주관식으로 변경되는 경우 choice 제거
             }
-
             quiz.updateType(newType);
         } else {
             // 타입이 안 바뀌었더라도 choice 수정이 들어왔는지 체크
@@ -149,13 +145,13 @@ public class QuizAdminService {
             .category(quiz.getCategory().getCategoryType()) // enum to string
             .createdAt(quiz.getCreatedAt())
             .updatedAt(quiz.getUpdatedAt())
-            .solvedCnt(0L) // 필요 시 따로 조회
+            .solvedCnt(quizAnswerRepository.countByQuizId(quiz.getId())) // 필요 시 따로 조회
             .build();
     }
 
     //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
     @Transactional
     public void deleteQuiz(@Positive Long quizId) {
-        
+
     }
 }

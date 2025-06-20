@@ -81,7 +81,6 @@ public class Quiz extends BaseEntity {
 
     public void updateType(QuizFormatType type) {
         this.type = type;
+        updateChoice(this.choice);
     }
-
-
 }

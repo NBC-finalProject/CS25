@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     //@Value("${FRONT_END_URI:http://localhost:5173}")
     private String frontEndUri = "http://localhost:8080";
+
+    @Value("${jwt.access-token-expiration}")
+    private long accessTokenExpiration;
+
+    @Value("${jwt.refresh-token-expiration}")
+    private long refreshTokenExpiration;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -49,7 +56,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .httpOnly(true)
                 .secure(true) // HTTPS가 아닐 경우 false
                 .path("/")
-                .maxAge(Duration.ofMinutes(30)) // 원하는 만료 시간
+                .maxAge(Duration.ofMillis(accessTokenExpiration)) // 원하는 만료 시간
                 .sameSite("None") // 필요에 따라 "Lax", "None"
                 .build();
 
@@ -58,7 +65,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(Duration.ofDays(7)) // 원하는 만료 시간
+                .maxAge(Duration.ofMillis(refreshTokenExpiration)) // 원하는 만료 시간
                 .sameSite("None")
                 .build();
 

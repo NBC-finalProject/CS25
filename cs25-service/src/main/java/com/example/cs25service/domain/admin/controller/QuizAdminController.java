@@ -52,7 +52,7 @@ public class QuizAdminController {
     }
 
     //PATCH	관리자 문제 수정	/admin/quizzes/{quizId}
-    @PatchMapping("{quizId}")
+    @PatchMapping("/{quizId}")
     public ApiResponse<QuizDetailDto> updateQuiz(
         @Positive @PathVariable(name = "quizId") Long quizId,
         @RequestBody QuizUpdateRequestDto requestDto
@@ -61,7 +61,7 @@ public class QuizAdminController {
     }
 
     //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
-    @DeleteMapping("{quizId}")
+    @DeleteMapping("/{quizId}")
     public ApiResponse<Void> deleteQuiz(
         @Positive @PathVariable(name = "quizId") Long quizId
     ) {
