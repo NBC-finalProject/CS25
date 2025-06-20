@@ -14,8 +14,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT u FROM User u JOIN FETCH u.subscription WHERE u.email = :email")
     Optional<User> findByEmail(String email);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.subscription WHERE u.email = :email")
+    Optional<User> findUserWithSubscriptionByEmail(String email);
 
     default void validateSocialJoinEmail(String email, SocialType socialType) {
         findByEmail(email).ifPresent(existingUser -> {
