@@ -1,6 +1,6 @@
 package com.example.cs25service.domain.subscription.service;
 
-import static com.example.cs25entity.domain.subscription.entity.Subscription.*;
+import static com.example.cs25entity.domain.subscription.entity.Subscription.decodeDays;
 
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
@@ -98,6 +98,7 @@ public class SubscriptionService {
                         .build()
                 );
                 createSubscriptionHistory(subscription);
+                user.updateSubscription(subscription);
                 return new SubscriptionResponseDto(
                     subscription.getId(),
                     subscription.getCategory(),
@@ -147,7 +148,7 @@ public class SubscriptionService {
      * 구독정보를 업데이트하는 메서드
      *
      * @param subscriptionId 구독 아이디
-     * @param requestDto 사용자로부터 받은 업데이트할 구독정보
+     * @param requestDto     사용자로부터 받은 업데이트할 구독정보
      */
     @Transactional
     public void updateSubscription(Long subscriptionId,
@@ -156,10 +157,12 @@ public class SubscriptionService {
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             requestDto.getCategory());
 
-        LocalDate requestDate = subscription.getEndDate().plusMonths(requestDto.getPeriod().getMonths());
+        LocalDate requestDate = subscription.getEndDate()
+            .plusMonths(requestDto.getPeriod().getMonths());
         LocalDate maxSubscriptionDate = subscription.getStartDate().plusYears(1);
-        if(requestDate.isAfter(maxSubscriptionDate)){
-            throw new SubscriptionException(SubscriptionExceptionCode.ILLEGAL_SUBSCRIPTION_PERIOD_ERROR);
+        if (requestDate.isAfter(maxSubscriptionDate)) {
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.ILLEGAL_SUBSCRIPTION_PERIOD_ERROR);
         }
 
         subscription.update(
