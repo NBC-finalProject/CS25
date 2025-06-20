@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.ai.prompt;
 
-
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25service.domain.ai.config.AiPromptProperties;
@@ -15,6 +14,15 @@ import org.springframework.stereotype.Component;
 public class AiPromptProvider {
 
     private final AiPromptProperties props;
+
+    // === [Keyword] ===
+    public String getKeywordSystem() {
+        return props.getKeyword().getSystem();
+    }
+
+    public String getKeywordUser() {
+        return props.getKeyword().getUser();
+    }
 
     // === [Feedback] ===
     public String getFeedbackSystem() {

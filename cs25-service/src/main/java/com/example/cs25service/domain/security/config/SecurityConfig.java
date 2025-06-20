@@ -17,7 +17,10 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +30,22 @@ public class SecurityConfig {
     private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    
+    @Value("${FRONT_END_URI:http://localhost:5173}")
+    private String frontEndUri;
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin(frontEndUri);
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
@@ -34,6 +53,10 @@ public class SecurityConfig {
         return http
 
             .httpBasic(HttpBasicConfigurer::disable)
+
+            // CORS 설정
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
             // 모든 요청에 대해 보안 정책을 적용함 (securityMatcher 선택적)
             .securityMatcher((request -> true))
 

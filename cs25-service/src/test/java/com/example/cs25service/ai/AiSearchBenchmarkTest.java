@@ -50,15 +50,29 @@ public class AiSearchBenchmarkTest {
         // 정답 문서 집합 (실제 파일명으로 지정)
         groundTruth = Map.of(
             "Spring", Set.of(
-                ("249387ff-8136-4c87-a4a5-3b3effa2b2b8"), // Web-Spring-Spring MVC.txt
-                ("8ced8aaa-b171-4bea-a75b-d209b2cfdaa5"),
-                // Web-Spring-[Spring Boot] SpringApplication.txt
-                ("b0465385-62c2-4483-9c7f-74eb77e53fab"), // Web-Spring-JPA.txt
-                ("cfb8169c-600d-405e-adfd-4972b4f670f7"), // Web-Spring-[Spring Boot] Test Code.txt
-                ("a5567f5a-6c1d-40da-af97-0ae262e680a5"), // Web-Spring-[Spring] Bean Scope.txt
-                ("8e79a167-6909-4e10-a4d7-be87c07079c5"),
+                "Web-Spring-Spring MVC.txt_chunk1",
+                        "Web-Spring-Spring MVC.txt_chunk2", // Web-Spring-Spring MVC.txt
+                "Web-Spring-[Spring Boot] SpringApplication.txt_chunk0",
+                        "Web-Spring-[Spring Boot] SpringApplication.txt_chunk1", // Web-Spring-[Spring Boot] SpringApplication.txt
+                "Web-Spring-JPA.txt_chunk0",
+                        "Web-Spring-JPA.txt_chunk1",
+                        "Web-Spring-JPA.txt_chunk2",
+                        "Web-Spring-JPA.txt_chunk3",// Web-Spring-JPA.txt
+                "Web-Spring-[Spring Boot] Test Code.txt_chunk0",
+                        "Web-Spring-[Spring Boot] Test Code.txt_chunk1",
+                        "Web-Spring-[Spring Boot] Test Code.txt_chunk2",// Web-Spring-[Spring Boot] Test Code.txt
+                "Web-Spring-[Spring] Bean Scope.txt_chunk0",
+                        "Web-Spring-[Spring] Bean Scope.txt_chunk2",
+                        "Web-Spring-[Spring] Bean Scope.txt_chunk3",// Web-Spring-[Spring] Bean Scope.txt
+                "Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt_chunk2",
+                        "Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt_chunk3",
+                        "Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt_chunk4",
                 // Web-Spring-[Spring Data JPA] 더티 체킹 (Dirty Checking).txt
-                ("8dfffd84-247d-4d1e-abc3-0326c515d895")
+                "Web-Spring-Spring Security - Authentication and Authorization.txt_chunk4",
+                        "Web-Spring-Spring Security - Authentication and Authorization.txt_chunk1",
+                        "Web-Spring-Spring Security - Authentication and Authorization.txt_chunk2",
+                        "Web-Spring-Spring Security - Authentication and Authorization.txt_chunk3",
+                        "Web-Spring-Spring Security - Authentication and Authorization.txt_chunk5"
                 // Web-Spring-Spring Security - Authentication and Authorization.txt
             )
         );
@@ -83,8 +97,8 @@ public class AiSearchBenchmarkTest {
 
     @Test
     public void benchmarkSearch() throws Exception {
-        int[] topKs = {10, 20, 30};
-        double[] thresholds = {0.5, 0.7, 0.9};
+        int[] topKs = {5, 10, 20, 30};
+        double[] thresholds = {0.1, 0.3, 0.5, 0.7, 0.9};
 
         try (PrintWriter writer = new PrintWriter("spring_benchmark_results.csv")) {
             writer.println("query,topK,threshold,result_count,elapsed_ms,precision,recall");
