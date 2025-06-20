@@ -40,7 +40,7 @@ public interface QuizCategoryRepository extends JpaRepository<QuizCategory, Long
     @Query("SELECT q.id FROM QuizCategory q")
     List<Long> selectAllCategoryId();
 
-    @Query("SELECT sc.categoryType FROM User u " +
+    @Query("SELECT sc FROM User u " +
         "JOIN u.subscription s " +
         "JOIN s.category sc " +
         "WHERE u.id = :userId")

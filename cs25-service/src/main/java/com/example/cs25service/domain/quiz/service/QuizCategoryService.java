@@ -42,7 +42,7 @@ public class QuizCategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> getQuizCategoryList() {
+    public List<String> getParentQuizCategoryList() {
         return quizCategoryRepository.findByParentIdIsNull() //대분류만 찾아오도록 변경
             .stream().map(QuizCategory::getCategoryType
             ).toList();

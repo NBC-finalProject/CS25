@@ -18,10 +18,9 @@ public class QuizCategoryController {
 
     private final QuizCategoryService quizCategoryService;
 
-    //여기다
     @GetMapping("/quiz-categories")
     public ApiResponse<List<String>> getQuizCategories() {
-        return new ApiResponse<>(200, quizCategoryService.getQuizCategoryList());
+        return new ApiResponse<>(200, quizCategoryService.getParentQuizCategoryList());
     }
 
     @PostMapping("/quiz-categories")

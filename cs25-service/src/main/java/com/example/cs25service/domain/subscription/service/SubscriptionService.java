@@ -85,6 +85,7 @@ public class SubscriptionService {
 
         // 로그인 한 경우
         if (authUser != null) {
+            System.out.println("user : " + authUser.getEmail());
             User user = userRepository.findByEmail(authUser.getEmail()).orElseThrow(
                 () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
             );
@@ -107,7 +108,7 @@ public class SubscriptionService {
                 createSubscriptionHistory(subscription);
                 return new SubscriptionResponseDto(
                     subscription.getId(),
-                    subscription.getCategory(),
+                    subscription.getCategory().getCategoryType(),
                     subscription.getStartDate(),
                     subscription.getEndDate(),
                     subscription.getSubscriptionType()
@@ -137,7 +138,7 @@ public class SubscriptionService {
                 createSubscriptionHistory(subscription);
                 return new SubscriptionResponseDto(
                     subscription.getId(),
-                    subscription.getCategory(),
+                    subscription.getCategory().getCategoryType(),
                     subscription.getStartDate(),
                     subscription.getEndDate(),
                     subscription.getSubscriptionType()

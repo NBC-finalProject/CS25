@@ -16,7 +16,10 @@ import jakarta.validation.Validator;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -56,23 +59,35 @@ public class QuizService {
                 if (!violations.isEmpty()) {
                     throw new ConstraintViolationException("유효성 검증 실패", violations);
                 }
-
-                if (!childCategory.contains(dto.getCategory())) {
-                    throw new IllegalArgumentException("소분류 카테고리가 존재하지 않습니다.");
-                }
             }
 
+            // 1. 소분류 카테고리 맵으로 변환
+            Map<String, QuizCategory> categoryMap = childCategory.stream()
+                .collect(Collectors.toMap(
+                    QuizCategory::getCategoryType,
+                    Function.identity()
+                ));
+
+            // 2. 퀴즈 DTO → 엔티티로 변환
             List<Quiz> quizzes = Arrays.stream(quizArray)
-                .map(dto -> Quiz.builder()
-                    .type(formatType)
-                    .question(dto.getQuestion())
-                    .choice(dto.getChoice())
-                    .answer(dto.getAnswer())
-                    .commentary(dto.getCommentary())
-                    .category(category)
-                    .level(dto.getLevel())
-                    .isDeleted(true)
-                    .build())
+                .map(dto -> {
+                    QuizCategory subCategory = categoryMap.get(dto.getCategory());
+                    if (subCategory == null) {
+                        throw new IllegalArgumentException(
+                            "소분류 카테고리가 존재하지 않습니다: " + dto.getCategory());
+                    }
+
+                    return Quiz.builder()
+                        .type(formatType)
+                        .question(dto.getQuestion())
+                        .choice(dto.getChoice())
+                        .answer(dto.getAnswer())
+                        .commentary(dto.getCommentary())
+                        .category(subCategory)
+                        .level(dto.getLevel())
+                        .isDeleted(true)
+                        .build();
+                })
                 .toList();
 
             quizRepository.saveAll(quizzes);

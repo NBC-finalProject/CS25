@@ -72,14 +72,13 @@ public class TodayQuizService {
 
     @Transactional
     public Quiz getTodayQuizBySubscription(Subscription subscription) {
-        //대분류 및 중분류 탐색
+        //대분류 및 소분류 탐색
         List<QuizCategory> childCategories = subscription.getCategory().getChildren();
         List<Long> categoryIds = childCategories.stream()
             .map(QuizCategory::getId)
-            .toList();
+            .collect(Collectors.toList());
 
         categoryIds.add(subscription.getCategory().getId());
-
 
         //id 순으로 정렬
         List<Quiz> quizList = quizRepository.findAllByCategoryIdIn(categoryIds)
@@ -87,6 +86,7 @@ public class TodayQuizService {
             .sorted(Comparator.comparing(Quiz::getId))  // id 순으로 정렬
             .toList();
 
+        System.out.println("문제 개수 : " +  quizList.size());
         if (quizList.isEmpty()) {
             throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
         }
