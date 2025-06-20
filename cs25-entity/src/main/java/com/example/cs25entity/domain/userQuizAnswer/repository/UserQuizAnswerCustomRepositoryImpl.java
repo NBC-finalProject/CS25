@@ -1,5 +1,6 @@
 package com.example.cs25entity.domain.userQuizAnswer.repository;
 
+import com.example.cs25entity.domain.quiz.entity.QQuiz;
 import com.example.cs25entity.domain.quiz.entity.QQuizCategory;
 import com.example.cs25entity.domain.subscription.entity.QSubscription;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
@@ -48,4 +49,22 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             .where(userQuizAnswer.quiz.id.eq(quizId))
             .fetch();
     }
+
+    @Override
+    public List<UserQuizAnswer> findByUserIdAndQuizCategoryId(Long userId, Long quizCategoryId){
+        QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
+        QQuiz quiz = QQuiz.quiz;
+        QQuizCategory category = QQuizCategory.quizCategory;
+
+        return queryFactory
+            .selectFrom(answer)
+            .join(answer.quiz, quiz)
+            .join(quiz.category, category)
+            .where(
+                answer.user.id.eq(userId),
+                category.id.eq(quizCategoryId)
+            )
+            .fetch();
+    }
+
 }

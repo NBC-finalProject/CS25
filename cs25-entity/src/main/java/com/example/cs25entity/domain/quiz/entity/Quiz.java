@@ -1,6 +1,8 @@
 package com.example.cs25entity.domain.quiz.entity;
 
 import com.example.cs25common.global.entity.BaseEntity;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,15 +46,22 @@ public class Quiz extends BaseEntity {
     @JoinColumn(name = "quiz_category_id")
     private QuizCategory category;
 
+    @Enumerated(EnumType.STRING)
+    private QuizLevel level;
+
+    private boolean isDeleted;
+
     @Builder
     public Quiz(QuizFormatType type, String question, String answer, String commentary,
-        String choice, QuizCategory category) {
+        String choice, QuizCategory category, QuizLevel level, boolean isDeleted) {
         this.type = type;
         this.question = question;
         this.choice = choice;
         this.answer = answer;
         this.commentary = commentary;
         this.category = category;
+        this.level = level;
+        this.isDeleted = isDeleted;
     }
 
     public void updateCategory(QuizCategory quizCategory) {

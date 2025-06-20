@@ -21,14 +21,14 @@ public class VerificationController {
     @PostMapping()
     public ApiResponse<String> issueVerificationCodeByEmail(
         @Valid @RequestBody VerificationIssueRequest request) {
-        verificationService.issue(request.email());
+        verificationService.issue(request.getEmail());
         return new ApiResponse<>(200, "인증코드가 발급되었습니다.");
     }
 
     @PostMapping("/verify")
     public ApiResponse<String> verifyVerificationCode(
         @Valid @RequestBody VerificationVerifyRequest request) {
-        verificationService.verify(request.email(), request.code());
+        verificationService.verify(request.getEmail(), request.getCode());
         return new ApiResponse<>(200, "인증 성공");
     }
 }

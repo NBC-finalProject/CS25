@@ -20,8 +20,8 @@ public class CrawlerController {
         @Valid @RequestBody CreateDocumentRequest request
     ) {
         try {
-            crawlerService.crawlingGithubDocument(request.link());
-            return new ApiResponse<>(200, request.link() + " 크롤링 성공");
+            crawlerService.crawlingGithubDocument(request.getLink());
+            return new ApiResponse<>(200, request.getLink() + " 크롤링 성공");
         } catch (IllegalArgumentException e) {
             return new ApiResponse<>(400, "잘못된 GitHub URL: " + e.getMessage());
         } catch (Exception e) {
