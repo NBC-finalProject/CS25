@@ -34,4 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     default User findByIdOrElseThrow(Long id){
         return findById(id).orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
     }
+
+    @Query("SELECT COUNT(u) + 1 FROM User u WHERE u.score > :score")
+    int findRankByScore(double score);
 }
