@@ -20,7 +20,7 @@ public class MailWriter implements ItemWriter<MailDto> {
         for (MailDto mail : items) {
             try {
                 //long start = System.currentTimeMillis();
-                mailService.sendQuizEmail(mail.subscription(), mail.quiz());
+                mailService.sendQuizEmail(mail.getSubscription(), mail.getQuiz());
                 //long end = System.currentTimeMillis();
                 //log.info("[6. 메일 발송] email : {}ms", end - start);
 

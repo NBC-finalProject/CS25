@@ -12,7 +12,8 @@ public enum UserExceptionCode {
     LOCK_FAILED(false, HttpStatus.CONFLICT, "요청 시간 초과, 락 획득 실패"),
     INVALID_ROLE(false, HttpStatus.BAD_REQUEST, "역할 값이 잘못되었습니다."),
     TOKEN_NOT_MATCHED(false, HttpStatus.BAD_REQUEST, "유효한 리프레시 토큰 값이 아닙니다."),
-    NOT_FOUND_USER(false, HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다.");
+    NOT_FOUND_USER(false, HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
+    INACTIVE_USER(false, HttpStatus.BAD_REQUEST, "이미 삭제된 유저입니다.");
 
     private final boolean isSuccess;
     private final HttpStatus httpStatus;

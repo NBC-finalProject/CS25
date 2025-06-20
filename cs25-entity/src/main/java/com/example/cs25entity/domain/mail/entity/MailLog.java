@@ -38,7 +38,7 @@ public class MailLog {
 
     private LocalDateTime sendDate;
 
-    //@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private MailStatus status;
 
     /**

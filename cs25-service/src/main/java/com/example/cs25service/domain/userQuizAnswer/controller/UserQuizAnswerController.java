@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.userQuizAnswer.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
 import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25service.domain.userQuizAnswer.service.UserQuizAnswerService;
@@ -20,19 +21,23 @@ public class UserQuizAnswerController {
     private final UserQuizAnswerService userQuizAnswerService;
 
     @PostMapping("/{quizId}")
-    public ApiResponse<String> answerSubmit(
+    public ApiResponse<Long> answerSubmit(
         @PathVariable("quizId") Long quizId,
         @RequestBody UserQuizAnswerRequestDto requestDto
     ) {
-
-        userQuizAnswerService.answerSubmit(quizId, requestDto);
-
-        return new ApiResponse<>(200, "답안이 제출 되었습니다.");
+        return new ApiResponse<>(200, userQuizAnswerService.answerSubmit(quizId, requestDto));
     }
 
     @GetMapping("/{quizId}/select-rate")
     public ApiResponse<SelectionRateResponseDto> getSelectionRateByOption(
         @PathVariable Long quizId) {
         return new ApiResponse<>(200, userQuizAnswerService.getSelectionRateByOption(quizId));
+    }
+
+    @GetMapping("/{userId}/correct-rate")
+    public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
+        @PathVariable Long userId
+    ){
+        return new ApiResponse<>(200, userQuizAnswerService.getUserQuizAnswerCorrectRate(userId));
     }
 }
