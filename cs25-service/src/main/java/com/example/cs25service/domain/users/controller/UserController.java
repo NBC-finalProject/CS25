@@ -2,11 +2,9 @@ package com.example.cs25service.domain.users.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25service.domain.security.dto.AuthUser;
-import com.example.cs25service.domain.users.dto.UserProfileResponse;
 import com.example.cs25service.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,13 +24,6 @@ public class UserController {
 //        response.sendRedirect("/login");
 //        return ResponseEntity.status(HttpStatus.FOUND).build();
 //    }
-
-    @GetMapping("/users/profile")
-    public ApiResponse<UserProfileResponse> getUserProfile(
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        return new ApiResponse<>(200, userService.getUserProfile(authUser));
-    }
 
     @PatchMapping("/users")
     public ApiResponse<Void> deleteUser(

@@ -38,6 +38,8 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private double score = 0;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
@@ -49,12 +51,13 @@ public class User extends BaseEntity {
      * @param name  the user's name
      */
     @Builder
-    public User(String email, String name, SocialType socialType, Role role,
+    public User(String email, String name, SocialType socialType, Role role, double score,
         Subscription subscription) {
         this.email = email;
         this.name = name;
         this.socialType = socialType;
         this.role = role;
+        this.score = score;
         this.subscription = subscription;
     }
 
@@ -86,5 +89,9 @@ public class User extends BaseEntity {
 
     public void updateSubscription(Subscription subscription) {
         this.subscription = subscription;
+    }
+
+    public void updateScore(double score) {
+        this.score = score;
     }
 }

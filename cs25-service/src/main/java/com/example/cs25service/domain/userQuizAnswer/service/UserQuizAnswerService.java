@@ -63,6 +63,16 @@ public class UserQuizAnswerService {
         // 정답 체크
         boolean isCorrect = requestDto.getAnswer().equals(quiz.getAnswer().substring(0, 1));
 
+        double score;
+
+        if(isCorrect){
+            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
+        }else{
+            score = user.getScore() + 1;
+        }
+
+        user.updateScore(score);
+
         UserQuizAnswer answer = userQuizAnswerRepository.save(
             UserQuizAnswer.builder()
                 .userAnswer(requestDto.getAnswer())

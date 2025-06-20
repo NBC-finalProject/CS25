@@ -38,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     }
 
     Page<User> findAllByOrderByIdAsc(Pageable pageable);
+
+    @Query("SELECT COUNT(u) + 1 FROM User u WHERE u.score > :score")
+    int findRankByScore(double score);
 }
