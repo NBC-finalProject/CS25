@@ -25,6 +25,15 @@ public class AiQuestionGeneratorService {
     private final RagService ragService;
     private final AiPromptProvider promptProvider;
 
+    /**
+     * Generates a new subjective quiz question using AI-driven keyword generation, document retrieval, topic extraction, and category classification.
+     *
+     * The method performs the following steps: generates a computer science keyword via AI, retrieves relevant documents, extracts a central topic, classifies the topic into a predefined category, generates a quiz question with answer and commentary, and saves the resulting quiz to the database.
+     *
+     * @return the newly created and persisted Quiz entity
+     * @throws IllegalStateException if the AI-generated keyword or retrieved documents are empty
+     * @throws IllegalArgumentException if the AI-generated category is not one of the allowed categories
+     */
     @Transactional
     public Quiz generateQuestionFromContext() {
         // 1. LLM으로부터 CS 키워드 동적 생성
