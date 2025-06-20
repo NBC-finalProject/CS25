@@ -101,7 +101,7 @@ public class UserQuizAnswerService {
         //유저 검증
         User user = userRepository.findByIdOrElseThrow(userId);
         if(!user.isActive()){
-            throw new UserException(UserExceptionCode.NOT_FOUND_USER);
+            throw new UserException(UserExceptionCode.INACTIVE_USER);
         }
 
         //유저 Id에 따른 구독 정보의 대분류 카테고리 조회

@@ -86,7 +86,6 @@ public class TodayQuizService {
             .sorted(Comparator.comparing(Quiz::getId))  // id 순으로 정렬
             .toList();
 
-        System.out.println("문제 개수 : " +  quizList.size());
         if (quizList.isEmpty()) {
             throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
         }

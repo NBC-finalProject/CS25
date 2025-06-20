@@ -21,7 +21,7 @@ public class CreateQuizDto {
 
     private String commentary; //해석이 없으면 null
 
-    @NotNull(message = "카테고리 설정은 필수입니다.")
+    @NotBlank(message = "카테고리 설정은 필수입니다.")
     private String category;
 
     @NotNull(message = "난이도 선택은 필수입니다.")
