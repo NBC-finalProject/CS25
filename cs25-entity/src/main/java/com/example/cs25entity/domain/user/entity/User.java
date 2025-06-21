@@ -79,10 +79,6 @@ public class User extends BaseEntity {
         this.name = name;
     }
 
-    public void updateActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public void updateDisableUser() {
         this.isActive = false;
     }

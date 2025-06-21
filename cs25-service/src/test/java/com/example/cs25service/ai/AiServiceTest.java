@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
@@ -51,18 +52,18 @@ class AiServiceTest {
     @BeforeEach
     void setUp() {
         // 카테고리 생성
-        QuizCategory quizCategory = new QuizCategory(null, "BACKEND");
+        QuizCategory quizCategory = new QuizCategory("BACKEND", null);
         em.persist(quizCategory);
 
         // 퀴즈 생성
         quiz = new Quiz(
-            null,
             QuizFormatType.SUBJECTIVE,
             "HTTP와 HTTPS의 차이점을 설명하세요.",
             "HTTPS는 암호화, HTTP는 암호화X",
             "HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.",
             null,
-            quizCategory
+            quizCategory,
+            QuizLevel.EASY
         );
         quizRepository.save(quiz);
 

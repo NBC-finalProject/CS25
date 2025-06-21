@@ -79,15 +79,16 @@ public class SubscriptionService {
             request.getCategory());
 
         //퀴즈 카테고리가 대분류인지 검증
-        if(!quizCategory.isParentCategory()){
+        if (!quizCategory.isParentCategory()) {
             throw new QuizException(QuizExceptionCode.PARENT_CATEGORY_REQUIRED_ERROR);
         }
 
         // 로그인 한 경우
         if (authUser != null) {
-            User user = userRepository.findUserWithSubscriptionByEmail(authUser.getEmail()).orElseThrow(
-                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-            );
+            User user = userRepository.findUserWithSubscriptionByEmail(authUser.getEmail())
+                .orElseThrow(
+                    () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
+                );
 
             // TODO: 로그인을 해도 이메일 체크를 해야할까?
             // this.checkEmail(user.getEmail());
@@ -191,7 +192,7 @@ public class SubscriptionService {
     public void cancelSubscription(Long subscriptionId) {
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
-        subscription.cancel();
+        subscription.updateDisable();
         createSubscriptionHistory(subscription);
     }
 
