@@ -99,6 +99,7 @@ public class ProfileService {
         );
     }
 
+    //유저의 소분류 카테고리별 정답률 조회
     public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(Long userId){
         //유저 검증
         User user = userRepository.findByIdOrElseThrow(userId);
@@ -109,7 +110,7 @@ public class ProfileService {
         //유저 Id에 따른 구독 정보의 대분류 카테고리 조회
         QuizCategory parentCategory = quizCategoryRepository.findQuizCategoryByUserId(userId);
 
-        //소분류 조회
+        //소분류 조회 -> getChildren()에서 실제 childCategories를 조회해오기 때문에 아래에서 이를 사용할 때 N+1 문제가 발생하지 않음
         List<QuizCategory> childCategories = parentCategory.getChildren();
 
         Map<String, Double> rates = new HashMap<>();
