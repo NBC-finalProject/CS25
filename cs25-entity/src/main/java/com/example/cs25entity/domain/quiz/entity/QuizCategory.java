@@ -34,7 +34,7 @@ public class QuizCategory extends BaseEntity {
     private QuizCategory parent;
 
     //소분류
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizCategory> children = new ArrayList<>();
 
     @Builder

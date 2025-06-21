@@ -7,8 +7,12 @@ import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
+import com.example.cs25service.domain.security.dto.AuthUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -37,8 +41,17 @@ public class QuizService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void uploadQuizJson(MultipartFile file, String categoryType,
-        QuizFormatType formatType) {
+    public void uploadQuizJson(
+            AuthUser authUser,
+            MultipartFile file,
+            String categoryType,
+            QuizFormatType formatType
+    ) {
+
+        if(authUser.getRole() != Role.ADMIN){
+            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+        }
+
         try {
             //대분류 확인
             QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)

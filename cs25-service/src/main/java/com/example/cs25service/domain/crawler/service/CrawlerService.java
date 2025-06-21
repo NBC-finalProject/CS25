@@ -1,5 +1,8 @@
 package com.example.cs25service.domain.crawler.service;
 
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25service.domain.ai.service.RagService;
 import com.example.cs25service.domain.crawler.github.GitHubRepoInfo;
 import com.example.cs25service.domain.crawler.github.GitHubUrlParser;
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.example.cs25service.domain.security.dto.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,7 +38,12 @@ public class CrawlerService {
     private final RestTemplate restTemplate;
     private String githubToken;
 
-    public void crawlingGithubDocument(String url) {
+    public void crawlingGithubDocument(AuthUser authUser, String url) {
+
+        if(authUser.getRole() != Role.ADMIN){
+            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+        }
+
         //url 에서 필요 정보 추출
         GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
 

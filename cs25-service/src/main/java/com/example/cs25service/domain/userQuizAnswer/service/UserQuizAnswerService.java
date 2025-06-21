@@ -108,41 +108,4 @@ public class UserQuizAnswerService {
         return new SelectionRateResponseDto(rates, total);
     }
 
-    public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(Long userId){
-        //유저 검증
-        User user = userRepository.findByIdOrElseThrow(userId);
-        if(!user.isActive()){
-            throw new UserException(UserExceptionCode.INACTIVE_USER);
-        }
-
-        //유저 Id에 따른 구독 정보의 대분류 카테고리 조회
-        QuizCategory parentCategory = quizCategoryRepository.findQuizCategoryByUserId(userId);
-
-        //소분류 조회
-        List<QuizCategory> childCategories = parentCategory.getChildren();
-
-        Map<String, Double> rates = new HashMap<>();
-        //유저가 푼 문제들 중, 소분류에 속하는 로그 다 가져와
-        for(QuizCategory child : childCategories){
-            List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndQuizCategoryId(userId, child.getId());
-
-            if (answers.isEmpty()) {
-                rates.put(child.getCategoryType(), 0.0);
-                continue;
-            }
-
-            long totalAnswers = answers.size();
-            long correctAnswers = answers.stream()
-                .filter(UserQuizAnswer::getIsCorrect) // 정답인 경우 필터링
-                .count();
-
-            double answerRate = (double) correctAnswers / totalAnswers * 100;
-            rates.put(child.getCategoryType(), answerRate);
-
-        }
-
-        return CategoryUserAnswerRateResponse.builder()
-            .correctRates(rates)
-            .build();
-    }
 }
