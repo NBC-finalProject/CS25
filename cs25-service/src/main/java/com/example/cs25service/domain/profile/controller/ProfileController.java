@@ -39,11 +39,11 @@ public class ProfileController {
         return new ApiResponse<>(200, profileService.getWrongQuiz(authUser));
     }
 
-    @GetMapping("/{userId}/correct-rate")
+    @GetMapping("/correct-rate")
     public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
-            @PathVariable Long userId
+            @AuthenticationPrincipal AuthUser authUser
     ){
-        return new ApiResponse<>(200, profileService.getUserQuizAnswerCorrectRate(userId));
+        return new ApiResponse<>(200, profileService.getUserQuizAnswerCorrectRate(authUser));
     }
 }
 

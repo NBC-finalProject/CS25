@@ -100,7 +100,10 @@ public class ProfileService {
     }
 
     //유저의 소분류 카테고리별 정답률 조회
-    public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(Long userId){
+    public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(AuthUser authUser){
+
+        Long userId = authUser.getId();
+
         //유저 검증
         User user = userRepository.findByIdOrElseThrow(userId);
         if(!user.isActive()){
