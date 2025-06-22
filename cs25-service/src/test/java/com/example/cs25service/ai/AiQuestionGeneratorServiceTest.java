@@ -41,16 +41,25 @@ class AiQuestionGeneratorServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 벡터 검색에 사용되는 카테고리 목록 등록
-        quizCategoryRepository.saveAll(List.of(
-            new QuizCategory(null, "운영체제"),
-            new QuizCategory(null, "컴퓨터구조"),
-            new QuizCategory(null, "자료구조"),
-            new QuizCategory(null, "네트워크"),
-            new QuizCategory(null, "DB"),
-            new QuizCategory(null, "보안")
-        ));
+        List<String> requiredCategories = List.of(
+            "SoftwareDevelopment",
+            "SoftwareDesign",
+            "Programming",
+            "Database",
+            "InformationSystemManagement"
+        );
+
+        for (String categoryType : requiredCategories) {
+            boolean exists = quizCategoryRepository.existsByCategoryType(categoryType);
+            if (!exists) {
+                quizCategoryRepository.save(new QuizCategory(categoryType, null));
+            }
+        }
+
+        em.flush();
+        em.clear();
     }
+
 
     @Test
     @DisplayName("RAG 문서를 기반으로 문제를 생성하고 DB에 저장한다")

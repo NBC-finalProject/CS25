@@ -2,11 +2,13 @@ package com.example.cs25service.domain.ai.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("fallbackAiChatClient")
 @RequiredArgsConstructor
 @Slf4j
+@Primary
 public class FallbackAiChatClient implements AiChatClient {
 
     private final OpenAiChatClient openAiClient;
