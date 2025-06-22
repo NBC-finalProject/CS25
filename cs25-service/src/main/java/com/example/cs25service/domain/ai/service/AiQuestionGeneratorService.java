@@ -2,7 +2,7 @@ package com.example.cs25service.domain.ai.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
-import com.example.cs25entity.domain.quiz.entity.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
@@ -70,7 +70,9 @@ public class AiQuestionGeneratorService {
             .trim()
             .toUpperCase();
 
-        if (!categoryType.equals("BACKEND") && !categoryType.equals("FRONTEND")) {
+        if (!categoryType.equalsIgnoreCase("SoftwareDevelopment") && !categoryType.equalsIgnoreCase("SoftwareDesign")
+            && !categoryType.equalsIgnoreCase("Programming") && !categoryType.equalsIgnoreCase("Database")
+            && !categoryType.equalsIgnoreCase("InformationSystemManagement") ) {
             throw new IllegalArgumentException("AI가 반환한 카테고리가 유효하지 않습니다: " + categoryType);
         }
 

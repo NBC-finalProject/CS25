@@ -1,18 +1,15 @@
 package com.example.cs25service.domain.ai.dto.response;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@Builder
+@RequiredArgsConstructor
 public class AiFeedbackResponse {
-    private Long quizId;
-    private boolean isCorrect;
-    private String aiFeedback;
-    private Long quizAnswerId;
-
-    public AiFeedbackResponse(Long quizId, Boolean isCorrect, String aiFeedback, Long quizAnswerId) {
-        this.quizId = quizId;
-        this.isCorrect = isCorrect;
-        this.aiFeedback = aiFeedback;
-        this.quizAnswerId = quizAnswerId;
-    }
+    private final Long quizId;
+    private final Long quizAnswerId;
+    private final boolean isCorrect;
+    private final String aiFeedback;
 }

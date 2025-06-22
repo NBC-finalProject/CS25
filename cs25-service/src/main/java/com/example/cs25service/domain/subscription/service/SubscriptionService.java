@@ -3,6 +3,8 @@ package com.example.cs25service.domain.subscription.service;
 import static com.example.cs25entity.domain.subscription.entity.Subscription.decodeDays;
 
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.entity.SubscriptionHistory;
@@ -76,11 +78,17 @@ public class SubscriptionService {
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             request.getCategory());
 
+        //퀴즈 카테고리가 대분류인지 검증
+        if (!quizCategory.isParentCategory()) {
+            throw new QuizException(QuizExceptionCode.PARENT_CATEGORY_REQUIRED_ERROR);
+        }
+
         // 로그인 한 경우
         if (authUser != null) {
-            User user = userRepository.findByEmail(authUser.getEmail()).orElseThrow(
-                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-            );
+            User user = userRepository.findUserWithSubscriptionByEmail(authUser.getEmail())
+                .orElseThrow(
+                    () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
+                );
 
             // TODO: 로그인을 해도 이메일 체크를 해야할까?
             // this.checkEmail(user.getEmail());
@@ -101,7 +109,7 @@ public class SubscriptionService {
                 user.updateSubscription(subscription);
                 return new SubscriptionResponseDto(
                     subscription.getId(),
-                    subscription.getCategory(),
+                    subscription.getCategory().getCategoryType(),
                     subscription.getStartDate(),
                     subscription.getEndDate(),
                     subscription.getSubscriptionType()
@@ -131,7 +139,7 @@ public class SubscriptionService {
                 createSubscriptionHistory(subscription);
                 return new SubscriptionResponseDto(
                     subscription.getId(),
-                    subscription.getCategory(),
+                    subscription.getCategory().getCategoryType(),
                     subscription.getStartDate(),
                     subscription.getEndDate(),
                     subscription.getSubscriptionType()
@@ -184,7 +192,7 @@ public class SubscriptionService {
     public void cancelSubscription(Long subscriptionId) {
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
-        subscription.cancel();
+        subscription.updateDisable();
         createSubscriptionHistory(subscription);
     }
 

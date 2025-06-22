@@ -2,6 +2,8 @@ package com.example.cs25entity.domain.quiz.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
@@ -37,6 +39,10 @@ public class QQuiz extends EntityPathBase<Quiz> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final BooleanPath isDeleted = createBoolean("isDeleted");
+
+    public final EnumPath<QuizLevel> level = createEnum("level", QuizLevel.class);
+
     public final StringPath question = createString("question");
 
     public final EnumPath<QuizFormatType> type = createEnum("type", QuizFormatType.class);
@@ -62,7 +68,7 @@ public class QQuiz extends EntityPathBase<Quiz> {
 
     public QQuiz(Class<? extends Quiz> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.category = inits.isInitialized("category") ? new QQuizCategory(forProperty("category")) : null;
+        this.category = inits.isInitialized("category") ? new QQuizCategory(forProperty("category"), inits.get("category")) : null;
     }
 
 }

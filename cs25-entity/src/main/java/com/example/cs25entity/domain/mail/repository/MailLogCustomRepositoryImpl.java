@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Repository
 public class MailLogCustomRepositoryImpl implements MailLogCustomRepository{
     private final EntityManager entityManager;
     private final JPAQueryFactory queryFactory;

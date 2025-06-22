@@ -21,10 +21,22 @@ public class QuizPageService {
     private final QuizRepository quizRepository;
 
     public TodayQuizResponseDto setTodayQuizPage(Long quizId, Model model) {
-
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
 
+		return switch (quiz.getType()) {
+			case MULTIPLE_CHOICE -> getMultipleQuiz(quiz);
+			case SUBJECTIVE -> getSubjectiveQuiz(quiz);
+			default -> throw new QuizException(QuizExceptionCode.QUIZ_TYPE_NOT_FOUND_ERROR);
+		};
+	}
+
+    /**
+     * 객관식인 오늘의 문제를 만들어서 반환해주는 메서드
+     * @param quiz 문제 객체
+     * @return 객관식 문제를 DTO로 반환
+     */
+    private TodayQuizResponseDto getMultipleQuiz(Quiz quiz) {
         List<String> choices = Arrays.stream(quiz.getChoice().split("/"))
             .filter(s -> !s.isBlank())
             .map(String::trim)
@@ -39,6 +51,22 @@ public class QuizPageService {
             .choice4(choices.get(3))
             .answerNumber(answerNumber)
             .commentary(quiz.getCommentary())
+            .quizType(quiz.getType().name())
+            .build();
+    }
+
+    /**
+     * 주관식인 오늘의 문제를 만들어서 반환해주는 메서드
+     * @param quiz 문제 객체
+     * @return 주관식 문제를 DTO로 반환
+     */
+    private TodayQuizResponseDto getSubjectiveQuiz(Quiz quiz) {
+        return TodayQuizResponseDto.builder()
+			.question(quiz.getQuestion())
+            .quizType(quiz.getQuestion())
+            .answer(quiz.getAnswer())
+            .commentary(quiz.getCommentary())
+            .quizType(quiz.getType().name())
             .build();
     }
 }

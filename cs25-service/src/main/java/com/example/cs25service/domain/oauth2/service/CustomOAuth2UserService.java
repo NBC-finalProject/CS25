@@ -82,15 +82,25 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_REQUIRED_FIELDS_MISSING);
         }
 
-        Subscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
+        // 기존 User 조회
+        User existingUser = userRepository.findByEmail(email).orElse(null);
 
-        return userRepository.findByEmail(email).orElseGet(() ->
-            userRepository.save(User.builder()
-                .email(email)
-                .name(name)
-                .socialType(provider)
-                .role(Role.USER)
-                .subscription(subscription)
-                .build()));
+        // 기존 유저가 있다면, isActive 값 확인 후 true로 업데이트
+        if (existingUser != null) {
+            if (!existingUser.isActive()) {
+                existingUser.updateEnableUser();  // isActive를 true로 설정
+                userRepository.save(existingUser);  // 변경 사항 저장
+            }
+            return existingUser;
+        }
+
+        Subscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
+        return userRepository.save(User.builder()
+            .email(email)
+            .name(name)
+            .socialType(provider)
+            .role(Role.USER) // 새로운 유저는 기본적으로 isActive=true
+            .subscription(subscription)
+            .build());
     }
 }

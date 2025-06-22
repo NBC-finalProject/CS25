@@ -36,7 +36,7 @@ public class QuizAdminController {
 
     //GET	관리자 문제  상세 조회	/admin/quizzes/{quizId}
     @GetMapping("/{quizId}")
-    public ApiResponse<QuizDetailDto> getQuizDetails(
+    public ApiResponse<QuizDetailDto> getQuizDetail(
         @Positive @PathVariable(name = "quizId") Long quizId
     ) {
         return new ApiResponse<>(200, quizAdminService.getAdminQuizDetail(quizId));

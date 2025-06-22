@@ -40,6 +40,9 @@ public class MailMessageProcessor implements ItemProcessor<Map<String, String>, 
         //long quizEnd = System.currentTimeMillis();
         //log.info("[5. 문제 출제] QuizId : {} {}ms", quiz.getId(), quizEnd - quizStart);
 
-        return new MailDto(subscription, quiz);
+        return MailDto.builder()
+            .subscription(subscription)
+            .quiz(quiz)
+            .build();
     }
 }
