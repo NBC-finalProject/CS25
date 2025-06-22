@@ -18,10 +18,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
 
-    //AWS SES
-    implementation 'software.amazon.awssdk:ses:2.25.39'
-    implementation 'software.amazon.awssdk:netty-nio-client:2.25.39'
-
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     //queryDSL
