@@ -6,5 +6,5 @@ public interface AiChatClient {
 
     String call(String systemPrompt, String userPrompt);
 
-    ChatClient raw(); // Optional: low-level access if needed
+    ChatClient raw();
 }
