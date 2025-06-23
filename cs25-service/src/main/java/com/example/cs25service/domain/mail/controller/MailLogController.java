@@ -2,12 +2,12 @@ package com.example.cs25service.domain.mail.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
+import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.mail.service.MailLogService;
-import java.util.List;
-
 import com.example.cs25service.domain.security.dto.AuthUser;
-import lombok.NonNull;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,20 +38,20 @@ public class MailLogController {
     }
 
     @GetMapping("/{mailLogId}")
-    public ApiResponse<MailLogResponse> getMailLog(
-            @PathVariable @NonNull Long mailLogId,
+    public ApiResponse<MailLogDetailResponse> getMailLog(
+            @PathVariable @NotNull Long mailLogId,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        MailLogResponse result =  mailLogService.getMailLog(authUser, mailLogId);
+        MailLogDetailResponse result =  mailLogService.getMailLog(authUser, mailLogId);
         return new ApiResponse<>(200, result);
     }
 
     @DeleteMapping
     public ApiResponse<String> deleteMailLogs(
-            @RequestBody List<Long> mailLogids,
-            @AuthenticationPrincipal AuthUser authUser
+        @RequestBody List<Long> mailLogIds,
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        mailLogService.deleteMailLogs(authUser, mailLogids);
+        mailLogService.deleteMailLogs(authUser, mailLogIds);
         return new ApiResponse<>(200, "MailLog 삭제 완료");
     }
 }

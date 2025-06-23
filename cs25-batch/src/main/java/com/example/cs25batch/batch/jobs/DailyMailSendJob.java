@@ -147,17 +147,6 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public ThreadPoolTaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("mail-step-thread-");
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean
     public Job mailConsumerJob(JobRepository jobRepository,
         @Qualifier("mailConsumerStep") Step mailConsumeStep) {
         return new JobBuilder("mailConsumerJob", jobRepository)
@@ -184,6 +173,17 @@ public class DailyMailSendJob {
     }
 
     @Bean
+    public ThreadPoolTaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("mail-step-thread-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
     public Job mailConsumerWithAsyncJob(JobRepository jobRepository,
         @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep,
         ThreadShuttingJobListener threadShuttingJobListener
@@ -202,7 +202,7 @@ public class DailyMailSendJob {
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
         PlatformTransactionManager transactionManager,
         MailStepLogger mailStepLogger,
-        @Qualifier("taskExecutor") TaskExecutor taskExecutor
+        @Qualifier("taskExecutor") ThreadPoolTaskExecutor taskExecutor
     ) {
         return new StepBuilder("mailConsumerWithAsyncStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)

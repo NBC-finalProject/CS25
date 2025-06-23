@@ -3,13 +3,13 @@ package com.example.cs25service.domain.mail.service;
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.repository.MailLogRepository;
+import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
-import java.util.List;
-
 import com.example.cs25service.domain.security.dto.AuthUser;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,13 +44,14 @@ public class MailLogService {
 
     //단일 로그 조회
     @Transactional(readOnly = true)
-    public MailLogResponse getMailLog(AuthUser authUser, Long id) {
+    public MailLogDetailResponse getMailLog(AuthUser authUser, Long id) {
+
         if(authUser.getRole() != Role.ADMIN){
             throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
         }
 
         MailLog mailLog = mailLogRepository.findByIdOrElseThrow(id);
-        return MailLogResponse.from(mailLog);
+        return MailLogDetailResponse.from(mailLog);
     }
 
     @Transactional
