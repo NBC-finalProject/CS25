@@ -82,18 +82,17 @@ public class QuizPageService {
 	 */
 	private QuizCategoryResponseDto getQuizCategory(Quiz quiz){
 		// 대분류만 있을 경우
-		if(!quiz.getCategory().isParentCategory()){
+		if(quiz.getCategory().isParentCategory()){
 			return QuizCategoryResponseDto.builder()
 				.main(quiz.getCategory().getCategoryType())
 				.build();
 		}
 		// 소분류일 경우 (대분류/소분류 존재)
-		if(quiz.getCategory().isParentCategory()){
+		else {
 			return QuizCategoryResponseDto.builder()
 				.main(quiz.getCategory().getParent().getCategoryType())
 				.sub(quiz.getCategory().getCategoryType())
 				.build();
 		}
-		throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR);
 	}
 }
