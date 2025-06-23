@@ -9,9 +9,12 @@ import com.example.cs25service.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25service.domain.ai.exception.AiException;
 import com.example.cs25service.domain.ai.exception.AiExceptionCode;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -53,32 +56,41 @@ public class AiService {
             .build();
     }
 
+    @Async
     public SseEmitter streamFeedback(Long answerId) {
         SseEmitter emitter = new SseEmitter(60_000L); // 1분 제한
 
-        new Thread(() -> {
+        emitter.onTimeout(() -> {
+            emitter.complete();
+        });
+
+        emitter.onError((ex) -> {
+            emitter.completeWithError(ex);
+        });
+
+        CompletableFuture.runAsync(() -> {
             try {
-                emitter.send(SseEmitter.event().data("🔍 유저 답변 조회 중..."));
+                sendSseEvent(emitter,"🔍 유저 답변 조회 중...");
                 var answer = userQuizAnswerRepository.findById(answerId)
                     .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
-                emitter.send(SseEmitter.event().data("📚 관련 문서 검색 중..."));
+                sendSseEvent(emitter,"📚 관련 문서 검색 중...");
                 var quiz = answer.getQuiz();
                 var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.3);
 
-                emitter.send(SseEmitter.event().data("🧠 프롬프트 생성 중..."));
+                sendSseEvent(emitter,"🧠 프롬프트 생성 중...");
                 String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
                 String systemPrompt = promptProvider.getFeedbackSystem();
 
                 // AI 응답 생성
-                emitter.send(SseEmitter.event().data("🤖 AI 응답 대기 중..."));
+                sendSseEvent(emitter,"🤖 AI 응답 대기 중...");
                 String feedback = aiChatClient.call(systemPrompt, userPrompt);
 
                 // 문장 단위 분할
-                String[] lines = feedback.split("(?<=[.?!])\\s+"); // 마침표/물음표 기준 분리
+                String[] lines = feedback.split("(?<=[.!?]|다\\.|습니다\\.|입니다\\.)\\s*");
 
                 for (String line : lines) {
-                    emitter.send(SseEmitter.event().data("🤖 " + line.trim()));
+                    sendSseEvent(emitter,"🤖 " + line.trim());
                 }
 
                 // 정답 여부 판별 및 저장
@@ -93,9 +105,15 @@ public class AiService {
             } catch (Exception e) {
                 emitter.completeWithError(e);
             }
-        }).start();
+        });
 
         return emitter;
     }
-
+    private void sendSseEvent(SseEmitter emitter, String data) {
+               try {
+                       emitter.send(SseEmitter.event().data(data));
+                   } catch (IOException e) {
+                       emitter.completeWithError(e);
+                   }
+            }
 }
