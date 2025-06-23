@@ -129,7 +129,7 @@ public class UserAdminService {
             throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
         }
 
-        subscriptionService.updateSubscription(user.getSubscription().getId(), request);
+        subscriptionService.updateSubscription(user.getSubscription().getSerialId(), request);
     }
 
     @Transactional
@@ -140,6 +140,6 @@ public class UserAdminService {
             throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
         }
 
-        subscriptionService.cancelSubscription(user.getSubscription().getId());
+        subscriptionService.cancelSubscription(user.getSubscription().getSerialId());
     }
 }

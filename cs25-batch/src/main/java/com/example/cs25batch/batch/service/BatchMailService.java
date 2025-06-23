@@ -30,9 +30,9 @@ public class BatchMailService {
             .add("quiz-email-stream", Map.of("subscriptionId", subscriptionId.toString()));
     }
 
-    protected String generateQuizLink(Long subscriptionId, Long quizId) {
+    protected String generateQuizLink(String subscriptionId, String quizId) {
         String domain = "https://cs25.co.kr/todayQuiz";
-        return String.format("%s?subscriptionId=%d&quizId=%d", domain, subscriptionId, quizId);
+        return String.format("%s?subscriptionId=%s&quizId=%s", domain, subscriptionId, quizId);
     }
 
     public void sendQuizEmail(Subscription subscription, Quiz quiz) {
@@ -40,7 +40,8 @@ public class BatchMailService {
             Context context = new Context();
             context.setVariable("toEmail", subscription.getEmail());
             context.setVariable("question", quiz.getQuestion());
-            context.setVariable("quizLink", generateQuizLink(subscription.getId(), quiz.getId()));
+            context.setVariable("quizLink",
+                generateQuizLink(subscription.getSerialId(), quiz.getSerialId()));
             String htmlContent = templateEngine.process("mail-template", context);
 
             MimeMessage message = mailSender.createMimeMessage();

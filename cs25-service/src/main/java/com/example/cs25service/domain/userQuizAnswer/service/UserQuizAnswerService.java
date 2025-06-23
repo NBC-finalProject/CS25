@@ -42,16 +42,19 @@ public class UserQuizAnswerService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     public Long answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
+
+        // 구독 정보 조회
+        Subscription subscription = subscriptionRepository.findBySerialId(
+                requestDto.getSubscriptionId())
+            .orElseThrow(() -> new SubscriptionException(
+                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
+
         // 중복 답변 제출 막음
-        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, requestDto.getSubscriptionId());
+        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId,
+            subscription.getId());
         if (isDuplicate) {
             throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
         }
-
-        // 구독 정보 조회
-        Subscription subscription = subscriptionRepository.findById(requestDto.getSubscriptionId())
-            .orElseThrow(() -> new SubscriptionException(
-                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
         // 유저 정보 조회
         User user = userRepository.findBySubscription(subscription);
@@ -65,9 +68,9 @@ public class UserQuizAnswerService {
 
         double score;
 
-        if(isCorrect){
+        if (isCorrect) {
             score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
-        }else{
+        } else {
             score = user.getScore() + 1;
         }
 
@@ -108,10 +111,10 @@ public class UserQuizAnswerService {
         return new SelectionRateResponseDto(rates, total);
     }
 
-    public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(Long userId){
+    public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(Long userId) {
         //유저 검증
         User user = userRepository.findByIdOrElseThrow(userId);
-        if(!user.isActive()){
+        if (!user.isActive()) {
             throw new UserException(UserExceptionCode.INACTIVE_USER);
         }
 
@@ -123,8 +126,9 @@ public class UserQuizAnswerService {
 
         Map<String, Double> rates = new HashMap<>();
         //유저가 푼 문제들 중, 소분류에 속하는 로그 다 가져와
-        for(QuizCategory child : childCategories){
-            List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndQuizCategoryId(userId, child.getId());
+        for (QuizCategory child : childCategories) {
+            List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndQuizCategoryId(
+                userId, child.getId());
 
             if (answers.isEmpty()) {
                 rates.put(child.getCategoryType(), 0.0);

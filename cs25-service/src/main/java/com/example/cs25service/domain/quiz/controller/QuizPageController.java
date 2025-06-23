@@ -6,7 +6,6 @@ import com.example.cs25service.domain.quiz.service.QuizPageService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,11 +20,11 @@ public class QuizPageController {
     @GetMapping("/todayQuiz")
     public ApiResponse<TodayQuizResponseDto> showTodayQuizPage(
         HttpServletResponse response,
-        @RequestParam("subscriptionId") Long subscriptionId,
-        @RequestParam("quizId") Long quizId,
+        @RequestParam("subscriptionId") String subscriptionId,
+        @RequestParam("quizId") String quizId,
         Model model
     ) {
-        Cookie cookie = new Cookie("subscriptionId", subscriptionId.toString());
+        Cookie cookie = new Cookie("subscriptionId", subscriptionId);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         response.addCookie(cookie);

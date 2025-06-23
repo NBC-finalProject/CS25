@@ -7,7 +7,6 @@ import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.service.SubscriptionService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,6 @@ public class UserService {
                 new UserException(UserExceptionCode.NOT_FOUND_USER));
 
         user.updateDisableUser();
-        subscriptionService.cancelSubscription(user.getSubscription().getId());
+        subscriptionService.cancelSubscription(user.getSubscription().getSerialId());
     }
 }

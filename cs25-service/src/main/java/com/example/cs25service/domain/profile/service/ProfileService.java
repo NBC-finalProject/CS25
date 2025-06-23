@@ -15,11 +15,10 @@ import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.dto.SubscriptionHistoryDto;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25service.domain.subscription.service.SubscriptionService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -34,44 +33,44 @@ public class ProfileService {
     public UserSubscriptionResponseDto getUserSubscription(AuthUser authUser) {
 
         User user = userRepository.findById(authUser.getId())
-                .orElseThrow(() ->
-                        new UserException(UserExceptionCode.NOT_FOUND_USER));
+            .orElseThrow(() ->
+                new UserException(UserExceptionCode.NOT_FOUND_USER));
 
         Long subscriptionId = user.getSubscription().getId();
 
         SubscriptionInfoDto subscriptionInfo = subscriptionService.getSubscription(
-                subscriptionId);
+            user.getSubscription().getSerialId());
 
         //로그 다 모아와서 리스트로 만들기
         List<SubscriptionHistory> subLogs = subscriptionHistoryRepository
-                .findAllBySubscriptionId(subscriptionId);
+            .findAllBySubscriptionId(subscriptionId);
         List<SubscriptionHistoryDto> dtoList = subLogs.stream()
-                .map(SubscriptionHistoryDto::fromEntity)
-                .toList();
+            .map(SubscriptionHistoryDto::fromEntity)
+            .toList();
 
         return UserSubscriptionResponseDto.builder()
-                .userId(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .subscriptionLogPage(dtoList)
-                .subscriptionInfoDto(subscriptionInfo)
-                .build();
+            .userId(user.getId())
+            .email(user.getEmail())
+            .name(user.getName())
+            .subscriptionLogPage(dtoList)
+            .subscriptionInfoDto(subscriptionInfo)
+            .build();
     }
 
     // 유저 틀린 문제 다시보기
     public ProfileWrongQuizResponseDto getWrongQuiz(AuthUser authUser) {
 
         List<WrongQuizDto> wrongQuizList = userQuizAnswerRepository
-                // 유저 아이디로 내가 푼 문제 조회
-                .findAllByUserId(authUser.getId()).stream()
-                .filter(answer -> !answer.getIsCorrect()) // 틀린 문제
-                .map(answer -> new WrongQuizDto(
-                        answer.getQuiz().getQuestion(),
-                        answer.getUserAnswer(),
-                        answer.getQuiz().getAnswer(),
-                        answer.getQuiz().getCommentary()
-                ))
-                .collect(Collectors.toList());
+            // 유저 아이디로 내가 푼 문제 조회
+            .findAllByUserId(authUser.getId()).stream()
+            .filter(answer -> !answer.getIsCorrect()) // 틀린 문제
+            .map(answer -> new WrongQuizDto(
+                answer.getQuiz().getQuestion(),
+                answer.getUserAnswer(),
+                answer.getQuiz().getAnswer(),
+                answer.getQuiz().getCommentary()
+            ))
+            .collect(Collectors.toList());
 
         return new ProfileWrongQuizResponseDto(authUser.getId(), wrongQuizList);
     }
@@ -79,16 +78,16 @@ public class ProfileService {
     public ProfileResponseDto getProfile(AuthUser authUser) {
 
         User user = userRepository.findById(authUser.getId()).orElseThrow(
-                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
+            () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
         );
 
         // 랭킹
         int myRank = userRepository.findRankByScore(user.getScore());
 
         return new ProfileResponseDto(
-                user.getName(),
-                user.getScore(),
-                myRank
+            user.getName(),
+            user.getScore(),
+            myRank
         );
     }
 }

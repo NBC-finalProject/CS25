@@ -27,7 +27,7 @@ public class SubscriptionController {
 
     @GetMapping("/{subscriptionId}")
     public ApiResponse<SubscriptionInfoDto> getSubscription(
-        @PathVariable("subscriptionId") Long subscriptionId
+        @PathVariable("subscriptionId") String subscriptionId
     ) {
         return new ApiResponse<>(
             200,
@@ -54,7 +54,7 @@ public class SubscriptionController {
 
     @PatchMapping("/{subscriptionId}")
     public ApiResponse<Void> updateSubscription(
-        @PathVariable(name = "subscriptionId") Long subscriptionId,
+        @PathVariable(name = "subscriptionId") String subscriptionId,
         @RequestBody @Valid SubscriptionRequestDto request
     ) {
         subscriptionService.updateSubscription(subscriptionId, request);
@@ -63,7 +63,7 @@ public class SubscriptionController {
 
     @PatchMapping("/{subscriptionId}/cancel")
     public ApiResponse<Void> cancelSubscription(
-        @PathVariable(name = "subscriptionId") Long subscriptionId
+        @PathVariable(name = "subscriptionId") String subscriptionId
     ) {
         subscriptionService.cancelSubscription(subscriptionId);
         return new ApiResponse<>(200);

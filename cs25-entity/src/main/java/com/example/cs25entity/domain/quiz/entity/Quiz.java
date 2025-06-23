@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -51,6 +52,9 @@ public class Quiz extends BaseEntity {
 
     private boolean isDeleted;
 
+    @Column(unique = true)
+    private String serialId; //uuid
+
     @Builder
     public Quiz(QuizFormatType type, String question, String answer, String commentary,
         String choice, QuizCategory category, QuizLevel level) {
@@ -62,6 +66,7 @@ public class Quiz extends BaseEntity {
         this.category = category;
         this.level = level;
         this.isDeleted = false;
+        this.serialId = UUID.randomUUID().toString();
     }
 
     public void updateCategory(QuizCategory quizCategory) {
