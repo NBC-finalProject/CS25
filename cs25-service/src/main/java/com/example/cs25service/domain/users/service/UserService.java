@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.users.service;
 
-import com.example.cs25entity.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
@@ -19,11 +18,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final SubscriptionService subscriptionService;
-    private final SubscriptionHistoryRepository subscriptionHistoryRepository;
 
     @Transactional
     public void disableUser(AuthUser authUser) {
-        User user = userRepository.findById(authUser.getId())
+        User user = userRepository.findBySerialId(authUser.getSerialId())
             .orElseThrow(() ->
                 new UserException(UserExceptionCode.NOT_FOUND_USER));
 

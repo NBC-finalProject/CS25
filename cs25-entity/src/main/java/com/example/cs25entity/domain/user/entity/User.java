@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -63,6 +64,7 @@ public class User extends BaseEntity {
         this.role = role;
         this.score = score;
         this.subscription = subscription;
+        this.serialId = UUID.randomUUID().toString();
     }
 
     /****

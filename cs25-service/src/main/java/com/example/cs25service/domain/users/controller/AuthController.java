@@ -46,7 +46,7 @@ public class AuthController {
     public ApiResponse<String> logout(@AuthenticationPrincipal AuthUser authUser,
         HttpServletResponse response) {
 
-        tokenService.clearTokenForUser(authUser.getId(), response);
+        tokenService.clearTokenForUser(authUser.getSerialId(), response);
         SecurityContextHolder.clearContext();
 
         return new ApiResponse<>(200, "로그아웃 완료");

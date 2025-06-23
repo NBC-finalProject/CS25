@@ -13,7 +13,7 @@ public class RefreshTokenService {
 
     private static final String PREFIX = "RT:";
 
-    public void save(Long userId, String refreshToken, Duration ttl) {
+    public void save(String userId, String refreshToken, Duration ttl) {
         String key = PREFIX + userId;
         if (ttl == null) {
             throw new IllegalArgumentException("TTL must not be null");
@@ -21,15 +21,15 @@ public class RefreshTokenService {
         redisTemplate.opsForValue().set(key, refreshToken, ttl);
     }
 
-    public String get(Long userId) {
+    public String get(String userId) {
         return redisTemplate.opsForValue().get(PREFIX + userId);
     }
 
-    public void delete(Long userId) {
+    public void delete(String userId) {
         redisTemplate.delete(PREFIX + userId);
     }
 
-    public boolean exists(Long userId) {
+    public boolean exists(String userId) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(PREFIX + userId));
     }
 }
