@@ -5,6 +5,7 @@ import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.BatchMailService;
 import com.example.cs25batch.batch.service.BatchSubscriptionService;
 import com.example.cs25batch.batch.service.TodayQuizService;
+import com.example.cs25batch.config.ThreadShuttingJobListener;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
@@ -14,6 +15,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -145,7 +147,7 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public TaskExecutor taskExecutor() {
+    public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
@@ -183,9 +185,12 @@ public class DailyMailSendJob {
 
     @Bean
     public Job mailConsumerWithAsyncJob(JobRepository jobRepository,
-        @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep) {
+        @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep,
+        ThreadShuttingJobListener threadShuttingJobListener
+    ) {
         return new JobBuilder("mailConsumerWithAsyncJob", jobRepository)
             .start(mailConsumeStep)
+            .listener(threadShuttingJobListener)
             .build();
     }
 

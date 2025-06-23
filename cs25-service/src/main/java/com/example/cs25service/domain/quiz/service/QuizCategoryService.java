@@ -5,8 +5,13 @@ import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25service.domain.quiz.dto.CreateQuizCategoryDto;
 import java.util.List;
+
+import com.example.cs25service.domain.security.dto.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +25,12 @@ public class QuizCategoryService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void createQuizCategory(CreateQuizCategoryDto request) {
+    public void createQuizCategory(AuthUser authUser, CreateQuizCategoryDto request) {
+
+        if(authUser.getRole() != Role.ADMIN){
+            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+        }
+
         quizCategoryRepository.findByCategoryType(request.getCategory())
             .ifPresent(c -> {
                 throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
