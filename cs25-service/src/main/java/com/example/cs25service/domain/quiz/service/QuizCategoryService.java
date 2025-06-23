@@ -5,13 +5,9 @@ import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
-import com.example.cs25entity.domain.user.entity.Role;
-import com.example.cs25entity.domain.user.exception.UserException;
-import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25service.domain.quiz.dto.CreateQuizCategoryDto;
-import java.util.List;
-
 import com.example.cs25service.domain.security.dto.AuthUser;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,9 +23,9 @@ public class QuizCategoryService {
     @Transactional
     public void createQuizCategory(AuthUser authUser, CreateQuizCategoryDto request) {
 
-        if(authUser.getRole() != Role.ADMIN){
-            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
-        }
+//        if(authUser.getRole() != Role.ADMIN){
+//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+//        }
 
         quizCategoryRepository.findByCategoryType(request.getCategory())
             .ifPresent(c -> {
@@ -41,7 +37,8 @@ public class QuizCategoryService {
             parent = quizCategoryRepository.findById(request.getParentId())
                 .orElseThrow(() ->
                     new QuizException(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR));
-        };
+        }
+        ;
 
         QuizCategory quizCategory = QuizCategory.builder()
             .categoryType(request.getCategory())

@@ -100,4 +100,8 @@ public class User extends BaseEntity {
     public void updateScore(double score) {
         this.score = score;
     }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }
