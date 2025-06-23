@@ -1,5 +1,6 @@
 package com.example.cs25batch.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -9,7 +10,9 @@ import software.amazon.awssdk.services.sesv2.SesV2Client;
 
 @Configuration
 public class AwsSesConfig {
+    @Value("aws.ses.accessKey")
     private String accessKey;
+    @Value("aws.ses.secretKey")
     private String secretKey;
     private String region;
 
