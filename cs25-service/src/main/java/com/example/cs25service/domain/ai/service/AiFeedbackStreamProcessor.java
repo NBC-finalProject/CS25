@@ -14,6 +14,7 @@ import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Component
@@ -26,6 +27,7 @@ public class AiFeedbackStreamProcessor {
     private final UserRepository userRepository;
     private final AiChatClient aiChatClient;
 
+    @Transactional
     public void stream(Long answerId, SseEmitter emitter) {
         try {
             send(emitter, "🔍 유저 답변 조회 중...");

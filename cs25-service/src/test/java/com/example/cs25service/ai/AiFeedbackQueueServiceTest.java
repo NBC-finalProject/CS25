@@ -23,11 +23,12 @@ class AiFeedbackQueueServiceTest {
     void setUp() {
         processor = mock(AiFeedbackStreamProcessor.class);
         queueService = new AiFeedbackQueueService(processor);
+        queueService.initWorker(); // 직접 호출
     }
 
     @Test
     @DisplayName("큐에 요청이 정상적으로 추가된다")
-    void enqueue_success() {
+    void enqueue_success() throws InterruptedException {
         // given
         SseEmitter emitter = new SseEmitter();
         FeedbackRequest request = new FeedbackRequest(1L, emitter);
@@ -36,7 +37,10 @@ class AiFeedbackQueueServiceTest {
         queueService.enqueue(request);
 
         // then
-        assertThat(request).isNotNull(); // 단순 성공 여부 확인
+        // 큐 처리를 위한 약간의 대기
+        Thread.sleep(100);
+        // preocessor가 호출되었는는 지 검증
+        verify(processor, timeout(1000)).stream(1L,emitter);
     }
 
     @DisplayName("큐가 가득 찼을 때 요청을 거절한다")

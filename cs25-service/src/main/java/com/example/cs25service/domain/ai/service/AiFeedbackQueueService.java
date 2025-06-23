@@ -2,24 +2,33 @@
 
     import com.example.cs25service.domain.ai.dto.request.FeedbackRequest;
     import jakarta.annotation.PostConstruct;
+    import jakarta.annotation.PreDestroy;
     import java.io.IOException;
     import java.util.concurrent.BlockingQueue;
+    import java.util.concurrent.ExecutorService;
     import java.util.concurrent.Executors;
     import java.util.concurrent.LinkedBlockingQueue;
+    import java.util.concurrent.TimeUnit;
     import lombok.RequiredArgsConstructor;
+    import lombok.extern.slf4j.Slf4j;
     import org.springframework.stereotype.Service;
     import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+    @Slf4j
     @Service
     @RequiredArgsConstructor
     public class AiFeedbackQueueService {
 
         private final AiFeedbackStreamProcessor processor;
         private final BlockingQueue<FeedbackRequest> queue = new LinkedBlockingQueue<>(100);
+        private final ExecutorService executor = Executors.newSingleThreadExecutor(
+            r -> new Thread(r, "ai-feedback-processor")
+        );
+        private volatile boolean running = true;
 
         @PostConstruct
         public void initWorker() {
-            Executors.newSingleThreadExecutor().submit(this::processQueue);
+            executor.submit(this::processQueue);
         }
 
         public void enqueue(FeedbackRequest request) {
@@ -35,13 +44,29 @@
         }
 
         private void processQueue() {
-            while (true) {
+            while (running) {
                 try {
-                    FeedbackRequest request = queue.take();
-                    processor.stream(request.answerId(), request.emitter());
+                    FeedbackRequest request = queue.poll(1, TimeUnit.SECONDS);
+                    if (request != null) {
+                        processor.stream(request.answerId(), request.emitter());
+                    }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error processing feedback request", e);
                 }
+            }
+        }
+
+        @PreDestroy
+        public void shutdown() {
+            running = false;
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
             }
         }
     }
