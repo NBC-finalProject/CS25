@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/quizzes")
@@ -22,10 +23,9 @@ public class AiController {
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
     private final FileLoaderService fileLoaderService;
 
-    @GetMapping("/{answerId}/feedback")
-    public ApiResponse<AiFeedbackResponse> getFeedback(@PathVariable(name = "answerId") Long answerId) {
-        AiFeedbackResponse response = aiService.getFeedback(answerId);
-        return new ApiResponse<>(200, response);
+    @GetMapping(value = "/{answerId}/feedback", produces = "text/event-stream")
+    public SseEmitter streamFeedback(@PathVariable Long answerId) {
+        return aiService.streamFeedback(answerId);
     }
 
     @GetMapping("/generate")
