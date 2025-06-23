@@ -45,4 +45,5 @@ public interface QuizCategoryRepository extends JpaRepository<QuizCategory, Long
         "WHERE u.id = :userId")
     QuizCategory findQuizCategoryByUserId(@Param("userId") Long userId);
 
+    boolean existsByCategoryType(String categoryType);
 }

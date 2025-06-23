@@ -6,9 +6,11 @@ import com.example.cs25service.domain.profile.dto.ProfileWrongQuizResponseDto;
 import com.example.cs25service.domain.profile.dto.UserSubscriptionResponseDto;
 import com.example.cs25service.domain.profile.service.ProfileService;
 import com.example.cs25service.domain.security.dto.AuthUser;
+import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +37,13 @@ public class ProfileController {
     public ApiResponse<ProfileWrongQuizResponseDto> getWrongQuiz(@AuthenticationPrincipal AuthUser authUser){
 
         return new ApiResponse<>(200, profileService.getWrongQuiz(authUser));
+    }
+
+    @GetMapping("/correct-rate")
+    public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
+            @AuthenticationPrincipal AuthUser authUser
+    ){
+        return new ApiResponse<>(200, profileService.getUserQuizAnswerCorrectRate(authUser));
     }
 }
 
