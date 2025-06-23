@@ -41,6 +41,10 @@ public class MailLogAspect {
             status = MailStatus.FAILED;
             caused = e.awsErrorDetails().errorMessage();
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
+        } catch (Exception e){
+            status = MailStatus.FAILED;
+            caused = e.getMessage();
+            throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         } finally {
             MailLog log = MailLog.builder()
                 .subscription(subscription)

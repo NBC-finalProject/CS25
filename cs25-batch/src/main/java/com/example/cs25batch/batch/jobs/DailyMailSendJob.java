@@ -147,17 +147,6 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("mail-step-thread-");
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean
     public Job mailConsumerJob(JobRepository jobRepository,
         @Qualifier("mailConsumerStep") Step mailConsumeStep) {
         return new JobBuilder("mailConsumerJob", jobRepository)
