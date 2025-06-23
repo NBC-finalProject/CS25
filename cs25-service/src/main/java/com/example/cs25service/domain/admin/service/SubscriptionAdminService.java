@@ -21,6 +21,15 @@ public class SubscriptionAdminService {
         Page<Subscription> subscriptionPage = subscriptionRepository.findAllByOrderByIdAsc(
             pageable);
 
-
+        return subscriptionPage.map(subscription ->
+            SubscriptionPageResponseDto.builder()
+                .id(subscription.getId())
+                .serialId(subscription.getSerialId())
+                .category(subscription.getCategory().getCategoryType())
+                .email(subscription.getEmail())
+                .isActive(subscription.isActive())
+                .subscriptionType(Subscription.decodeDays(subscription.getSubscriptionType()))
+                .build()
+        );
     }
 }
