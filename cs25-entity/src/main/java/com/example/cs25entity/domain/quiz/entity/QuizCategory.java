@@ -33,7 +33,7 @@ public class QuizCategory extends BaseEntity {
     private QuizCategory parent;
 
     //소분류
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizCategory> children = new ArrayList<>();
 
     @Builder
@@ -46,7 +46,7 @@ public class QuizCategory extends BaseEntity {
      * 부모가 존재하면 true, 없으면 false를 반환하는 메서드
      * @return true/false
      */
-    public boolean isParentCategory(){
+    public boolean isChildCategory(){
         return parent != null;
     }
 }

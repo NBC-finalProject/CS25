@@ -34,10 +34,4 @@ public class UserQuizAnswerController {
         return new ApiResponse<>(200, userQuizAnswerService.getSelectionRateByOption(quizId));
     }
 
-    @GetMapping("/{userId}/correct-rate")
-    public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
-        @PathVariable Long userId
-    ){
-        return new ApiResponse<>(200, userQuizAnswerService.getUserQuizAnswerCorrectRate(userId));
-    }
 }
