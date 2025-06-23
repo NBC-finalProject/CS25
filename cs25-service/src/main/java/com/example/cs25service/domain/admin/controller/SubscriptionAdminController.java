@@ -5,25 +5,41 @@ import com.example.cs25service.domain.admin.dto.response.SubscriptionPageRespons
 import com.example.cs25service.domain.admin.service.SubscriptionAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/admin")
 public class SubscriptionAdminController {
 
     private final SubscriptionAdminService subscriptionAdminService;
 
-    @GetMapping
+    @GetMapping("/subscription")
     public ApiResponse<Page<SubscriptionPageResponseDto>> getSubscriptionLists(
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "30") int size
     ) {
         return new ApiResponse<>(200, subscriptionAdminService.getAdminSubscriptions(page, size));
     }
+
+    // 구독자 개별 조회
+    @GetMapping("/subscription/{subscriptionId}")
+    public ApiResponse<SubscriptionPageResponseDto> getSubscription(
+            @PathVariable Long subscriptionId
+    ){
+        return new ApiResponse<>(200, subscriptionAdminService.getSubscription(subscriptionId));
+    }
+
+    // 구독자 삭제
+    @PatchMapping("/subscription/{subscriptionId}")
+    public ApiResponse<Void> deleteSubscription(
+            @PathVariable Long subscriptionId
+    ) {
+        subscriptionAdminService.deleteSubscription(subscriptionId);
+        return new ApiResponse<>(200);
+    }
+
+
 
     
 }
