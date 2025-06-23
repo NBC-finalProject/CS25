@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +33,7 @@ public class QuizCategory extends BaseEntity {
     private QuizCategory parent;
 
     //소분류
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<QuizCategory> children = new ArrayList<>();
 
     @Builder
@@ -43,7 +42,11 @@ public class QuizCategory extends BaseEntity {
         this.parent = parent;
     }
 
+    /**
+     * 부모가 존재하면 true, 없으면 false를 반환하는 메서드
+     * @return true/false
+     */
     public boolean isParentCategory(){
-        return parent == null;
+        return parent != null;
     }
 }
