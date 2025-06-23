@@ -4,6 +4,7 @@ import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25service.domain.quiz.dto.QuizCategoryResponseDto;
 import com.example.cs25service.domain.quiz.dto.TodayQuizResponseDto;
 
 import java.util.Arrays;
@@ -52,6 +53,8 @@ public class QuizPageService {
             .answerNumber(answerNumber)
             .commentary(quiz.getCommentary())
             .quizType(quiz.getType().name())
+			.quizLevel(quiz.getLevel().name())
+			.category(getQuizCategory(quiz))
             .build();
     }
 
@@ -67,6 +70,29 @@ public class QuizPageService {
             .answer(quiz.getAnswer())
             .commentary(quiz.getCommentary())
             .quizType(quiz.getType().name())
+			.quizLevel(quiz.getLevel().name())
+			.category(getQuizCategory(quiz))
             .build();
     }
+
+	/**
+	 * 문제분야의 대분류/소분류를 DTO로 만들어서 반환해주는 메서드
+	 * @param quiz 문제 객체
+	 * @return 문제분야 대분류/소분류 DTO를 반환
+	 */
+	private QuizCategoryResponseDto getQuizCategory(Quiz quiz){
+		// 대분류만 있을 경우
+		if(quiz.getCategory().isParentCategory()){
+			return QuizCategoryResponseDto.builder()
+				.main(quiz.getCategory().getCategoryType())
+				.build();
+		}
+		// 소분류일 경우 (대분류/소분류 존재)
+		else {
+			return QuizCategoryResponseDto.builder()
+				.main(quiz.getCategory().getParent().getCategoryType())
+				.sub(quiz.getCategory().getCategoryType())
+				.build();
+		}
+	}
 }
