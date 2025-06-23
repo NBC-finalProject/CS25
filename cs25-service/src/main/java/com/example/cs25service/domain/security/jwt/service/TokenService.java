@@ -19,12 +19,12 @@ public class TokenService {
 
     public TokenResponseDto generateAndSaveTokenPair(AuthUser authUser) {
         String accessToken = jwtTokenProvider.generateAccessToken(
-            authUser.getId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
+            authUser.getSerialId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
         );
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-            authUser.getId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
+            authUser.getSerialId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
         );
-        refreshTokenService.save(authUser.getId(), refreshToken,
+        refreshTokenService.save(authUser.getSerialId(), refreshToken,
             jwtTokenProvider.getRefreshTokenDuration());
 
         return new TokenResponseDto(accessToken, refreshToken);
@@ -41,7 +41,7 @@ public class TokenService {
             .build();
     }
 
-    public void clearTokenForUser(Long userId, HttpServletResponse response) {
+    public void clearTokenForUser(String userId, HttpServletResponse response) {
         // 1. Redis refreshToken 삭제
         refreshTokenService.delete(userId);
 

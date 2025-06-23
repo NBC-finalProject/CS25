@@ -31,8 +31,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findBySubscription(Subscription subscription);
 
-    Optional<User> findById(Long id);
-
     default User findByIdOrElseThrow(Long id) {
         return findById(id).orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
     }
@@ -41,4 +39,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) + 1 FROM User u WHERE u.score > :score")
     int findRankByScore(double score);
+
+    Optional<User> findBySerialId(String serialId);
 }

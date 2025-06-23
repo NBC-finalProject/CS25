@@ -1,9 +1,7 @@
 package com.example.cs25service.domain.userQuizAnswer.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
-import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
-import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
-import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.*;
 import com.example.cs25service.domain.userQuizAnswer.service.UserQuizAnswerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +18,7 @@ public class UserQuizAnswerController {
 
     private final UserQuizAnswerService userQuizAnswerService;
 
+    //정답 제출
     @PostMapping("/{quizId}")
     public ApiResponse<Long> answerSubmit(
         @PathVariable("quizId") Long quizId,
@@ -28,16 +27,18 @@ public class UserQuizAnswerController {
         return new ApiResponse<>(200, userQuizAnswerService.answerSubmit(quizId, requestDto));
     }
 
+    //객관식 or 주관식 채점
+    @PostMapping("/simpleAnswer/{userQuizAnswerId}")
+    public ApiResponse<CheckSimpleAnswerResponseDto> checkSimpleAnswer(
+            @PathVariable("userQuizAnswerId") Long userQuizAnswerId
+    ){
+        return new ApiResponse<>(200, userQuizAnswerService.checkSimpleAnswer(userQuizAnswerId));
+    }
+
     @GetMapping("/{quizId}/select-rate")
     public ApiResponse<SelectionRateResponseDto> getSelectionRateByOption(
         @PathVariable Long quizId) {
         return new ApiResponse<>(200, userQuizAnswerService.getSelectionRateByOption(quizId));
     }
 
-    @GetMapping("/{userId}/correct-rate")
-    public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
-        @PathVariable Long userId
-    ){
-        return new ApiResponse<>(200, userQuizAnswerService.getUserQuizAnswerCorrectRate(userId));
-    }
 }

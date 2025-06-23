@@ -6,6 +6,7 @@ import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25service.domain.quiz.dto.CreateQuizCategoryDto;
+import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,12 @@ public class QuizCategoryService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void createQuizCategory(CreateQuizCategoryDto request) {
+    public void createQuizCategory(AuthUser authUser, CreateQuizCategoryDto request) {
+
+//        if(authUser.getRole() != Role.ADMIN){
+//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+//        }
+
         quizCategoryRepository.findByCategoryType(request.getCategory())
             .ifPresent(c -> {
                 throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
@@ -31,7 +37,8 @@ public class QuizCategoryService {
             parent = quizCategoryRepository.findById(request.getParentId())
                 .orElseThrow(() ->
                     new QuizException(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR));
-        };
+        }
+        ;
 
         QuizCategory quizCategory = QuizCategory.builder()
             .categoryType(request.getCategory())

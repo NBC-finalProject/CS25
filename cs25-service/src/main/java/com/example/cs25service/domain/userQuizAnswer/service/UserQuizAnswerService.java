@@ -19,9 +19,8 @@ import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
-import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
-import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,16 +42,19 @@ public class UserQuizAnswerService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     public Long answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
+
+        // 구독 정보 조회
+        Subscription subscription = subscriptionRepository.findBySerialId(
+                requestDto.getSubscriptionId())
+            .orElseThrow(() -> new SubscriptionException(
+                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
+
         // 중복 답변 제출 막음
-        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, requestDto.getSubscriptionId());
+        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId,
+            subscription.getId());
         if (isDuplicate) {
             throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
         }
-
-        // 구독 정보 조회
-        Subscription subscription = subscriptionRepository.findById(requestDto.getSubscriptionId())
-            .orElseThrow(() -> new SubscriptionException(
-                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
         // 유저 정보 조회
         User user = userRepository.findBySubscription(subscription);
@@ -60,29 +63,64 @@ public class UserQuizAnswerService {
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
 
-        // 정답 체크
-        boolean isCorrect = requestDto.getAnswer().equals(quiz.getAnswer().substring(0, 1));
-
-        double score;
-
-        if(isCorrect){
-            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
-        }else{
-            score = user.getScore() + 1;
-        }
-
-        user.updateScore(score);
-
         UserQuizAnswer answer = userQuizAnswerRepository.save(
             UserQuizAnswer.builder()
                 .userAnswer(requestDto.getAnswer())
-                .isCorrect(isCorrect)
+                .isCorrect(null)
                 .user(user)
                 .quiz(quiz)
                 .subscription(subscription)
                 .build()
         );
         return answer.getId();
+    }
+
+    /**
+     * 객관식 or 주관식 채점
+     * @param userQuizAnswerId
+     * @return
+     */
+    @Transactional
+    public CheckSimpleAnswerResponseDto checkSimpleAnswer(Long userQuizAnswerId) {
+        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findByIdWithQuiz(userQuizAnswerId).orElseThrow(
+                () -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
+        );
+
+        Quiz quiz = quizRepository.findById(userQuizAnswer.getQuiz().getId()).orElseThrow(
+                () -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR)
+        );
+
+        User user = userRepository.findById(userQuizAnswer.getUser().getId()).orElseThrow(
+                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
+        );
+
+        boolean isCorrect;
+
+        if(quiz.getType().getScore() == 1){
+            isCorrect = userQuizAnswer.getUserAnswer().equals(quiz.getAnswer().substring(0, 1));
+        }else if(quiz.getType().getScore() == 3){
+            isCorrect = userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
+        }else{
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+
+        double score;
+        if(isCorrect){
+            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
+        }else{
+            score = user.getScore() + 1;
+        }
+
+        userQuizAnswer.updateIsCorrect(isCorrect);
+        user.updateScore(score);
+
+        return new CheckSimpleAnswerResponseDto(
+                quiz.getQuestion(),
+                userQuizAnswer.getUserAnswer(),
+                quiz.getAnswer(),
+                quiz.getCommentary(),
+                userQuizAnswer.getIsCorrect()
+        );
     }
 
     public SelectionRateResponseDto getSelectionRateByOption(Long quizId) {
@@ -108,41 +146,4 @@ public class UserQuizAnswerService {
         return new SelectionRateResponseDto(rates, total);
     }
 
-    public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(Long userId){
-        //유저 검증
-        User user = userRepository.findByIdOrElseThrow(userId);
-        if(!user.isActive()){
-            throw new UserException(UserExceptionCode.INACTIVE_USER);
-        }
-
-        //유저 Id에 따른 구독 정보의 대분류 카테고리 조회
-        QuizCategory parentCategory = quizCategoryRepository.findQuizCategoryByUserId(userId);
-
-        //소분류 조회
-        List<QuizCategory> childCategories = parentCategory.getChildren();
-
-        Map<String, Double> rates = new HashMap<>();
-        //유저가 푼 문제들 중, 소분류에 속하는 로그 다 가져와
-        for(QuizCategory child : childCategories){
-            List<UserQuizAnswer> answers = userQuizAnswerRepository.findByUserIdAndQuizCategoryId(userId, child.getId());
-
-            if (answers.isEmpty()) {
-                rates.put(child.getCategoryType(), 0.0);
-                continue;
-            }
-
-            long totalAnswers = answers.size();
-            long correctAnswers = answers.stream()
-                .filter(UserQuizAnswer::getIsCorrect) // 정답인 경우 필터링
-                .count();
-
-            double answerRate = (double) correctAnswers / totalAnswers * 100;
-            rates.put(child.getCategoryType(), answerRate);
-
-        }
-
-        return CategoryUserAnswerRateResponse.builder()
-            .correctRates(rates)
-            .build();
-    }
 }

@@ -3,6 +3,7 @@ package com.example.cs25service.domain.crawler.service;
 import com.example.cs25service.domain.ai.service.RagService;
 import com.example.cs25service.domain.crawler.github.GitHubRepoInfo;
 import com.example.cs25service.domain.crawler.github.GitHubUrlParser;
+import com.example.cs25service.domain.security.dto.AuthUser;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +34,12 @@ public class CrawlerService {
     private final RestTemplate restTemplate;
     private String githubToken;
 
-    public void crawlingGithubDocument(String url) {
+    public void crawlingGithubDocument(AuthUser authUser, String url) {
+//
+//        if(authUser.getRole() != Role.ADMIN){
+//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+//        }
+
         //url 에서 필요 정보 추출
         GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
 

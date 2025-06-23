@@ -38,15 +38,15 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(Long userId, String email, String nickname, Role role) {
-        return createToken(userId.toString(), email, nickname, role, accessTokenExpiration);
+    public String generateAccessToken(String userId, String email, String nickname, Role role) {
+        return createToken(userId, email, nickname, role, accessTokenExpiration);
     }
 
-    public String generateRefreshToken(Long userId, String email, String nickname, Role role) {
-        return createToken(userId.toString(), email, nickname, role, refreshTokenExpiration);
+    public String generateRefreshToken(String userId, String email, String nickname, Role role) {
+        return createToken(userId, email, nickname, role, refreshTokenExpiration);
     }
 
-    public TokenResponseDto generateTokenPair(Long userId, String email, String nickname,
+    public TokenResponseDto generateTokenPair(String userId, String email, String nickname,
         Role role) {
         String accessToken = generateAccessToken(userId, email, nickname, role);
         String refreshToken = generateRefreshToken(userId, email, nickname, role);
@@ -111,8 +111,8 @@ public class JwtTokenProvider {
         }
     }
 
-    public Long getAuthorId(String token) throws JwtAuthenticationException {
-        return Long.parseLong(parseClaims(token).getSubject());
+    public String getAuthorId(String token) throws JwtAuthenticationException {
+        return parseClaims(token).getSubject();
     }
 
     public String getEmail(String token) throws JwtAuthenticationException {

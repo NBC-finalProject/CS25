@@ -5,6 +5,7 @@ import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.BatchMailService;
 import com.example.cs25batch.batch.service.BatchSubscriptionService;
 import com.example.cs25batch.batch.service.TodayQuizService;
+import com.example.cs25batch.config.ThreadShuttingJobListener;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
@@ -14,6 +15,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -123,11 +125,11 @@ public class DailyMailSendJob {
     @Bean
     public Tasklet mailProducerTasklet() {
         return (contribution, chunkContext) -> {
-            //log.info("[배치 시작] 메일 발송 대상 구독자 선별");
+            log.info("[배치 시작] 메일 발송 대상 구독자 선별");
 
-            long searchStart = System.currentTimeMillis();
+            //long searchStart = System.currentTimeMillis();
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
-            long searchEnd = System.currentTimeMillis();
+            //long searchEnd = System.currentTimeMillis();
             //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd - searchStart);
 
             for (SubscriptionMailTargetDto sub : subscriptions) {
@@ -139,9 +141,20 @@ public class DailyMailSendJob {
                 //log.info("[2. Queue에 넣기] {}ms", queueEnd-queueStart);
             }
 
-            //log.info("[배치 종료] MessageQueue push 완료");
+            log.info("[배치 종료] MessageQueue push 완료");
             return RepeatStatus.FINISHED;
         };
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("mail-step-thread-");
+        executor.initialize();
+        return executor;
     }
 
     @Bean
@@ -183,9 +196,12 @@ public class DailyMailSendJob {
 
     @Bean
     public Job mailConsumerWithAsyncJob(JobRepository jobRepository,
-        @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep) {
+        @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep,
+        ThreadShuttingJobListener threadShuttingJobListener
+    ) {
         return new JobBuilder("mailConsumerWithAsyncJob", jobRepository)
             .start(mailConsumeStep)
+            .listener(threadShuttingJobListener)
             .build();
     }
 

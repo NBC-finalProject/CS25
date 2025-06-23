@@ -1,9 +1,9 @@
 package com.example.cs25entity.domain.quiz.repository;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
-
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +20,5 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     @Query("SELECT q FROM Quiz q ORDER BY q.createdAt DESC")
     Page<Quiz> findAllOrderByCreatedAtDesc(Pageable pageable);
 
+    Optional<Quiz> findBySerialId(String quizId);
 }
