@@ -99,9 +99,9 @@ public class TodayQuizService {
     //유저 정답률 기준으로 바운더리 정해줌
     private List<QuizLevel> getAllowedDifficulties(double accuracy) {
         // 난이도 낮
-        if (accuracy <= 0.5) {
+        if (accuracy <= 50.0) {
             return List.of(QuizLevel.EASY);
-        } else if (accuracy <= 0.75) { //난이도 중
+        } else if (accuracy <= 75.0) { //난이도 중
             return List.of(QuizLevel.EASY, QuizLevel.NORMAL);
         } else { //난이도 상
             return List.of(QuizLevel.EASY, QuizLevel.NORMAL, QuizLevel.HARD);
