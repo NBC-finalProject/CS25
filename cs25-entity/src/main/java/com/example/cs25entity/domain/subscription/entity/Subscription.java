@@ -48,6 +48,7 @@ public class Subscription extends BaseEntity {
 
     private int subscriptionType; // "월화수목금토일" => "1111111"
 
+    @Column(unique = true)
     private String serialId;
 
     @Builder
