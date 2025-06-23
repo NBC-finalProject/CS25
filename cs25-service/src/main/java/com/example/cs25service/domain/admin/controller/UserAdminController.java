@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.admin.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25service.domain.admin.dto.request.UserRoleUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.UserDetailResponseDto;
 import com.example.cs25service.domain.admin.dto.response.UserPageResponseDto;
 import com.example.cs25service.domain.admin.service.UserAdminService;
@@ -71,4 +72,16 @@ public class UserAdminController {
 
         return new ApiResponse<>(204);
     }
+
+    //PATCH  관리자의 권한 수정 /admin/users/{userId}/role
+    @PatchMapping("/{userId}/role")
+    public ApiResponse<Void> patchUserRole(
+        @Positive @PathVariable(name = "userId") Long userId,
+        @RequestBody @Valid UserRoleUpdateRequestDto request
+    ) {
+        userAdminService.patchUserRole(userId, request);
+        return new ApiResponse<>(204);
+    }
+
+
 }
