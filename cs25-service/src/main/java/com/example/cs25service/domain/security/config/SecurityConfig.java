@@ -6,6 +6,7 @@ import com.example.cs25service.domain.oauth2.service.CustomOAuth2UserService;
 import com.example.cs25service.domain.security.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25service.domain.security.jwt.provider.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,7 +18,6 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,7 +30,7 @@ public class SecurityConfig {
     private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    
+
     @Value("${FRONT_END_URI:http://localhost:5173}")
     private String frontEndUri;
 
@@ -41,7 +41,7 @@ public class SecurityConfig {
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -74,9 +74,12 @@ public class SecurityConfig {
                 //로그인이 필요한 서비스만 여기다가 추가하기 (permaiAll 은 패싱 ㄱㄱ)
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers(HttpMethod.POST, "/quizzes/upload/**")
-                .hasAnyRole(PERMITTED_ROLES) //퀴즈 업로드 - 추후 ADMIN으로 변경
+                .hasRole("ADMIN")//퀴즈 업로드 - 추후 ADMIN으로 변경
+
                 .requestMatchers(HttpMethod.POST, "/auth/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/quiz-categories/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/crawlers/github/**").hasRole("ADMIN")
 
                 .anyRequest().permitAll()
             )

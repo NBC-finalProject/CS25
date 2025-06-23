@@ -44,7 +44,11 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
         redisTemplate.opsForStream().acknowledge(STREAM, GROUP, msg.getId());
 
         Map<String, String> data = new HashMap<>();
-        msg.getValue().forEach((k, v) -> data.put(k.toString(), v.toString()));
+        Object subscriptionId = msg.getValue().get("subscriptionId");
+        if (subscriptionId != null) {
+            data.put("subscriptionId", subscriptionId.toString());
+        }
+        data.put("recordId", msg.getId().getValue());
 
         //long end = System.currentTimeMillis();
         //log.info("[3. Queue에서 꺼내기] {}ms", end - start);

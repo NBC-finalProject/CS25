@@ -3,6 +3,7 @@ package com.example.cs25entity.domain.mail.entity;
 import com.example.cs25entity.domain.mail.enums.MailStatus;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,6 +42,8 @@ public class MailLog {
     @Enumerated(EnumType.STRING)
     private MailStatus status;
 
+    @Column(length = 300)
+    private String caused;
     /**
      * Constructs a MailLog entity with the specified id, user, quiz, send date, and mail status.
      *
@@ -52,12 +55,13 @@ public class MailLog {
      */
     @Builder
     public MailLog(Long id, Subscription subscription, Quiz quiz, LocalDateTime sendDate,
-        MailStatus status) {
+        MailStatus status, String caused) {
         this.id = id;
         this.subscription = subscription;
         this.quiz = quiz;
         this.sendDate = sendDate;
         this.status = status;
+        this.caused = caused;
     }
 
     /**

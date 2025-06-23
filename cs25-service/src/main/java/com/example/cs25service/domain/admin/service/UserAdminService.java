@@ -5,10 +5,12 @@ import static com.example.cs25entity.domain.subscription.entity.Subscription.dec
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.entity.SubscriptionHistory;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionHistoryRepository;
+import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
+import com.example.cs25service.domain.admin.dto.request.UserRoleUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.UserDetailResponseDto;
 import com.example.cs25service.domain.admin.dto.response.UserPageResponseDto;
 import com.example.cs25service.domain.subscription.dto.SubscriptionHistoryDto;
@@ -141,5 +143,18 @@ public class UserAdminService {
         }
 
         subscriptionService.cancelSubscription(user.getSubscription().getSerialId());
+    }
+
+    @Transactional
+    public void patchUserRole(@Positive Long userId, @Valid UserRoleUpdateRequestDto request) {
+        User user = userRepository.findByIdOrElseThrow(userId);
+
+        Role requestRole = request.getRole();
+
+        if (requestRole == null) {
+            throw new UserException(UserExceptionCode.INVALID_ROLE);
+        } else if (!requestRole.equals(user.getRole())) {
+            user.updateRole(request.getRole());
+        }
     }
 }
