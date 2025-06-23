@@ -7,6 +7,8 @@ import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptio
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,4 +45,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
         @Param("todayBit") int todayBit);
 
     Optional<Subscription> findByEmail(String email);
+
+    Page<Subscription> findAllByOrderByIdAsc(Pageable pageable);
+
+    Optional<Subscription> findBySerialId(String subscriptionId);
 }

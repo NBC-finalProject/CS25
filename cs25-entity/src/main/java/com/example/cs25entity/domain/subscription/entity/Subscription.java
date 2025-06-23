@@ -1,6 +1,5 @@
 package com.example.cs25entity.domain.subscription.entity;
 
-
 import com.example.cs25common.global.entity.BaseEntity;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import jakarta.persistence.Column;
@@ -15,6 +14,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,6 +48,9 @@ public class Subscription extends BaseEntity {
 
     private int subscriptionType; // "월화수목금토일" => "1111111"
 
+    @Column(unique = true)
+    private String serialId;
+
     @Builder
     public Subscription(QuizCategory category, String email, LocalDate startDate,
         LocalDate endDate, Set<DayOfWeek> subscriptionType) {
@@ -57,6 +60,7 @@ public class Subscription extends BaseEntity {
         this.endDate = endDate;
         this.isActive = true;
         this.subscriptionType = encodeDays(subscriptionType);
+        this.serialId = UUID.randomUUID().toString();
     }
 
     // Set<DayOfWeek> → int

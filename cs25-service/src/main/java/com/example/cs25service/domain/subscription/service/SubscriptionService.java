@@ -45,8 +45,9 @@ public class SubscriptionService {
      * @return 구독정보 DTO 반환
      */
     @Transactional(readOnly = true)
-    public SubscriptionInfoDto getSubscription(Long subscriptionId) {
-        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+    public SubscriptionInfoDto getSubscription(String subscriptionId) {
+        Subscription subscription = subscriptionRepository.findBySerialId(subscriptionId)
+            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
 
         //구독 시작, 구독 종료 날짜 기반으로 구독 기간 계산
         LocalDate start = subscription.getStartDate();
@@ -79,7 +80,7 @@ public class SubscriptionService {
             request.getCategory());
 
         //퀴즈 카테고리가 대분류인지 검증
-        if (!quizCategory.isParentCategory()) {
+        if (!quizCategory.isChildCategory()) {
             throw new QuizException(QuizExceptionCode.PARENT_CATEGORY_REQUIRED_ERROR);
         }
 
@@ -159,9 +160,10 @@ public class SubscriptionService {
      * @param requestDto     사용자로부터 받은 업데이트할 구독정보
      */
     @Transactional
-    public void updateSubscription(Long subscriptionId,
+    public void updateSubscription(String subscriptionId,
         SubscriptionRequestDto requestDto) {
-        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+        Subscription subscription = subscriptionRepository.findBySerialId(subscriptionId)
+            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             requestDto.getCategory());
 
@@ -189,8 +191,9 @@ public class SubscriptionService {
      * @param subscriptionId 구독 아이디
      */
     @Transactional
-    public void cancelSubscription(Long subscriptionId) {
-        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
+    public void cancelSubscription(String subscriptionId) {
+        Subscription subscription = subscriptionRepository.findBySerialId(subscriptionId)
+            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
 
         subscription.updateDisable();
         createSubscriptionHistory(subscription);

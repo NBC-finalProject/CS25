@@ -2,6 +2,7 @@ package com.example.cs25entity.domain.user.entity;
 
 import com.example.cs25common.global.entity.BaseEntity;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,9 @@ public class User extends BaseEntity {
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
 
+    @Column(unique = true)
+    private String serialId;
+
     /**
      * Constructs a new User with the specified email and name, initializing totalSolved to zero.
      *
@@ -59,6 +64,7 @@ public class User extends BaseEntity {
         this.role = role;
         this.score = score;
         this.subscription = subscription;
+        this.serialId = UUID.randomUUID().toString();
     }
 
     /****

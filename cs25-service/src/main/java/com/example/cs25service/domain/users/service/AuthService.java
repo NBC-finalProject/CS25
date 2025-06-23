@@ -26,7 +26,7 @@ public class AuthService {
         throws JwtAuthenticationException {
         String refreshToken = reissueRequestDto.getRefreshToken();
 
-        Long userId = jwtTokenProvider.getAuthorId(refreshToken);
+        String userId = jwtTokenProvider.getAuthorId(refreshToken);
         String email = jwtTokenProvider.getEmail(refreshToken);
         String nickname = jwtTokenProvider.getNickname(refreshToken);
         Role role = jwtTokenProvider.getRole(refreshToken);
@@ -48,7 +48,7 @@ public class AuthService {
         return newToken;
     }
 
-    public void logout(Long userId) {
+    public void logout(String userId) {
         if (!refreshTokenService.exists(userId)) {
             throw new UserException(UserExceptionCode.TOKEN_NOT_MATCHED);
         }

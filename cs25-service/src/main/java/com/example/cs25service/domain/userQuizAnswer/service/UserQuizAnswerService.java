@@ -42,16 +42,19 @@ public class UserQuizAnswerService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     public Long answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
+
+        // 구독 정보 조회
+        Subscription subscription = subscriptionRepository.findBySerialId(
+                requestDto.getSubscriptionId())
+            .orElseThrow(() -> new SubscriptionException(
+                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
+
         // 중복 답변 제출 막음
-        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, requestDto.getSubscriptionId());
+        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId,
+            subscription.getId());
         if (isDuplicate) {
             throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
         }
-
-        // 구독 정보 조회
-        Subscription subscription = subscriptionRepository.findById(requestDto.getSubscriptionId())
-            .orElseThrow(() -> new SubscriptionException(
-                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
         // 유저 정보 조회
         User user = userRepository.findBySubscription(subscription);
