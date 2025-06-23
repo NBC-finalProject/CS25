@@ -5,23 +5,18 @@ import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.entity.QMailLog;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import java.time.LocalTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-public class MailLogCustomRepositoryImpl implements MailLogCustomRepository{
-    private final EntityManager entityManager;
-    private final JPAQueryFactory queryFactory;
+@RequiredArgsConstructor
+public class MailLogCustomRepositoryImpl implements MailLogCustomRepository {
 
-    public MailLogCustomRepositoryImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-        this.queryFactory = new JPAQueryFactory(entityManager);
-    }
+    private final JPAQueryFactory queryFactory;
 
     @Override
     @Transactional(readOnly = true)

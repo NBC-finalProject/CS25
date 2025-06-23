@@ -11,9 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface QuizRepository extends JpaRepository<Quiz, Long> {
-
-    List<Quiz> findAllByCategoryId(Long categoryId);
+public interface QuizRepository extends JpaRepository<Quiz, Long>, QuizCustomRepository {
 
     List<Quiz> findAllByCategoryIdIn(Collection<Long> categoryIds);
 
@@ -21,4 +19,5 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     Page<Quiz> findAllOrderByCreatedAtDesc(Pageable pageable);
 
     Optional<Quiz> findBySerialId(String quizId);
+
 }

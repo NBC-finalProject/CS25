@@ -20,10 +20,10 @@ public class QuizTestController {
         return new ApiResponse<>(200, accuracyService.getTodayQuiz(1L));
     }
 
-    @GetMapping("/accuracyTest/getTodayQuizNew")
-    public ApiResponse<QuizDto> getTodayQuizNew() {
-        return new ApiResponse<>(200, accuracyService.getTodayQuizNew(1L));
-    }
+//    @GetMapping("/accuracyTest/getTodayQuizNew")
+//    public ApiResponse<QuizDto> getTodayQuizNew() {
+//        return new ApiResponse<>(200, accuracyService.getTodayQuizNew(1L));
+//    }
 
     @PostMapping("/emails/getTodayQuiz")
     public ApiResponse<String> sendTodayQuiz(
