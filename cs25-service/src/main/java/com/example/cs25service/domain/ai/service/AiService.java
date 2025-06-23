@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.ai.service;
 
-
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
@@ -15,11 +14,9 @@ import com.example.cs25service.domain.ai.exception.AiException;
 import com.example.cs25service.domain.ai.exception.AiExceptionCode;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -27,11 +24,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class AiService {
 
-
     private final ChatClient chatClient;
 
     @Qualifier("fallbackAiChatClient")
     private final AiChatClient aiChatClient;
+
     private final AiFeedbackQueueService feedbackQueueService;
     private final QuizRepository quizRepository;
     private final SubscriptionRepository subscriptionRepository;
@@ -53,17 +50,12 @@ public class AiService {
         String feedback = aiChatClient.call(systemPrompt, userPrompt);
         boolean isCorrect = feedback.startsWith("정답");
 
-        User user = userRepository.findById(answer.getUser().getId()).orElseThrow(
-                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-        );
+        User user = userRepository.findById(answer.getUser().getId())
+            .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
-        // 점수 부여
-        double score;
-        if(isCorrect){
-            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
-        }else{
-            score = user.getScore() + 1;
-        }
+        double score = isCorrect
+            ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp())
+            : user.getScore() + 1;
 
         user.updateScore(score);
         answer.updateIsCorrect(isCorrect);
@@ -85,60 +77,5 @@ public class AiService {
 
         feedbackQueueService.enqueue(new FeedbackRequest(answerId, emitter));
         return emitter;
-    }
-
-    private void sendSseEvent(SseEmitter emitter, String data) {
-        try {
-            emitter.send(SseEmitter.event().data(data));
-        } catch (IOException e) {
-            emitter.completeWithError(e);
-        }
-    }
-
-    public void streamFeedbackInternal(Long answerId, SseEmitter emitter) {
-        try {
-            sendSseEvent(emitter,"🔍 유저 답변 조회 중...");
-            var answer = userQuizAnswerRepository.findById(answerId)
-                .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
-
-            sendSseEvent(emitter,"📚 관련 문서 검색 중...");
-            var quiz = answer.getQuiz();
-            var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.3);
-
-            sendSseEvent(emitter,"🧠 프롬프트 생성 중...");
-            String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
-            String systemPrompt = promptProvider.getFeedbackSystem();
-
-            // AI 응답 생성
-            sendSseEvent(emitter,"🤖 AI 응답 대기 중...");
-            String feedback = aiChatClient.call(systemPrompt, userPrompt);
-
-            // 문장 단위 분할
-            String[] lines = feedback.split("(?<=[.!?]|다\\.|습니다\\.|입니다\\.)\\s*");
-
-            for (String line : lines) {
-                sendSseEvent(emitter,"🤖 " + line.trim());
-            }
-
-            // 정답 여부 판별 및 저장
-            boolean isCorrect = feedback.startsWith("정답");
-            User user = userRepository.findById(answer.getUser().getId())
-                .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
-
-            double score = isCorrect
-                ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp())
-                : user.getScore() + 1;
-
-            user.updateScore(score);
-            answer.updateIsCorrect(isCorrect);
-            answer.updateAiFeedback(feedback);
-            userQuizAnswerRepository.save(answer);
-
-            emitter.send(SseEmitter.event().name("complete").data("✅ 피드백 완료"));
-            emitter.complete();
-
-        } catch (Exception e) {
-            emitter.completeWithError(e);
-        }
     }
 }
