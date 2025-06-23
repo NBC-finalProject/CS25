@@ -19,9 +19,8 @@ import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
-import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
-import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,29 +60,64 @@ public class UserQuizAnswerService {
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
 
-        // 정답 체크
-        boolean isCorrect = requestDto.getAnswer().equals(quiz.getAnswer().substring(0, 1));
-
-        double score;
-
-        if(isCorrect){
-            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
-        }else{
-            score = user.getScore() + 1;
-        }
-
-        user.updateScore(score);
-
         UserQuizAnswer answer = userQuizAnswerRepository.save(
             UserQuizAnswer.builder()
                 .userAnswer(requestDto.getAnswer())
-                .isCorrect(isCorrect)
+                .isCorrect(null)
                 .user(user)
                 .quiz(quiz)
                 .subscription(subscription)
                 .build()
         );
         return answer.getId();
+    }
+
+    /**
+     * 객관식 or 주관식 채점
+     * @param userQuizAnswerId
+     * @return
+     */
+    @Transactional
+    public CheckSimpleAnswerResponseDto checkSimpleAnswer(Long userQuizAnswerId) {
+        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findByIdWithQuiz(userQuizAnswerId).orElseThrow(
+                () -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
+        );
+
+        Quiz quiz = quizRepository.findById(userQuizAnswer.getQuiz().getId()).orElseThrow(
+                () -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR)
+        );
+
+        User user = userRepository.findById(userQuizAnswer.getUser().getId()).orElseThrow(
+                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
+        );
+
+        boolean isCorrect;
+
+        if(quiz.getType().getScore() == 1){
+            isCorrect = userQuizAnswer.getUserAnswer().equals(quiz.getAnswer().substring(0, 1));
+        }else if(quiz.getType().getScore() == 3){
+            isCorrect = userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
+        }else{
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+
+        double score;
+        if(isCorrect){
+            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
+        }else{
+            score = user.getScore() + 1;
+        }
+
+        userQuizAnswer.updateIsCorrect(isCorrect);
+        user.updateScore(score);
+
+        return new CheckSimpleAnswerResponseDto(
+                quiz.getQuestion(),
+                userQuizAnswer.getUserAnswer(),
+                quiz.getAnswer(),
+                quiz.getCommentary(),
+                userQuizAnswer.getIsCorrect()
+        );
     }
 
     public SelectionRateResponseDto getSelectionRateByOption(Long quizId) {

@@ -39,9 +39,4 @@ public class QuizController {
         quizService.uploadQuizJson(file, categoryType, formatType);
         return new ApiResponse<>(200, "문제 등록 성공");
     }
-
-    @GetMapping("/{quizId}")
-    public ApiResponse<QuizResponseDto> getQuizDetail(@PathVariable Long quizId) {
-        return new ApiResponse<>(200, quizService.getQuizDetail(quizId));
-    }
 }
