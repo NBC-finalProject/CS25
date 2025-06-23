@@ -123,11 +123,11 @@ public class DailyMailSendJob {
     @Bean
     public Tasklet mailProducerTasklet() {
         return (contribution, chunkContext) -> {
-            log.info("[배치 시작] 메일 발송 대상 구독자 선별");
+            //log.info("[배치 시작] 메일 발송 대상 구독자 선별");
 
-            //long searchStart = System.currentTimeMillis();
+            long searchStart = System.currentTimeMillis();
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
-            //long searchEnd = System.currentTimeMillis();
+            long searchEnd = System.currentTimeMillis();
             //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd - searchStart);
 
             for (SubscriptionMailTargetDto sub : subscriptions) {
@@ -139,20 +139,9 @@ public class DailyMailSendJob {
                 //log.info("[2. Queue에 넣기] {}ms", queueEnd-queueStart);
             }
 
-            log.info("[배치 종료] MessageQueue push 완료");
+            //log.info("[배치 종료] MessageQueue push 완료");
             return RepeatStatus.FINISHED;
         };
-    }
-
-    @Bean
-    public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("mail-step-thread-");
-        executor.initialize();
-        return executor;
     }
 
     @Bean
@@ -182,6 +171,17 @@ public class DailyMailSendJob {
     }
 
     @Bean
+    public ThreadPoolTaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("mail-step-thread-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
     public Job mailConsumerWithAsyncJob(JobRepository jobRepository,
         @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep) {
         return new JobBuilder("mailConsumerWithAsyncJob", jobRepository)
@@ -197,7 +197,7 @@ public class DailyMailSendJob {
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
         PlatformTransactionManager transactionManager,
         MailStepLogger mailStepLogger,
-        @Qualifier("taskExecutor") TaskExecutor taskExecutor
+        @Qualifier("taskExecutor") ThreadPoolTaskExecutor taskExecutor
     ) {
         return new StepBuilder("mailConsumerWithAsyncStep", jobRepository)
             .<Map<String, String>, MailDto>chunk(10, transactionManager)

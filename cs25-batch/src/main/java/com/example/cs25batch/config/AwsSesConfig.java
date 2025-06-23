@@ -10,18 +10,17 @@ import software.amazon.awssdk.services.sesv2.SesV2Client;
 
 @Configuration
 public class AwsSesConfig {
-    @Value("aws.ses.accessKey")
+    @Value("${AWS_SES_ACCESS_KEY}")
     private String accessKey;
-    @Value("aws.ses.secretKey")
+    @Value("${AWS_SES_SECRET_KEY}")
     private String secretKey;
-    private String region;
 
     @Bean
     public SesV2Client amazonSesClient() {	// SES V2 사용 시 SesV2Client
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
         return SesV2Client.builder()
             .credentialsProvider(StaticCredentialsProvider.create(credentials))
-            .region(Region.of(region))
+            .region(Region.AP_NORTHEAST_2)
             .build();
     }
 }

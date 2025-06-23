@@ -41,6 +41,7 @@ public class MailLog {
     @Enumerated(EnumType.STRING)
     private MailStatus status;
 
+    private String caused;
     /**
      * Constructs a MailLog entity with the specified id, user, quiz, send date, and mail status.
      *
@@ -52,12 +53,13 @@ public class MailLog {
      */
     @Builder
     public MailLog(Long id, Subscription subscription, Quiz quiz, LocalDateTime sendDate,
-        MailStatus status) {
+        MailStatus status, String caused) {
         this.id = id;
         this.subscription = subscription;
         this.quiz = quiz;
         this.sendDate = sendDate;
         this.status = status;
+        this.caused = caused;
     }
 
     /**
