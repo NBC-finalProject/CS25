@@ -64,7 +64,7 @@ public class AiService {
 
                 emitter.send(SseEmitter.event().data("📚 관련 문서 검색 중..."));
                 var quiz = answer.getQuiz();
-                var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.1);
+                var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.3);
 
                 emitter.send(SseEmitter.event().data("🧠 프롬프트 생성 중..."));
                 String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
