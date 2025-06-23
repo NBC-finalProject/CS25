@@ -23,7 +23,7 @@ public class AiController {
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
     private final FileLoaderService fileLoaderService;
 
-    @GetMapping(value = "/{answerId}/feedback/stream", produces = "text/event-stream")
+    @GetMapping(value = "/{answerId}/feedback", produces = "text/event-stream")
     public SseEmitter streamFeedback(@PathVariable Long answerId) {
         return aiService.streamFeedback(answerId);
     }
