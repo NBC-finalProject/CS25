@@ -2,6 +2,7 @@ package com.example.cs25service.domain.mail.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
+import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.mail.service.MailLogService;
 import java.util.List;
@@ -31,14 +32,14 @@ public class MailLogController {
         return mailLogService.getMailLogs(condition, pageable);
     }
 
-    @GetMapping("/{id}")
-    public MailLogResponse getMailLog(@PathVariable Long id) {
-        return mailLogService.getMailLog(id);
+    @GetMapping("/{mailLogId}")
+    public MailLogDetailResponse getMailLog(@PathVariable Long mailLogId) {
+        return mailLogService.getMailLog(mailLogId);
     }
 
     @DeleteMapping
-    public ApiResponse<String> deleteMailLogs(@RequestBody List<Long> ids) {
-        mailLogService.deleteMailLogs(ids);
+    public ApiResponse<String> deleteMailLogs(@RequestBody List<Long> mailLogIdids) {
+        mailLogService.deleteMailLogs(mailLogIdids);
         return new ApiResponse<>(200, "MailLog 삭제 완료");
     }
 }

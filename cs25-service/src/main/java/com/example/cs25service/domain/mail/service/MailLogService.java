@@ -3,6 +3,7 @@ package com.example.cs25service.domain.mail.service;
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.repository.MailLogRepository;
+import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,9 @@ public class MailLogService {
 
     //단일 로그 조회
     @Transactional(readOnly = true)
-    public MailLogResponse getMailLog(Long id) {
+    public MailLogDetailResponse getMailLog(Long id) {
         MailLog mailLog = mailLogRepository.findByIdOrElseThrow(id);
-        return MailLogResponse.from(mailLog);
+        return MailLogDetailResponse.from(mailLog);
     }
 
     @Transactional
