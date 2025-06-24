@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -203,4 +204,32 @@ class QuizCategoryServiceTest {
         assertEquals("PARENT", response.getMain());
     }
 
+    @Test
+    @DisplayName("카테고리 삭제 성공")
+    void deleteQuizCategory_success() {
+        // given
+        when(quizCategoryRepository.existsById(1L)).thenReturn(true);
+
+        // when
+        quizCategoryService.deleteQuizCategory(1L);
+
+        // then
+        verify(quizCategoryRepository).existsById(1L);
+        verify(quizCategoryRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 카테고리 삭제 시 예외 발생")
+    void deleteQuizCategory_notFound_shouldThrowException() {
+        // given
+        when(quizCategoryRepository.existsById(999L)).thenReturn(false);
+
+        // when
+        QuizException ex = assertThrows(QuizException.class,
+            () -> quizCategoryService.deleteQuizCategory(999L));
+
+        //then
+        assertEquals(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR, ex.getErrorCode());
+        verify(quizCategoryRepository, never()).deleteById(any());
+    }
 }

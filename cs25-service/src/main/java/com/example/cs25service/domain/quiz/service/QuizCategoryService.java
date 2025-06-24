@@ -71,6 +71,9 @@ public class QuizCategoryService {
 
     @Transactional
     public void deleteQuizCategory(Long quizCategoryId){
+        if (!quizCategoryRepository.existsById(quizCategoryId)) {
+            throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR);
+        }
         quizCategoryRepository.deleteById(quizCategoryId);
     }
 }
