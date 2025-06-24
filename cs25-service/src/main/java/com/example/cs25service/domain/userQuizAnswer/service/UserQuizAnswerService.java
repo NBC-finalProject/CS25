@@ -57,7 +57,7 @@ public class UserQuizAnswerService {
         }
 
         // 유저 정보 조회
-        User user = userRepository.findBySubscription(subscription);
+        User user = userRepository.findBySubscription(subscription).orElse(null);
 
         // 퀴즈 조회
         Quiz quiz = quizRepository.findById(quizId)
@@ -90,9 +90,7 @@ public class UserQuizAnswerService {
                 () -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR)
         );
 
-        User user = userRepository.findById(userQuizAnswer.getUser().getId()).orElseThrow(
-                () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-        );
+        User user = userRepository.findBySubscription(userQuizAnswer.getSubscription()).orElse(null);
 
         boolean isCorrect;
 
@@ -104,15 +102,18 @@ public class UserQuizAnswerService {
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
 
-        double score;
-        if(isCorrect){
-            score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
-        }else{
-            score = user.getScore() + 1;
+        // 회원인 경우에만 점수 부여
+        if(user != null){
+            double score;
+            if(isCorrect){
+                score = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
+            }else{
+                score = user.getScore() + 1;
+            }
+            user.updateScore(score);
         }
 
         userQuizAnswer.updateIsCorrect(isCorrect);
-        user.updateScore(score);
 
         return new CheckSimpleAnswerResponseDto(
                 quiz.getQuestion(),
