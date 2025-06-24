@@ -6,6 +6,7 @@ import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25service.domain.quiz.dto.QuizCategoryRequestDto;
+import com.example.cs25service.domain.quiz.dto.QuizCategoryResponseDto;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,6 @@ public class QuizCategoryService {
 
     @Transactional
     public void createQuizCategory(AuthUser authUser, QuizCategoryRequestDto request) {
-
-//        if(authUser.getRole() != Role.ADMIN){
-//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
-//        }
 
         quizCategoryRepository.findByCategoryType(request.getCategory())
             .ifPresent(c -> {
@@ -53,5 +50,21 @@ public class QuizCategoryService {
         return quizCategoryRepository.findByParentIdIsNull() //대분류만 찾아오도록 변경
             .stream().map(QuizCategory::getCategoryType
             ).toList();
+    }
+
+    @Transactional
+    public QuizCategoryResponseDto updateQuizCategoryList(AuthUser authUser, Long quizCategoryId, QuizCategoryRequestDto request) {
+        QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(quizCategoryId);
+        quizCategory.setCategoryType(request.getCategory());
+
+        if(request.getParentId() != null){
+            QuizCategory parentQuizCategory = quizCategoryRepository.findByIdOrElseThrow(request.getParentId());
+            quizCategory.setParent(parentQuizCategory);
+        }
+
+        return QuizCategoryResponseDto.builder()
+            .main(quizCategory.getParent().getCategoryType())
+            .sub(quizCategory.getCategoryType())
+            .build();
     }
 }
