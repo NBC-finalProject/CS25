@@ -50,14 +50,13 @@ public class AiService {
         String feedback = aiChatClient.call(systemPrompt, userPrompt);
         boolean isCorrect = feedback.startsWith("정답");
 
-        User user = userRepository.findById(answer.getUser().getId())
-            .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
+        User user = userRepository.findById(answer.getUser().getId()).orElse(null);
 
-        double score = isCorrect
-            ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp())
-            : user.getScore() + 1;
+        if(user != null){
+            double score = isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp()) : user.getScore() + 1;
+            user.updateScore(score);
+        }
 
-        user.updateScore(score);
         answer.updateIsCorrect(isCorrect);
         answer.updateAiFeedback(feedback);
         userQuizAnswerRepository.save(answer);
