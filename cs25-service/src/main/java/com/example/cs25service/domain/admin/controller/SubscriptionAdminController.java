@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/admin/subscriptions")
 public class SubscriptionAdminController {
 
     private final SubscriptionAdminService subscriptionAdminService;
 
-    @GetMapping("/subscription")
+    @GetMapping
     public ApiResponse<Page<SubscriptionPageResponseDto>> getSubscriptionLists(
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "30") int size
@@ -23,7 +23,7 @@ public class SubscriptionAdminController {
     }
 
     // 구독자 개별 조회
-    @GetMapping("/subscription/{subscriptionId}")
+    @GetMapping("/{subscriptionId}")
     public ApiResponse<SubscriptionPageResponseDto> getSubscription(
             @PathVariable Long subscriptionId
     ){
@@ -31,7 +31,7 @@ public class SubscriptionAdminController {
     }
 
     // 구독자 삭제
-    @PatchMapping("/subscription/{subscriptionId}")
+    @PatchMapping("/{subscriptionId}")
     public ApiResponse<Void> deleteSubscription(
             @PathVariable Long subscriptionId
     ) {
@@ -41,5 +41,5 @@ public class SubscriptionAdminController {
 
 
 
-    
+
 }

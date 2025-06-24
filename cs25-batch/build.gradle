@@ -33,6 +33,9 @@ dependencies {
     //Monitoring
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    //Test dummy Data
+    implementation 'net.datafaker:datafaker:2.2.2'
 }
 
 bootJar {
