@@ -8,7 +8,7 @@ import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
-import com.example.cs25service.domain.security.dto.AuthUser;
+import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -38,15 +38,10 @@ public class QuizService {
 
     @Transactional
     public void uploadQuizJson(
-        AuthUser authUser,
         MultipartFile file,
         String categoryType,
         QuizFormatType formatType
     ) {
-
-//        if(authUser.getRole() != Role.ADMIN){
-//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
-//        }
 
         try {
             //대분류 확인
@@ -104,5 +99,17 @@ public class QuizService {
         } catch (ConstraintViolationException e) {
             throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public QuizResponseDto getQuiz(Long id) {
+        Quiz quiz = quizRepository.findByIdOrElseThrow(id);
+
+        return QuizResponseDto.builder()
+            .id(quiz.getId())
+            .question(quiz.getQuestion())
+            .answer(quiz.getAnswer())
+            .commentary(quiz.getCommentary() != null ? quiz.getCommentary() : null)
+            .build();
     }
 }

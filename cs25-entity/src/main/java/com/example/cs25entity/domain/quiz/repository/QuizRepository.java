@@ -1,6 +1,8 @@
 package com.example.cs25entity.domain.quiz.repository;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,4 +22,10 @@ public interface QuizRepository extends JpaRepository<Quiz, Long>, QuizCustomRep
 
     Optional<Quiz> findBySerialId(String quizId);
 
+    Optional<Quiz> findById(Long id);
+
+    default Quiz findByIdOrElseThrow(Long id) {
+        return findById(id)
+            .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
+    }
 }
