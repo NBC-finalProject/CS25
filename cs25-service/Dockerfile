@@ -1,14 +1,13 @@
 FROM gradle:8.10.2-jdk17 AS builder
 
 # 작업 디렉토리 설정
-WORKDIR /apps
+WORKDIR /build
 
 # 소스 복사 (모듈 전체가 아닌 현재 모듈만 복사)
 COPY . .
 
 # 테스트 생략하여 빌드 안정화
-RUN gradle clean build -x test
-
+RUN gradle :cs25-service:bootJar --no-daemon
 FROM openjdk:17
 
 # 메타 정보
@@ -18,7 +17,7 @@ LABEL type="application" module="cs25-service"
 WORKDIR /apps
 
 # jar 복사
-COPY --from=builder /apps/cs25-service/build/libs/cs25-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /build/cs25-service/build/libs/*.jar app.jar
 
 # 포트 오픈 (service는 8080)
 EXPOSE 8080
