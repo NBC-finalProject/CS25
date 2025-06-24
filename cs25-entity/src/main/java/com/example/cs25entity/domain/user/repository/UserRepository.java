@@ -13,6 +13,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -29,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         });
     }
 
-    User findBySubscription(Subscription subscription);
+    Optional<User> findBySubscription(Subscription subscription);
 
     default User findByIdOrElseThrow(Long id) {
         return findById(id).orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
