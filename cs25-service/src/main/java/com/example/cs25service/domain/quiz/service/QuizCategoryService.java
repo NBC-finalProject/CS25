@@ -53,7 +53,7 @@ public class QuizCategoryService {
     }
 
     @Transactional
-    public QuizCategoryResponseDto updateQuizCategoryList(AuthUser authUser, Long quizCategoryId, QuizCategoryRequestDto request) {
+    public QuizCategoryResponseDto updateQuizCategory(AuthUser authUser, Long quizCategoryId, QuizCategoryRequestDto request) {
         QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(quizCategoryId);
         quizCategory.setCategoryType(request.getCategory());
 
@@ -66,5 +66,10 @@ public class QuizCategoryService {
             .main(quizCategory.getParent().getCategoryType())
             .sub(quizCategory.getCategoryType())
             .build();
+    }
+
+    @Transactional
+    public void deleteQuizCategory(AuthUser authUser, Long quizCategoryId){
+        quizCategoryRepository.deleteById(quizCategoryId);
     }
 }

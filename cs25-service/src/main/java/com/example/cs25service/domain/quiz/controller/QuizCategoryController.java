@@ -47,7 +47,7 @@ public class QuizCategoryController {
         @NotNull @PathVariable Long quizCategoryId,
         @AuthenticationPrincipal AuthUser authUser
     ){
-        return new ApiResponse<>(200, quizCategoryService.updateQuizCategoryList(authUser, quizCategoryId, request));
+        return new ApiResponse<>(200, quizCategoryService.updateQuizCategory(authUser, quizCategoryId, request));
     }
 
     @DeleteMapping("/{quizCategoryId}")
@@ -55,6 +55,7 @@ public class QuizCategoryController {
         @NotNull @PathVariable Long quizCategoryId,
         @AuthenticationPrincipal AuthUser authUser
     ){
+        quizCategoryService.deleteQuizCategory(authUser, quizCategoryId);
         return new ApiResponse<>(200, "카테고리가 삭제되었습니다.");
     }
 }
