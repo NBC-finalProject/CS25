@@ -38,7 +38,7 @@ public class AiService {
     private final UserRepository userRepository;
 
     public AiFeedbackResponse getFeedback(Long answerId) {
-        var answer = userQuizAnswerRepository.findById(answerId)
+        var answer = userQuizAnswerRepository.findWithQuizAndUserById(answerId)
             .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
         var quiz = answer.getQuiz();
@@ -48,10 +48,10 @@ public class AiService {
         String systemPrompt = promptProvider.getFeedbackSystem();
 
         String feedback = aiChatClient.call(systemPrompt, userPrompt);
+
         boolean isCorrect = feedback.startsWith("정답");
 
-        User user = userRepository.findById(answer.getUser().getId()).orElse(null);
-
+        User user = answer.getUser();
         if(user != null){
             double score = isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp()) : user.getScore() + 1;
             user.updateScore(score);

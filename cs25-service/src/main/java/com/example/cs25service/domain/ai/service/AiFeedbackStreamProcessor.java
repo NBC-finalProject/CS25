@@ -31,7 +31,7 @@ public class AiFeedbackStreamProcessor {
     public void stream(Long answerId, SseEmitter emitter) {
         try {
             send(emitter, "🔍 유저 답변 조회 중...");
-            var answer = userQuizAnswerRepository.findById(answerId)
+            var answer = userQuizAnswerRepository.findWithQuizAndUserById(answerId)
                 .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
             send(emitter, "📚 관련 문서 검색 중...");
@@ -52,14 +52,13 @@ public class AiFeedbackStreamProcessor {
 
             boolean isCorrect = feedback.startsWith("정답");
 
-            User user = userRepository.findById(answer.getUser().getId())
-                .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
-            double score = isCorrect
-                ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp())
-                : user.getScore() + 1;
+            User user = answer.getUser();
+            if(user != null){
+                double score = isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp()) : user.getScore() + 1;
+                user.updateScore(score);
+            }
 
-            user.updateScore(score);
             answer.updateIsCorrect(isCorrect);
             answer.updateAiFeedback(feedback);
             userQuizAnswerRepository.save(answer);

@@ -21,6 +21,7 @@ import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRep
 import com.example.cs25service.domain.userQuizAnswer.dto.CheckSimpleAnswerResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -178,8 +179,7 @@ class UserQuizAnswerServiceTest {
                 .subscription(subscription)
                 .build();
 
-        when(userQuizAnswerRepository.findByIdWithQuiz(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
-        when(quizRepository.findById(choiceAnswer.getQuiz().getId())).thenReturn(Optional.of(choiceQuiz));
+        when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
 
         //when
         CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(choiceAnswer.getId());
@@ -197,8 +197,7 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findByIdWithQuiz(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
-        when(quizRepository.findById(shortAnswer.getQuiz().getId())).thenReturn(Optional.of(shortAnswerQuiz));
+        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
 
         //when
         CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(shortAnswer.getId());
@@ -217,9 +216,7 @@ class UserQuizAnswerServiceTest {
                 .subscription(subscription)
                 .build();
 
-        when(userQuizAnswerRepository.findByIdWithQuiz(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
-        when(quizRepository.findById(choiceAnswer.getQuiz().getId())).thenReturn(Optional.of(choiceQuiz));
-        when(userRepository.findBySubscription(subscription)).thenReturn(Optional.of(user));
+        when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
 
         //when
         CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(choiceAnswer.getId());
@@ -235,12 +232,11 @@ class UserQuizAnswerServiceTest {
         UserQuizAnswer shortAnswer = UserQuizAnswer.builder()
                 .subscription(subscription)
                 .userAnswer("java")
+                .user(user)
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findByIdWithQuiz(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
-        when(quizRepository.findById(shortAnswer.getQuiz().getId())).thenReturn(Optional.of(shortAnswerQuiz));
-        when(userRepository.findBySubscription(subscription)).thenReturn(Optional.of(user));
+        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
 
         //when
         CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(shortAnswer.getId());
@@ -259,8 +255,7 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findByIdWithQuiz(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
-        when(quizRepository.findById(shortAnswer.getQuiz().getId())).thenReturn(Optional.of(shortAnswerQuiz));
+        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
 
         //when
         CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(shortAnswer.getId());
