@@ -5,7 +5,7 @@ import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
-import com.example.cs25service.domain.quiz.dto.CreateQuizCategoryDto;
+import com.example.cs25service.domain.quiz.dto.QuizCategoryRequestDto;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class QuizCategoryService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void createQuizCategory(AuthUser authUser, CreateQuizCategoryDto request) {
+    public void createQuizCategory(AuthUser authUser, QuizCategoryRequestDto request) {
 
 //        if(authUser.getRole() != Role.ADMIN){
 //            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);

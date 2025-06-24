@@ -1,7 +1,7 @@
 package com.example.cs25service.domain.quiz.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
-import com.example.cs25service.domain.quiz.dto.CreateQuizCategoryDto;
+import com.example.cs25service.domain.quiz.dto.QuizCategoryRequestDto;
 import com.example.cs25service.domain.quiz.service.QuizCategoryService;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import jakarta.validation.Valid;
@@ -11,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,7 +26,7 @@ public class QuizCategoryController {
 
     @PostMapping("/quiz-categories")
     public ApiResponse<String> createQuizCategory(
-        @Valid @RequestBody CreateQuizCategoryDto request,
+        @Valid @RequestBody QuizCategoryRequestDto request,
         @AuthenticationPrincipal AuthUser authUser
     ) {
         quizCategoryService.createQuizCategory(authUser, request);
