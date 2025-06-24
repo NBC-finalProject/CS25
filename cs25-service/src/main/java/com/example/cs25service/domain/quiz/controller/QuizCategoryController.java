@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,11 +42,19 @@ public class QuizCategoryController {
     }
 
     @PutMapping("/{quizCategoryId}")
-    public ApiResponse<QuizCategoryResponseDto> updateQuizCategories(
+    public ApiResponse<QuizCategoryResponseDto> updateQuizCategory(
         @Valid @RequestBody QuizCategoryRequestDto request,
         @NotNull @PathVariable Long quizCategoryId,
         @AuthenticationPrincipal AuthUser authUser
     ){
         return new ApiResponse<>(200, quizCategoryService.updateQuizCategoryList(authUser, quizCategoryId, request));
+    }
+
+    @DeleteMapping("/{quizCategoryId}")
+    public ApiResponse<String> deleteQuizCategory(
+        @NotNull @PathVariable Long quizCategoryId,
+        @AuthenticationPrincipal AuthUser authUser
+    ){
+        return new ApiResponse<>(200, "카테고리가 삭제되었습니다.");
     }
 }
