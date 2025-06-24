@@ -37,7 +37,7 @@ public class QuizCategoryController {
         @Valid @RequestBody QuizCategoryRequestDto request,
         @AuthenticationPrincipal AuthUser authUser
     ) {
-        quizCategoryService.createQuizCategory(authUser, request);
+        quizCategoryService.createQuizCategory(request);
         return new ApiResponse<>(200, "카테고리 등록 성공");
     }
 
@@ -47,7 +47,7 @@ public class QuizCategoryController {
         @NotNull @PathVariable Long quizCategoryId,
         @AuthenticationPrincipal AuthUser authUser
     ){
-        return new ApiResponse<>(200, quizCategoryService.updateQuizCategory(authUser, quizCategoryId, request));
+        return new ApiResponse<>(200, quizCategoryService.updateQuizCategory(quizCategoryId, request));
     }
 
     @DeleteMapping("/{quizCategoryId}")
@@ -55,7 +55,7 @@ public class QuizCategoryController {
         @NotNull @PathVariable Long quizCategoryId,
         @AuthenticationPrincipal AuthUser authUser
     ){
-        quizCategoryService.deleteQuizCategory(authUser, quizCategoryId);
+        quizCategoryService.deleteQuizCategory(quizCategoryId);
         return new ApiResponse<>(200, "카테고리가 삭제되었습니다.");
     }
 }

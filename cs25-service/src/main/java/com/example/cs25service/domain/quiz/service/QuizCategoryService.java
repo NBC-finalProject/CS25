@@ -22,7 +22,7 @@ public class QuizCategoryService {
     private final QuizCategoryRepository quizCategoryRepository;
 
     @Transactional
-    public void createQuizCategory(AuthUser authUser, QuizCategoryRequestDto request) {
+    public void createQuizCategory(QuizCategoryRequestDto request) {
 
         quizCategoryRepository.findByCategoryType(request.getCategory())
             .ifPresent(c -> {
@@ -35,7 +35,6 @@ public class QuizCategoryService {
                 .orElseThrow(() ->
                     new QuizException(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR));
         }
-        ;
 
         QuizCategory quizCategory = QuizCategory.builder()
             .categoryType(request.getCategory())
@@ -53,7 +52,7 @@ public class QuizCategoryService {
     }
 
     @Transactional
-    public QuizCategoryResponseDto updateQuizCategory(AuthUser authUser, Long quizCategoryId, QuizCategoryRequestDto request) {
+    public QuizCategoryResponseDto updateQuizCategory(Long quizCategoryId, QuizCategoryRequestDto request) {
         QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(quizCategoryId);
         quizCategory.setCategoryType(request.getCategory());
 
@@ -69,7 +68,7 @@ public class QuizCategoryService {
     }
 
     @Transactional
-    public void deleteQuizCategory(AuthUser authUser, Long quizCategoryId){
+    public void deleteQuizCategory(Long quizCategoryId){
         quizCategoryRepository.deleteById(quizCategoryId);
     }
 }
