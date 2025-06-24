@@ -23,6 +23,6 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
 
     long countByQuizId(Long quizId);
 
-    @Query("SELECT uqa FROM UserQuizAnswer uqa JOIN FETCH uqa.quiz WHERE uqa.id = :userQuizAnswerId")
-    Optional<UserQuizAnswer> findByIdWithQuiz(Long userQuizAnswerId);
+    @Query("SELECT a FROM UserQuizAnswer a JOIN FETCH a.quiz JOIN FETCH a.user WHERE a.id = :id")
+    Optional<UserQuizAnswer> findWithQuizAndUserById(Long id);
 }
