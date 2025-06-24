@@ -84,7 +84,7 @@ public class QuizPageService {
      */
     private QuizCategoryResponseDto getQuizCategory(Quiz quiz) {
         // 대분류만 있을 경우
-        if (quiz.getCategory().isChildCategory()) {
+        if (!quiz.getCategory().isChildCategory()) {
             return QuizCategoryResponseDto.builder()
                 .main(quiz.getCategory().getCategoryType())
                 .build();
