@@ -11,6 +11,8 @@ import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25service.domain.quiz.dto.QuizCategoryRequestDto;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -113,4 +115,32 @@ class QuizCategoryServiceTest {
         //then
         assertEquals(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR, ex.getErrorCode());
     }
+
+    @Test
+    @DisplayName("대분류 카테고리 조회 성공")
+    void getParentQuizCategoryList_returnsCategoryTypes() {
+        //given
+        List<QuizCategory> parents = List.of(
+            QuizCategory.builder().categoryType("BACKEND").build(),
+            QuizCategory.builder().categoryType("FRONTEND").build()
+        );
+        when(quizCategoryRepository.findByParentIdIsNull()).thenReturn(parents);
+
+        //when
+        List<String> result = quizCategoryService.getParentQuizCategoryList();
+
+        //then
+        assertEquals(List.of("BACKEND", "FRONTEND"), result);
+    }
+
+    @Test
+    @DisplayName("대분류 카테고리가 없으면 빈 List를 반환")
+    void getParentQuizCategoryList_whenNone_returnsEmptyList() {
+        when(quizCategoryRepository.findByParentIdIsNull()).thenReturn(Collections.emptyList());
+
+        List<String> result = quizCategoryService.getParentQuizCategoryList();
+
+        assertTrue(result.isEmpty());
+    }
+
 }
