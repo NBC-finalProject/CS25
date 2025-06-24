@@ -62,7 +62,9 @@ public class QuizCategoryService {
         }
 
         return QuizCategoryResponseDto.builder()
-            .main(quizCategory.getParent().getCategoryType())
+            .main(quizCategory.getParent() != null
+                ? quizCategory.getParent().getCategoryType()
+                : null)
             .sub(quizCategory.getCategoryType())
             .build();
     }
