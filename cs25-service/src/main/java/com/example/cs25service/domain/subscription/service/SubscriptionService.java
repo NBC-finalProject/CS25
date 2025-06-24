@@ -80,7 +80,7 @@ public class SubscriptionService {
             request.getCategory());
 
         //퀴즈 카테고리가 대분류인지 검증
-        if (!quizCategory.isChildCategory()) {
+        if (quizCategory.isChildCategory()) {
             throw new QuizException(QuizExceptionCode.PARENT_CATEGORY_REQUIRED_ERROR);
         }
 

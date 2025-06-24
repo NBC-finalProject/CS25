@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/admin/subscriptions")
 public class SubscriptionAdminController {
 
     private final SubscriptionAdminService subscriptionAdminService;
@@ -25,5 +25,5 @@ public class SubscriptionAdminController {
         return new ApiResponse<>(200, subscriptionAdminService.getAdminSubscriptions(page, size));
     }
 
-    
+
 }
