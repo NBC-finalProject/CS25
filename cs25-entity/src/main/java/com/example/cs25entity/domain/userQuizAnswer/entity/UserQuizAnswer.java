@@ -4,6 +4,7 @@ import com.example.cs25common.global.entity.BaseEntity;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.user.entity.User;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,6 +36,7 @@ public class UserQuizAnswer extends BaseEntity {
 
     private Boolean isCorrect;
 
+    @Nullable
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

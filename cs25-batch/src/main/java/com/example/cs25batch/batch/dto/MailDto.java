@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class MailDto {
-    Subscription subscription;
-    Quiz quiz;
+    private Subscription subscription;
+    private Quiz quiz;
+    private String recordId;
 }

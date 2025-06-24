@@ -22,6 +22,7 @@ public class MailMessageProcessor implements ItemProcessor<Map<String, String>, 
     @Override
     public MailDto process(Map<String, String> message) throws Exception {
         Long subscriptionId = Long.valueOf(message.get("subscriptionId"));
+        String recordId = message.get("recordId");
 
         //long getStart = System.currentTimeMillis();
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
@@ -43,6 +44,7 @@ public class MailMessageProcessor implements ItemProcessor<Map<String, String>, 
         return MailDto.builder()
             .subscription(subscription)
             .quiz(quiz)
+            .recordId(recordId)
             .build();
     }
 }
