@@ -47,14 +47,11 @@ public class TodayQuizService {
             subscriptionId, parentCategoryId);
         double accuracy = calculateAccuracy(answerHistory);
 
-        // 3. 정답률 기반 난이도 바운더리 설정
-        List<QuizLevel> allowedDifficulties = getAllowedDifficulties(accuracy);
-
         //4. 가장 최근에 푼 문제 소분류 카테고리 지워줘야해
         Set<Long> excludedCategoryIds = userQuizAnswerRepository.findRecentSolvedCategoryIds(
             subscriptionId,
             parentCategoryId,
-            LocalDate.now().minusDays(1)  // ← 이거 몇일 중복 제거할건지 설정가능쓰
+            LocalDate.now().minusDays(1)  // 이거 몇일 중복 제거할건지 설정가능쓰
         );
 
         // 5. 내가 푼 문제 ID
@@ -64,22 +61,25 @@ public class TodayQuizService {
 
         // 6. 서술형 주기 판단 (풀이 횟수 기반)
         int quizCount = answerHistory.size(); // 사용자가 지금까지 푼 문제 수
-        boolean isEssayDay = quizCount % 5 == 4;
+        boolean isEssayDay = quizCount % 5 == 4; //일단 5배수일때 한번씩은 서술 뽑아줘야함( 조정 필요하면 나중에 하는거롤)
 
         List<QuizFormatType> targetTypes = isEssayDay
             ? List.of(QuizFormatType.SUBJECTIVE)
             : List.of(QuizFormatType.MULTIPLE_CHOICE, QuizFormatType.SHORT_ANSWER);
 
-        // 7. 필터링 조건으로 문제 조회
+        // 3. 정답률 기반 난이도 바운더리 설정
+        List<QuizLevel> allowedDifficulties = getAllowedDifficulties(accuracy);
+
+        // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
         List<Quiz> candidateQuizzes = quizRepository.findAvailableQuizzesUnderParentCategory(
             parentCategoryId,
             allowedDifficulties,
             solvedQuizIds,
             excludedCategoryIds,
             targetTypes
-        );
+        ); //한개만뽑기(find first)
 
-        if (candidateQuizzes.isEmpty()) {
+        if (candidateQuizzes.isEmpty()) { // 뽀ㅃ을문제없을때
             throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
         }
 
