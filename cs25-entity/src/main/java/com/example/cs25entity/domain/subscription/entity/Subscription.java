@@ -110,9 +110,16 @@ public class Subscription extends BaseEntity {
     }
 
     /**
-     * 구독취소하는 메서드
+     * 구독 비활성화하는 메서드
      */
     public void updateDisable() {
         this.isActive = false;
+    }
+
+    /**
+     * 구독 활성화하는 메서드
+     */
+    public void updateEnable() {
+        this.isActive = true;
     }
 }
