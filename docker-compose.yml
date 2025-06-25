@@ -1,0 +1,134 @@
+services:
+
+  cs25-service:
+    container_name: cs25-service
+    build:
+      context: .
+      dockerfile: cs25-service/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+      - chroma
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+
+  cs25-batch:
+    container_name: cs25-batch
+    build:
+      context: .
+      dockerfile: cs25-batch/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+      - chroma
+    ports:
+      - "8081:8080"
+    networks:
+      - monitoring
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: cs25
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - monitoring
+
+  redis:
+    container_name: redis
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - monitoring
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - ./cs25-service/chroma-data:/data
+    networks:
+      - monitoring
+
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "9000:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - --web.enable-remote-write-receiver
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - "--enable-feature=native-histograms"
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  k6:
+    image: my-k6-prometheus
+    container_name: k6
+    volumes:
+      - ./k6/scripts:/scripts
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
+    ports:
+      - "6565:6565"
+    command: run --out experimental-prometheus-rw /scripts/sse-test.js
+    depends_on:
+      - prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring
+
+volumes:
+  chroma-data:
+  grafana-data:
+  jenkins_home:
+  mysql-data:
+  redis-data:
+
+networks:
+  monitoring:
