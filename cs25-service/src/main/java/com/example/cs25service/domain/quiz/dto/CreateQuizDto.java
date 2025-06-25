@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CreateQuizDto {
+
+    @NotBlank(message = "문제 타입은 필수입니다.")
+    private String type;
+
     @NotBlank(message = "문제는 필수입니다.")
     private String question;
 
@@ -25,11 +29,12 @@ public class CreateQuizDto {
     private String category;
 
     @NotNull(message = "난이도 선택은 필수입니다.")
-    private QuizLevel level;
+    private String level;
 
     @Builder
-    public CreateQuizDto(String question, String choice, String answer, String commentary,
-        String category, QuizLevel level) {
+    public CreateQuizDto(String type, String question, String choice, String answer, String commentary,
+        String category, String level) {
+        this.type = type;
         this.question = question;
         this.choice = choice;
         this.answer = answer;

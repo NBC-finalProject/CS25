@@ -3,11 +3,18 @@ package com.example.cs25service.domain.quiz.service;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
+import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
+import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
+import com.example.cs25entity.domain.quiz.dto.QuizSearchDto;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -22,6 +29,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,15 +47,10 @@ public class QuizService {
 
     @Transactional
     public void uploadQuizJson(
-        AuthUser authUser,
         MultipartFile file,
         String categoryType,
         QuizFormatType formatType
     ) {
-
-//        if(authUser.getRole() != Role.ADMIN){
-//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
-//        }
 
         try {
             //대분류 확인
@@ -93,7 +97,7 @@ public class QuizService {
                         .answer(dto.getAnswer())
                         .commentary(dto.getCommentary())
                         .category(subCategory)
-                        .level(dto.getLevel())
+                        .level(QuizLevel.valueOf(dto.getLevel()))
                         .build();
                 })
                 .toList();
@@ -104,5 +108,54 @@ public class QuizService {
         } catch (ConstraintViolationException e) {
             throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
         }
+    }
+
+    @Transactional
+    public void createQuiz(CreateQuizDto request){
+
+        QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(request.getCategory());
+
+        Quiz quiz = Quiz.builder()
+            .type(QuizFormatType.valueOf(request.getType()))
+            .question(request.getQuestion())
+            .answer(request.getAnswer())
+            .commentary(request.getCommentary())
+            .choice(request.getChoice())
+            .category(quizCategory)
+            .level(QuizLevel.valueOf(request.getLevel()))
+            .build();
+
+        quizRepository.save(quiz);
+    }
+
+    @Transactional(readOnly = true)
+    public QuizResponseDto getQuiz(Long id) {
+        Quiz quiz = quizRepository.findByIdOrElseThrow(id);
+
+        return QuizResponseDto.builder()
+            .id(quiz.getId())
+            .question(quiz.getQuestion())
+            .answer(quiz.getAnswer())
+            .commentary(quiz.getCommentary() != null ? quiz.getCommentary() : null)
+            .level(quiz.getLevel())
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<QuizResponseDto> getQuizzes(QuizSearchDto condition, Pageable pageable){
+
+        return quizRepository.searchQuizzes(condition, pageable)
+            .map(QuizResponseDto::from);
+
+    }
+
+    @Transactional
+    public void deleteQuizzes(List<Long> ids) {
+
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("삭제할 퀴즈를 선택해주세요.");
+        }
+
+        quizRepository.deleteAllByIdIn(ids);
     }
 }
