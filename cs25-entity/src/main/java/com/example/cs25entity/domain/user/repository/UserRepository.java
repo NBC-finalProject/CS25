@@ -43,4 +43,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int findRankByScore(double score);
 
     Optional<User> findBySerialId(String serialId);
+
+    boolean existsByEmail(String email);
 }
