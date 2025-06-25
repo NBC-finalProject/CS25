@@ -28,9 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -163,4 +160,33 @@ class MailLogServiceTest {
         assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
     }
 
+    @Test
+    @DisplayName("관리자 - 로그 삭제 성공")
+    void deleteMailLogs_admin_success() {
+        List<Long> ids = List.of(1L, 2L);
+
+        mailLogService.deleteMailLogs(authUserAdmin, ids);
+
+        verify(mailLogRepository).deleteAllByIdIn(ids);
+    }
+
+    @Test
+    @DisplayName("관리자 - 삭제할 ID 리스트가 null이면 IllegalArgumentException 예외를 던짐")
+    void deleteMailLogs_listEmpty_throwIllegalArgumentException() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+            mailLogService.deleteMailLogs(authUserAdmin, null));
+
+        assertEquals("삭제할 메일 로그를 선택해주세요.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("권한 없는 사용자 - 로그 삭제 시 UNAUTHORIZE_ROLE 예외를 던짐")
+    void deleteMailLogs_user_throwUserException() {
+        List<Long> ids = List.of(1L);
+
+        UserException ex = assertThrows(UserException.class, () ->
+            mailLogService.deleteMailLogs(authUser, ids));
+
+        assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
+    }
 }
