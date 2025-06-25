@@ -2,6 +2,7 @@ package com.example.cs25service.domain.quiz.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
@@ -11,6 +12,7 @@ import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.List;
 import javax.xml.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,5 +88,21 @@ class QuizServiceTest {
 
         //then
         verify(quizRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("퀴즈 삭제 성공")
+    void deleteQuizzes_success() {
+        quizService.deleteQuizzes(List.of(1L, 2L));
+        verify(quizRepository).deleteAllByIdIn(List.of(1L, 2L));
+    }
+
+    @Test
+    @DisplayName("List가 비어있으면 퀴즈 삭제 실패")
+    void deleteQuizzes_withEmptyList_throwIllegalArgumentException() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> quizService.deleteQuizzes(List.of()));
+
+        assertEquals("삭제할 퀴즈를 선택해주세요.", ex.getMessage());
     }
 }
