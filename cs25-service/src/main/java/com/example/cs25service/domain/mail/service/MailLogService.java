@@ -62,7 +62,7 @@ public class MailLogService {
         }
 
         if (ids == null || ids.isEmpty()) {
-            throw new IllegalArgumentException("삭제할 로그 데이터가 없습니다.");
+            throw new IllegalArgumentException("삭제할 메일 로그를 선택해주세요.");
         }
 
         mailLogRepository.deleteAllByIdIn(ids);

@@ -76,6 +76,7 @@ public class QuizController {
         @RequestBody List<Long> quizIds,
         @AuthenticationPrincipal AuthUser authUser
     ) {
+        quizService.deleteQuizzes(quizIds);
         return new ApiResponse<>(200, "문제 삭제 완료");
     }
 

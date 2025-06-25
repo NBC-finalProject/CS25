@@ -28,4 +28,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long>, QuizCustomRep
         return findById(id)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
     }
+
+    void deleteAllByIdIn(Collection<Long> ids);
 }

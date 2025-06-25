@@ -14,6 +14,7 @@ import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.example.cs25entity.domain.quiz.dto.QuizSearchDto;
+import com.example.cs25service.domain.security.dto.AuthUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -127,5 +128,15 @@ public class QuizService {
         return quizRepository.searchQuizzes(condition, pageable)
             .map(QuizResponseDto::from);
 
+    }
+
+    @Transactional
+    public void deleteQuizzes(List<Long> ids) {
+
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("삭제할 퀴즈를 선택해주세요.");
+        }
+
+        quizRepository.deleteAllByIdIn(ids);
     }
 }
