@@ -2,14 +2,29 @@ package com.example.cs25service.domain.quiz.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.cs25entity.domain.quiz.entity.QuizCategory;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import javax.xml.validation.Validator;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QuizServiceTest {
@@ -26,5 +41,50 @@ class QuizServiceTest {
     @Mock
     private QuizCategoryRepository quizCategoryRepository;
 
+    @Test
+    @DisplayName("퀴즈 생성 성공")
+    void createQuiz_success() {
+        //given
+        CreateQuizDto dto = CreateQuizDto
+            .builder()
+            .type("SHORT_ANSWER")
+            .category("BACKEND")
+            .question("오늘 내 점심 메뉴는?")
+            .answer("안 궁금해")
+            .level("EASY")
+            .build();
 
+        when(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
+            .thenReturn(mock(QuizCategory.class));
+
+        //when
+        quizService.createQuiz(dto);
+
+        //then
+        verify(quizRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("퀴즈 생성 시, 카테고리 없으면 실패")
+    void createQuiz_withoutCategory_throwQuizException() {
+        //given
+        CreateQuizDto dto = CreateQuizDto
+            .builder()
+            .type("SHORT_ANSWER")
+            .category("BACKEND")
+            .question("오늘 내 점심 메뉴는?")
+            .answer("안 궁금해")
+            .level("EASY")
+            .build();
+
+        when(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
+            .thenThrow(new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
+
+        //when
+        QuizException ex = assertThrows(QuizException.class, () -> quizService.createQuiz(dto));
+        assertEquals(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR, ex.getErrorCode());
+
+        //then
+        verify(quizRepository, never()).save(any());
+    }
 }
