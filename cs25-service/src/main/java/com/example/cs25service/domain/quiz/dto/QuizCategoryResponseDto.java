@@ -9,7 +9,7 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class QuizCategoryResponseDto {
 	private final String main; // 대분류
-	private final String sub; // 소분
+	private final String sub; // 소분류
 
 	private QuizCategoryResponseDto(String main, String sub) {
 		this.main = main;
