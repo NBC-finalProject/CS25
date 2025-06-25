@@ -54,6 +54,8 @@ public class QuizCategoryService {
     @Transactional
     public QuizCategoryResponseDto updateQuizCategory(Long quizCategoryId, QuizCategoryRequestDto request) {
         QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(quizCategoryId);
+
+
         quizCategory.setCategoryType(request.getCategory());
 
         if(request.getParentId() != null){
