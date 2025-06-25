@@ -2,7 +2,6 @@ package com.example.cs25batch.batch.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
@@ -117,8 +116,10 @@ class TodayQuizServiceTest {
                     LocalDate.class)))
                 .willReturn(recentCategoryIds);
             given(quizRepository.findAvailableQuizzesUnderParentCategory(eq(parentCategoryId),
-                anyList()
-                , eq(solvedQuizIds), eq(recentCategoryIds), anyList())).willReturn(
+                eq(List.of(QuizLevel.NORMAL, QuizLevel.EASY))
+                , eq(solvedQuizIds)
+                , eq(List.of(QuizFormatType.SHORT_ANSWER,
+                    QuizFormatType.MULTIPLE_CHOICE)))).willReturn(
                 availableQuizzes);
 
             //when
