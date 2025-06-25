@@ -12,6 +12,7 @@ import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
+import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.time.LocalDate;
@@ -42,6 +43,7 @@ class MailLogServiceTest {
     @Mock
     private MailLogRepository mailLogRepository;
 
+    private AuthUser authUserAdmin;
     private AuthUser authUser;
 
     @BeforeEach
@@ -51,7 +53,14 @@ class MailLogServiceTest {
             .name("test")
             .role(Role.ADMIN)
             .build();
-        authUser = new AuthUser(user);
+        authUserAdmin = new AuthUser(user);
+
+        User user2 = User.builder()
+            .email("test2@test.com")
+            .name("test2")
+            .role(Role.USER)
+            .build();
+        authUser = new AuthUser(user2);
     }
 
     @Test
@@ -75,7 +84,7 @@ class MailLogServiceTest {
         when(mailLogRepository.search(condition, pageable)).thenReturn(mockPage);
 
         //when
-        Page<MailLogResponse> result = mailLogService.getMailLogs(authUser, condition, pageable);
+        Page<MailLogResponse> result = mailLogService.getMailLogs(authUserAdmin, condition, pageable);
 
         //then
         assertEquals(1, result.getContent().size());
@@ -102,7 +111,7 @@ class MailLogServiceTest {
 
         //when
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            mailLogService.getMailLogs(authUser, condition, Pageable.ofSize(10)));
+            mailLogService.getMailLogs(authUserAdmin, condition, Pageable.ofSize(10)));
 
         //then
         assertEquals("시작일은 종료일보다 이후일 수 없습니다.", ex.getMessage());
@@ -112,18 +121,45 @@ class MailLogServiceTest {
     @DisplayName("권한 없는 사용자 - 전체 로그 조회 시 UNAUTHORIZE_ROLE 예외를 던짐")
     void getMailLogs_user_throwUserException() {
         //given
-        User user = User.builder()
-            .role(Role.USER)
-            .build();
-
-        AuthUser authUser1 = new AuthUser(user);
-
         MailLogSearchDto condition = MailLogSearchDto.builder().build();
+
         //when
         UserException ex = assertThrows(UserException.class, () ->
-            mailLogService.getMailLogs(authUser1, condition, Pageable.ofSize(10)));
+            mailLogService.getMailLogs(authUser, condition, Pageable.ofSize(10)));
 
         //then
+        assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("관리자 - 단일 로그 조회 성공")
+    void getMailLog_admin_success() {
+        //given
+        Subscription subscription = Subscription.builder()
+            .email("test@test.com")
+            .subscriptionType(Collections.singleton(DayOfWeek.MONDAY))
+            .build();
+
+        MailLog mailLog = MailLog.builder()
+            .subscription(subscription)
+            .status(MailStatus.SENT)
+            .build();
+
+        when(mailLogRepository.findByIdOrElseThrow(1L)).thenReturn(mailLog);
+
+        //when
+        MailLogDetailResponse result = mailLogService.getMailLog(authUserAdmin, 1L);
+
+        //then
+        assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("권한 없는 사용자 - 단일 로그 조회 시 UNAUTHORIZE_ROLE 예외를 던짐")
+    void getMailLog_user_throwUserException() {
+        UserException ex = assertThrows(UserException.class, () ->
+            mailLogService.getMailLog(authUser, 1L));
+
         assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
     }
 
