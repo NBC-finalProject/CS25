@@ -77,7 +77,7 @@ class ProfileServiceTest {
     @BeforeEach
     void setUp() {
         QuizCategory category = QuizCategory.builder()
-                .categoryType("BECKEND")
+                .categoryType("BACKEND")
                 .build();
 
         subscription = Subscription.builder()
@@ -97,6 +97,8 @@ class ProfileServiceTest {
                 .subscriptionType(EnumSet.of(DayOfWeek.SUNDAY, DayOfWeek.MONDAY))
                 .build();
         ReflectionTestUtils.setField(subscription1, "id", 2L);
+        ReflectionTestUtils.setField(subscription, "serialId", "sub-uuid-1");
+
 
         quiz = Quiz.builder()
                 .type(QuizFormatType.MULTIPLE_CHOICE)
@@ -105,7 +107,6 @@ class ProfileServiceTest {
                 .commentary("Java is a language.")
                 .choice("1. Programming // 2. Coffee")
                 .category(category)
-                .type(QuizFormatType.MULTIPLE_CHOICE)
                 .level(QuizLevel.EASY)
                 .build();
 
@@ -116,7 +117,6 @@ class ProfileServiceTest {
                 .commentary("Java is a language.")
                 .choice("1. Programming // 2. Coffee")
                 .category(category)
-                .type(QuizFormatType.MULTIPLE_CHOICE)
                 .level(QuizLevel.EASY)
                 .build();
 
@@ -124,6 +124,7 @@ class ProfileServiceTest {
                 .email("test@naver.com")
                 .name("test")
                 .role(Role.USER)
+                .serialId(serialId)
                 .build();
 
         user = User.builder()
@@ -133,6 +134,7 @@ class ProfileServiceTest {
                 .subscription(subscription)
                 .score(3.0)
                 .build();
+        ReflectionTestUtils.setField(user, "id", 1L);
 
         subLogs = List.of(
                 SubscriptionHistory.builder().category(category).subscription(subscription).build(),
@@ -206,7 +208,7 @@ class ProfileServiceTest {
         //then
         assertThat(profile.getName()).isEqualTo(user.getName());
         assertThat(profile.getRank()).isEqualTo(1);
-        assertThat(user.getScore()).isEqualTo(3.0);
+        assertThat(profile.getScore()).isEqualTo(user.getScore());
     }
 
 }
