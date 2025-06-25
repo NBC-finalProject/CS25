@@ -1,12 +1,9 @@
 package com.example.cs25service.domain.quiz.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
-import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
-import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
-import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
-import com.example.cs25service.domain.quiz.dto.QuizSearchDto;
+import com.example.cs25entity.domain.quiz.dto.QuizSearchDto;
 import com.example.cs25service.domain.quiz.service.QuizService;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import jakarta.validation.constraints.NotNull;
@@ -51,7 +48,7 @@ public class QuizController {
             return new ApiResponse<>(400, "JSON 파일만 업로드 가능합니다.");
         }
 
-        quizService.uploadQuizJson(authUser, file, categoryType, formatType);
+        quizService.uploadQuizJson(file, categoryType, formatType);
         return new ApiResponse<>(200, "문제 등록 성공");
     }
 
@@ -62,15 +59,16 @@ public class QuizController {
         @PageableDefault(size = 20, sort = "category", direction = Direction.ASC) Pageable pageable,
         @AuthenticationPrincipal AuthUser authUser
     ) {
-        return new ApiResponse<>(200, results);
+        return new ApiResponse<>(200, quizService.getQuizzes(condition, pageable));
     }
 
+    //단일 퀴즈 조회
     @GetMapping("/{quizId}")
     public ApiResponse<QuizResponseDto> getQuiz(
         @PathVariable @NotNull Long quizId,
         @AuthenticationPrincipal AuthUser authUser
     ) {
-        return new ApiResponse<>(200, result);
+        return new ApiResponse<>(200, quizService.getQuiz(quizId));
     }
 
     @DeleteMapping
@@ -80,12 +78,5 @@ public class QuizController {
     ) {
         return new ApiResponse<>(200, "문제 삭제 완료");
     }
-    //퀴즈 목록 조회
-
-    //퀴즈 단일 조회
-
-    //퀴즈 내용 수정
-
-    //퀴즈 삭제
 
 }

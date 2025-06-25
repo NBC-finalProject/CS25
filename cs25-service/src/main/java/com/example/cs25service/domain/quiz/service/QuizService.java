@@ -7,8 +7,13 @@ import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25entity.domain.user.entity.Role;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
+import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
+import com.example.cs25entity.domain.quiz.dto.QuizSearchDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -22,6 +27,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,6 +117,15 @@ public class QuizService {
             .question(quiz.getQuestion())
             .answer(quiz.getAnswer())
             .commentary(quiz.getCommentary() != null ? quiz.getCommentary() : null)
+            .level(quiz.getLevel())
             .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<QuizResponseDto> getQuizzes(QuizSearchDto condition, Pageable pageable){
+
+        return quizRepository.searchQuizzes(condition, pageable)
+            .map(QuizResponseDto::from);
+
     }
 }

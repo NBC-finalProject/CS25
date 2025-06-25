@@ -1,5 +1,6 @@
 package com.example.cs25entity.domain.quiz.repository;
 
+import com.example.cs25entity.domain.quiz.dto.QuizSearchDto;
 import com.example.cs25entity.domain.quiz.entity.QQuiz;
 import com.example.cs25entity.domain.quiz.entity.QQuizCategory;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
@@ -7,9 +8,14 @@ import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor
 public class QuizCustomRepositoryImpl implements QuizCustomRepository {
@@ -58,4 +64,35 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
             .fetch();
     }
 
+    @Override
+    public Page<Quiz> searchQuizzes(QuizSearchDto condition, Pageable pageable){
+
+        QQuiz quiz = QQuiz.quiz;
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (condition.getCategoryId() != null) {
+            builder.and(quiz.category.id.eq(condition.getCategoryId()));
+        }
+
+        if (condition.getLevel() != null) {
+            builder.and(quiz.level.eq(condition.getLevel()));
+        }
+
+        List<Quiz> content = queryFactory
+            .selectFrom(quiz)
+            .where(builder)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .orderBy(quiz.id.asc())
+            .fetch();
+
+        long total = queryFactory
+            .select(quiz.count())
+            .from(quiz)
+            .where(builder)
+            .fetchOne();
+
+        return new PageImpl<>(content, pageable, Optional.of(total).orElse(0L));
+    }
 }
