@@ -2,33 +2,20 @@ package com.example.cs25service.domain.quiz.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
-import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.xml.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -40,10 +27,6 @@ class QuizServiceTest {
     @InjectMocks
     private QuizService quizService;
 
-    @Mock
-    private ObjectMapper objectMapper;
-    @Mock
-    private Validator validator;
     @Mock
     private QuizRepository quizRepository;
     @Mock
@@ -73,7 +56,7 @@ class QuizServiceTest {
     }
 
     @Test
-    @DisplayName("퀴즈 생성 시, 카테고리 없으면 실패")
+    @DisplayName("퀴즈 생성 시, 카테고리 없으면 QUIZ_CATEGORY_NOT_FOUND_ERROR 예외를 던짐")
     void createQuiz_withoutCategory_throwQuizException() {
         //given
         CreateQuizDto dto = CreateQuizDto
@@ -104,7 +87,7 @@ class QuizServiceTest {
     }
 
     @Test
-    @DisplayName("List가 비어있으면 퀴즈 삭제 실패")
+    @DisplayName("List가 비어있으면 퀴즈 삭제 IllegalArgumentException 예외를 던짐")
     void deleteQuizzes_withEmptyList_throwIllegalArgumentException() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> quizService.deleteQuizzes(List.of()));

@@ -219,7 +219,7 @@ class QuizCategoryServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 카테고리 삭제 시 예외 발생")
+    @DisplayName("존재하지 않는 카테고리 삭제 시 QUIZ_CATEGORY_NOT_FOUND_ERROR 예외를 던짐")
     void deleteQuizCategory_notFound_shouldThrowException() {
         // given
         when(quizCategoryRepository.existsById(999L)).thenReturn(false);
