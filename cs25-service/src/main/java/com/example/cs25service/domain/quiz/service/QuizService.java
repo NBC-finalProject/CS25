@@ -3,6 +3,7 @@ package com.example.cs25service.domain.quiz.service;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
@@ -96,7 +97,7 @@ public class QuizService {
                         .answer(dto.getAnswer())
                         .commentary(dto.getCommentary())
                         .category(subCategory)
-                        .level(dto.getLevel())
+                        .level(QuizLevel.valueOf(dto.getLevel()))
                         .build();
                 })
                 .toList();
@@ -107,6 +108,24 @@ public class QuizService {
         } catch (ConstraintViolationException e) {
             throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
         }
+    }
+
+    @Transactional
+    public void createQuiz(CreateQuizDto request){
+
+        QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(request.getCategory());
+
+        Quiz quiz = Quiz.builder()
+            .type(QuizFormatType.valueOf(request.getType()))
+            .question(request.getQuestion())
+            .answer(request.getAnswer())
+            .commentary(request.getCommentary())
+            .choice(request.getChoice())
+            .category(quizCategory)
+            .level(QuizLevel.valueOf(request.getLevel()))
+            .build();
+
+        quizRepository.save(quiz);
     }
 
     @Transactional(readOnly = true)

@@ -2,10 +2,12 @@ package com.example.cs25service.domain.quiz.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
 import com.example.cs25service.domain.quiz.dto.QuizResponseDto;
 import com.example.cs25entity.domain.quiz.dto.QuizSearchDto;
 import com.example.cs25service.domain.quiz.service.QuizService;
 import com.example.cs25service.domain.security.dto.AuthUser;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,16 @@ public class QuizController {
         }
 
         quizService.uploadQuizJson(file, categoryType, formatType);
+        return new ApiResponse<>(200, "문제 등록 성공");
+    }
+
+    //단일 퀴즈 생성
+    @PostMapping
+    public ApiResponse<String> createQuiz(
+        @Valid @RequestBody CreateQuizDto request,
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        quizService.createQuiz(request);
         return new ApiResponse<>(200, "문제 등록 성공");
     }
 
