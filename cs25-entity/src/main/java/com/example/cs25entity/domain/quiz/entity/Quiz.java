@@ -32,6 +32,7 @@ public class Quiz extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private QuizFormatType type;
 
+    @Column(columnDefinition = "TEXT")
     private String question; // 문제
 
     @Column(columnDefinition = "TEXT")

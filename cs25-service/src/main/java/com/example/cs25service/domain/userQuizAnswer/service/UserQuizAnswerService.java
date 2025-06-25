@@ -82,18 +82,13 @@ public class UserQuizAnswerService {
      */
     @Transactional
     public CheckSimpleAnswerResponseDto checkSimpleAnswer(Long userQuizAnswerId) {
-        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findByIdWithQuiz(userQuizAnswerId).orElseThrow(
+        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findWithQuizAndUserById(userQuizAnswerId).orElseThrow(
                 () -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
         );
 
-        Quiz quiz = quizRepository.findById(userQuizAnswer.getQuiz().getId()).orElseThrow(
-                () -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR)
-        );
-
-        User user = userRepository.findBySubscription(userQuizAnswer.getSubscription()).orElse(null);
+        Quiz quiz = userQuizAnswer.getQuiz();
 
         boolean isCorrect;
-
         if(quiz.getType().getScore() == 1){
             isCorrect = userQuizAnswer.getUserAnswer().equals(quiz.getAnswer().substring(0, 1));
         }else if(quiz.getType().getScore() == 3){
@@ -102,6 +97,7 @@ public class UserQuizAnswerService {
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
 
+        User user = userQuizAnswer.getUser();
         // 회원인 경우에만 점수 부여
         if(user != null){
             double score;

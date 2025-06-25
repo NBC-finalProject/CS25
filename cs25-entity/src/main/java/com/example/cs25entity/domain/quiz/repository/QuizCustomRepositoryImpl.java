@@ -60,7 +60,7 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
         return queryFactory
             .selectFrom(quiz)
             .where(builder)
-            .orderBy(quiz.id.asc())
+            .limit(100)
             .fetch();
     }
 

@@ -21,3 +21,12 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'cs25-batch:9292' ] # 추후 해당 배치가 올라가는 ec2 인스턴스의 프라이빗 ip로 변경
+
+  - job_name: 'localhost-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:9292' ] # 로컬 테스트용
+
+  - job_name: 'k6'
+    static_configs:
+      - targets: [ 'k6:6565' ] # k6용

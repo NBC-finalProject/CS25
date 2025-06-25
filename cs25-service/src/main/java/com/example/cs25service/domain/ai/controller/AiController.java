@@ -23,15 +23,16 @@ public class AiController {
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
     private final FileLoaderService fileLoaderService;
 
-    @GetMapping(value = "/{answerId}/feedback", produces = "text/event-stream")
-    public SseEmitter streamFeedback(@PathVariable Long answerId) {
-        return aiService.streamFeedback(answerId);
+    @GetMapping("/{answerId}/feedback")
+    public ApiResponse<AiFeedbackResponse> streamFeedback(@PathVariable Long answerId) {
+        // TODO: aiService.streamFeedback(answerId);로 추후 수정예정
+        return new ApiResponse<>(200, aiService.getFeedback(answerId));
     }
 
     @GetMapping("/generate")
-    public ResponseEntity<?> generateQuiz() {
+    public ApiResponse<Quiz> generateQuiz() {
         Quiz quiz = aiQuestionGeneratorService.generateQuestionFromContext();
-        return ResponseEntity.ok(new ApiResponse<>(200, quiz));
+        return new ApiResponse<>(200, quiz);
     }
 
     @GetMapping("/load/{dirName}")

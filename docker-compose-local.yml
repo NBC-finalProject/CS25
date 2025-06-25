@@ -1,0 +1,41 @@
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: cs25
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - monitoring
+
+  redis:
+    container_name: redis
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - monitoring
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - ./cs25-service/chroma-data:/data
+    networks:
+      - monitoring
+
+volumes:
+  chroma-data:
+  mysql-data:
+  redis-data:
+
+networks:
+  monitoring:
