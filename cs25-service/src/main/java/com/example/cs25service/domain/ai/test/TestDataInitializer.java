@@ -28,7 +28,12 @@ public class TestDataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // 1. 테스트 유저 생성
+           // 기존 테스트 데이터가 있는지 확인
+        if (userRepository.existsByEmail("loadtest@test.com")) {
+            return; // 이미 데이터가 존재하면 종료
+        }
+
+            // 1. 테스트 유저 생성
         User user = User.builder()
             .email("loadtest@test.com")
             .score(0.0)

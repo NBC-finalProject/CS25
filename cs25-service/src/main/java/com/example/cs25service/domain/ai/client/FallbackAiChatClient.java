@@ -16,7 +16,7 @@ public class FallbackAiChatClient implements AiChatClient {
 
     @Override
     public String call(String systemPrompt, String userPrompt) {
-        if (System.getenv("MOCK_AI").equals("true")) {
+        if ("true".equals(System.getenv("MOCK_AI"))) {
             return "정답입니다. 이 피드백은 테스트용입니다.";
         }
         try {
