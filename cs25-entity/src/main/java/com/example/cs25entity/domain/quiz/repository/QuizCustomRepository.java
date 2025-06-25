@@ -14,7 +14,6 @@ public interface QuizCustomRepository {
     List<Quiz> findAvailableQuizzesUnderParentCategory(Long parentCategoryId,
         List<QuizLevel> difficulties,
         Set<Long> solvedQuizIds,
-        Set<Long> recentQuizIds,
         List<QuizFormatType> targetTypes);
 
     Page<Quiz> searchQuizzes(QuizSearchDto condition, Pageable pageable);

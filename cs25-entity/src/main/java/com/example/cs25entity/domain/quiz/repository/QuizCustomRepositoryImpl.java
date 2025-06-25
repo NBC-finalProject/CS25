@@ -26,7 +26,6 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
     public List<Quiz> findAvailableQuizzesUnderParentCategory(Long parentCategoryId,
         List<QuizLevel> difficulties,
         Set<Long> solvedQuizIds,
-        Set<Long> recentQuizIds,
         List<QuizFormatType> targetTypes) {
 
         QQuiz quiz = QQuiz.quiz;
@@ -51,10 +50,6 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
 
         if (!solvedQuizIds.isEmpty()) {
             builder.and(quiz.id.notIn(solvedQuizIds)); //혹시라도 구독자가 문제를 푼 이력잉 ㅣㅆ으면 그것도 제외해야햄
-        }
-
-        if (!recentQuizIds.isEmpty()) {
-            builder.and(quiz.category.id.notIn(recentQuizIds)); //거뭐냐 가장
         }
 
         return queryFactory
