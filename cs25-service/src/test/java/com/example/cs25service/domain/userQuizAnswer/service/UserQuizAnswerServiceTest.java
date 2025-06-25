@@ -30,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.swing.text.html.Option;
 import java.time.LocalDate;
@@ -72,7 +73,7 @@ class UserQuizAnswerServiceTest {
     @BeforeEach
     void setUp() {
         QuizCategory category = QuizCategory.builder()
-                .categoryType("BECKEND")
+                .categoryType("BACKEND")
                 .build();
 
         subscription = Subscription.builder()
@@ -82,6 +83,8 @@ class UserQuizAnswerServiceTest {
                 .endDate(LocalDate.now().plusMonths(1))
                 .subscriptionType(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY))
                 .build();
+        ReflectionTestUtils.setField(subscription, "id", 1L);
+        ReflectionTestUtils.setField(subscription, "serialId", "sub-uuid-1");
 
         // 객관식 퀴즈
         choiceQuiz = Quiz.builder()
@@ -91,18 +94,16 @@ class UserQuizAnswerServiceTest {
                 .commentary("Java is a language.")
                 .choice("1. Programming // 2. Coffee")
                 .category(category)
-                .type(QuizFormatType.MULTIPLE_CHOICE)
                 .level(QuizLevel.EASY)
                 .build();
 
         // 주관식 퀴즈
         shortAnswerQuiz = Quiz.builder()
-                .type(QuizFormatType.MULTIPLE_CHOICE)
+                .type(QuizFormatType.SHORT_ANSWER)
                 .question("Java is?")
                 .answer("java")
                 .commentary("Java is a language.")
                 .category(category)
-                .type(QuizFormatType.SHORT_ANSWER)
                 .level(QuizLevel.EASY)
                 .build();
 
@@ -115,6 +116,7 @@ class UserQuizAnswerServiceTest {
                 .name("test")
                 .role(Role.USER)
                 .build();
+        ReflectionTestUtils.setField(user, "id", 1L);
 
         requestDto = new UserQuizAnswerRequestDto("1", serialId);
     }

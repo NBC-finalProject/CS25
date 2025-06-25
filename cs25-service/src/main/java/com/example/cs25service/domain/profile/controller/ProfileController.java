@@ -8,6 +8,9 @@ import com.example.cs25service.domain.profile.service.ProfileService;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,9 +37,12 @@ public class ProfileController {
     }
 
     @GetMapping("/wrong-quiz")
-    public ApiResponse<ProfileWrongQuizResponseDto> getWrongQuiz(@AuthenticationPrincipal AuthUser authUser){
+    public ApiResponse<ProfileWrongQuizResponseDto> getWrongQuiz(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ){
 
-        return new ApiResponse<>(200, profileService.getWrongQuiz(authUser));
+        return new ApiResponse<>(200, profileService.getWrongQuiz(authUser, pageable));
     }
 
     @GetMapping("/correct-rate")

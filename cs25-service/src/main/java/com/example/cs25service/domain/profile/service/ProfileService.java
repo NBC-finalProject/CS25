@@ -19,11 +19,14 @@ import com.example.cs25service.domain.subscription.dto.SubscriptionHistoryDto;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25service.domain.subscription.service.SubscriptionService;
 import com.example.cs25service.domain.userQuizAnswer.dto.CategoryUserAnswerRateResponse;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,12 +42,15 @@ public class ProfileService {
     // 구독 정보 가져오기
     public UserSubscriptionResponseDto getUserSubscription(AuthUser authUser) {
 
+        // 유저 정보 조회
         User user = userRepository.findBySerialId(authUser.getSerialId())
             .orElseThrow(() ->
                 new UserException(UserExceptionCode.NOT_FOUND_USER));
 
+        // 구독 아이디 조회
         Long subscriptionId = user.getSubscription().getId();
 
+        //
         SubscriptionInfoDto subscriptionInfo = subscriptionService.getSubscription(
             user.getSubscription().getSerialId());
 
@@ -65,15 +71,16 @@ public class ProfileService {
     }
 
     // 유저 틀린 문제 다시보기
-    public ProfileWrongQuizResponseDto getWrongQuiz(AuthUser authUser) {
+    public ProfileWrongQuizResponseDto getWrongQuiz(AuthUser authUser, Pageable pageable) {
 
         User user = userRepository.findBySerialId(authUser.getSerialId())
             .orElseThrow(() ->
                 new UserException(UserExceptionCode.NOT_FOUND_USER));
 
-        List<WrongQuizDto> wrongQuizList = userQuizAnswerRepository
-            // 유저 아이디로 내가 푼 문제 조회
-            .findAllByUserId(user.getId()).stream()
+        // 유저 아이디로 내가 푼 문제 조회
+        Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserId(user.getId(), pageable);
+
+        List<WrongQuizDto> wrongQuizList = page.stream()
             .filter(answer -> !answer.getIsCorrect()) // 틀린 문제
             .map(answer -> new WrongQuizDto(
                 answer.getQuiz().getQuestion(),
