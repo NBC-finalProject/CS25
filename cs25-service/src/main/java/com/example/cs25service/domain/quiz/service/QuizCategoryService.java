@@ -55,6 +55,13 @@ public class QuizCategoryService {
     public QuizCategoryResponseDto updateQuizCategory(Long quizCategoryId, QuizCategoryRequestDto request) {
         QuizCategory quizCategory = quizCategoryRepository.findByIdOrElseThrow(quizCategoryId);
 
+        if(request.getCategory() != null){
+            quizCategoryRepository.findByCategoryType(request.getCategory())
+                .filter(existingCategory -> !existingCategory.getId().equals(quizCategoryId))
+                .ifPresent(c -> {
+                    throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
+                });
+        }
 
         quizCategory.setCategoryType(request.getCategory());
 
