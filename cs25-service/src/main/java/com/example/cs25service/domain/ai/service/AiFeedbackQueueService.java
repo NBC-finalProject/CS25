@@ -20,15 +20,21 @@
     public class AiFeedbackQueueService {
 
         private final AiFeedbackStreamProcessor processor;
-        private final BlockingQueue<FeedbackRequest> queue = new LinkedBlockingQueue<>(100);
-        private final ExecutorService executor = Executors.newSingleThreadExecutor(
-            r -> new Thread(r, "ai-feedback-processor")
+        private final BlockingQueue<FeedbackRequest> queue = new LinkedBlockingQueue<>(500);
+        private final int WORKER_COUNT = 16;
+
+        private final ExecutorService executor = Executors.newFixedThreadPool(
+            WORKER_COUNT,
+            r -> new Thread(r, "ai-feedback-worker-" + r.hashCode())
         );
+
         private volatile boolean running = true;
 
         @PostConstruct
         public void initWorker() {
-            executor.submit(this::processQueue);
+            for (int i = 0; i < WORKER_COUNT; i++) {
+                executor.submit(this::processQueue);
+            }
         }
 
         public void enqueue(FeedbackRequest request) {
