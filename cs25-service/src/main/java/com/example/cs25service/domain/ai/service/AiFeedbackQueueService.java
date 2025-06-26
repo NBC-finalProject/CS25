@@ -20,7 +20,7 @@ public class AiFeedbackQueueService {
 
     private final EmitterRegistry emitterRegistry;
     private final RedisTemplate<String, Object> redisTemplate;
-    private static final String DEDUPLICATION_SET_KEY = "ai-feedback-dedup-set";
+    public static final String DEDUPLICATION_SET_KEY = "ai-feedback-dedup-set";
 
     public void enqueue(Long answerId, SseEmitter emitter) {
         try {

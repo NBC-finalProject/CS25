@@ -60,7 +60,7 @@ public class AiFeedbackStreamWorker {
                         processor.stream(answerId, emitter);
                         emitterRegistry.remove(answerId);
 
-                        redisTemplate.opsForSet().remove("ai-feedback-dedup-set", answerId);
+                        redisTemplate.opsForSet().remove(AiFeedbackQueueService.DEDUPLICATION_SET_KEY, answerId);
 
                         redisTemplate.opsForStream()
                             .acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
