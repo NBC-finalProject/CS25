@@ -23,10 +23,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final TokenService tokenService;
 
-    private boolean cookieSecure = true; //배포시에는 true로 변경해야함
+    private boolean cookieSecure = true; // 배포시에는 true로 변경해야함
 
-    //@Value("${FRONT_END_URI:http://localhost:5173}")
-    private String frontEndUri = "http://localhost:8080";
+    @Value("${FRONT_END_URI:http://localhost:5173}")
+    private String frontEndUri;
 
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpiration;
@@ -45,21 +45,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             TokenResponseDto tokenResponse = tokenService.generateAndSaveTokenPair(authUser);
 
-//            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-//            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-//            response.setStatus(HttpServletResponse.SC_OK);
-
-            //response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
-
-            //프론트 생기면 추가 -> 헤더에 바로 jwt 꼽아넣어서 하나하나 jwt 적용할 필요가 없어짐
             // 쿠키 생성 - 보안 설정에 따라 Secure, SameSite 옵션 등 조정 가능
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken",
                     tokenResponse.getAccessToken())
-                .httpOnly(true)
-                .secure(cookieSecure) // HTTPS가 아닐 경우 false
-                .path("/")
+                .httpOnly(true) // XSS 방지
+                .secure(cookieSecure) // HTTPS 통신만 가능
+                .path("/") // 전체 경로에서 쿠키 유효
                 .maxAge(Duration.ofMillis(accessTokenExpiration)) // 원하는 만료 시간
-                .sameSite("None") // 필요에 따라 "Lax", "None"
+                .sameSite("Lax") // GET 호출에만 쿠키 전송
                 .build();
 
             ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken",
@@ -68,10 +61,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .secure(cookieSecure)
                 .path("/")
                 .maxAge(Duration.ofMillis(refreshTokenExpiration)) // 원하는 만료 시간
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
-            log.error("OAuth2 로그인 완료 핸들러에서 쿠키넣기");
+            log.info("OAuth2 로그인 응답헤더에 쿠키 추가 완료");
 
             // 응답 헤더에 쿠키 추가
             response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
