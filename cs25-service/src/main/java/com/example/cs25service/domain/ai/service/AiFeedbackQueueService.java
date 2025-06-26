@@ -1,78 +1,52 @@
-    package com.example.cs25service.domain.ai.service;
+package com.example.cs25service.domain.ai.service;
 
-    import com.example.cs25service.domain.ai.dto.request.FeedbackRequest;
-    import jakarta.annotation.PostConstruct;
-    import jakarta.annotation.PreDestroy;
-    import java.io.IOException;
-    import java.util.concurrent.BlockingQueue;
-    import java.util.concurrent.ExecutorService;
-    import java.util.concurrent.Executors;
-    import java.util.concurrent.LinkedBlockingQueue;
-    import java.util.concurrent.TimeUnit;
-    import lombok.RequiredArgsConstructor;
-    import lombok.extern.slf4j.Slf4j;
-    import org.springframework.stereotype.Service;
-    import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import com.example.cs25service.domain.ai.config.RedisStreamConfig;
+import com.example.cs25service.domain.ai.queue.EmitterRegistry;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import jakarta.annotation.PreDestroy;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-    @Slf4j
-    @Service
-    @RequiredArgsConstructor
-    public class AiFeedbackQueueService {
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class AiFeedbackQueueService {
 
-        private final AiFeedbackStreamProcessor processor;
-        private final BlockingQueue<FeedbackRequest> queue = new LinkedBlockingQueue<>(500);
-        private final int WORKER_COUNT = 16;
+    private final EmitterRegistry emitterRegistry;
+    private final RedisTemplate<String, Object> redisTemplate;
+    public static final String DEDUPLICATION_SET_KEY = "ai-feedback-dedup-set";
 
-        private final ExecutorService executor = Executors.newFixedThreadPool(
-            WORKER_COUNT,
-            r -> new Thread(r, "ai-feedback-worker-" + r.hashCode())
-        );
-
-        private volatile boolean running = true;
-
-        @PostConstruct
-        public void initWorker() {
-            for (int i = 0; i < WORKER_COUNT; i++) {
-                executor.submit(this::processQueue);
+    public void enqueue(Long answerId, SseEmitter emitter) {
+        try {
+            // 중복 체크 (이미 등록된 경우 enqueue 하지 않음)
+            Long added = redisTemplate.opsForSet().add(DEDUPLICATION_SET_KEY, String.valueOf(answerId));
+            if (added == null || added == 0) {
+                log.info("Duplicate enqueue prevented for answerId {}", answerId);
+                return;
             }
-        }
 
-        public void enqueue(FeedbackRequest request) {
-            boolean offered = queue.offer(request);
-            if (!offered) {
-                try {
-                    request.emitter().send(SseEmitter.event().data("현재 요청이 너무 많습니다. 잠시 후 다시 시도해주세요."));
-                    request.emitter().complete();
-                } catch (IOException e) {
-                    request.emitter().completeWithError(e);
-                }
-            }
-        }
-
-        private void processQueue() {
-            while (running) {
-                try {
-                    FeedbackRequest request = queue.poll(1, TimeUnit.SECONDS);
-                    if (request != null) {
-                        processor.stream(request.answerId(), request.emitter());
-                    }
-                } catch (Exception e) {
-                    log.error("Error processing feedback request", e);
-                }
-            }
-        }
-
-        @PreDestroy
-        public void shutdown() {
-            running = false;
-            executor.shutdown();
-            try {
-                if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
-                    executor.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executor.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
+            emitterRegistry.register(answerId, emitter);
+            Map<String, Object> data = Map.of("answerId", answerId);
+            redisTemplate.opsForStream().add(RedisStreamConfig.STREAM_KEY, data);
+        } catch (Exception e) {
+            emitterRegistry.remove(answerId);
+            redisTemplate.opsForSet().remove(DEDUPLICATION_SET_KEY, answerId); // 실패 시 롤백
+            completeWithError(emitter, e);
         }
     }
+
+    private void completeWithError(SseEmitter emitter, Exception e) {
+        try {
+            emitter.send(SseEmitter.event().data("요청 처리 중 오류가 발생했습니다."));
+        } catch (Exception ignored) {
+        }
+        emitter.completeWithError(e);
+    }
+
+}
