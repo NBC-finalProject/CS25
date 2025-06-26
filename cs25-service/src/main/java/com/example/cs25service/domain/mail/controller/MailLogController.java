@@ -16,6 +16,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +30,7 @@ public class MailLogController {
 
     @GetMapping
     public ApiResponse<Page<MailLogResponse>> getMailLogs(
-        @RequestBody MailLogSearchDto condition,
+        @ModelAttribute MailLogSearchDto condition,
         @PageableDefault(size = 20, sort = "sendDate", direction = Direction.DESC) Pageable pageable,
         @AuthenticationPrincipal AuthUser authUser
     ) {

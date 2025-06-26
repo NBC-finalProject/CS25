@@ -47,13 +47,6 @@ public class TodayQuizService {
             subscriptionId, parentCategoryId);
         double accuracy = calculateAccuracy(answerHistory);
 
-        //4. 가장 최근에 푼 문제 소분류 카테고리 지워줘야해
-        Set<Long> excludedCategoryIds = userQuizAnswerRepository.findRecentSolvedCategoryIds(
-            subscriptionId,
-            parentCategoryId,
-            LocalDate.now().minusDays(1)  // 이거 몇일 중복 제거할건지 설정가능쓰
-        );
-
         // 5. 내가 푼 문제 ID
         Set<Long> solvedQuizIds = answerHistory.stream()
             .map(a -> a.getQuiz().getId())
@@ -75,7 +68,7 @@ public class TodayQuizService {
             parentCategoryId,
             allowedDifficulties,
             solvedQuizIds,
-            excludedCategoryIds,
+            //excludedCategoryIds,
             targetTypes
         ); //한개만뽑기(find first)
 
@@ -95,6 +88,7 @@ public class TodayQuizService {
             .type(selectedQuiz.getType())
             .build();  //return -> QuizDto
     }
+
 
     //유저 정답률 기준으로 바운더리 정해줌
     private List<QuizLevel> getAllowedDifficulties(double accuracy) {
