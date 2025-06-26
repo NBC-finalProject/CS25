@@ -26,7 +26,7 @@ public class AiFeedbackQueueService {
         try {
             // 중복 체크 (이미 등록된 경우 enqueue 하지 않음)
             Long added = redisTemplate.opsForSet().add(DEDUPLICATION_SET_KEY, String.valueOf(answerId));
-            if (Boolean.FALSE.equals(added)) {
+            if (added == null || added == 0) {
                 log.info("Duplicate enqueue prevented for answerId {}", answerId);
                 return;
             }
