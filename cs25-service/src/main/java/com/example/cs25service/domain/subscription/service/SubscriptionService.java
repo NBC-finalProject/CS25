@@ -69,30 +69,26 @@ public class SubscriptionService {
      * 구독정보를 생성하는 메서드
      *
      * @param request 사용자를 통해 받은 생성할 구독 정보
+     * @param authUser 로그인 정보
+     * @return 구독 응답 DTO를 반환
      */
     @Transactional
     public SubscriptionResponseDto createSubscription(
-        SubscriptionRequestDto request,
-        AuthUser authUser) {
+        SubscriptionRequestDto request, AuthUser authUser) {
 
         // 퀴즈 카테고리 불러오기
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             request.getCategory());
 
-        //퀴즈 카테고리가 대분류인지 검증
+        // 퀴즈 카테고리가 대분류인지 검증
         if (quizCategory.isChildCategory()) {
             throw new QuizException(QuizExceptionCode.PARENT_CATEGORY_REQUIRED_ERROR);
         }
 
-        // 로그인 한 경우
+        // 로그인을 한 경우
         if (authUser != null) {
             User user = userRepository.findUserWithSubscriptionByEmail(authUser.getEmail())
-                .orElseThrow(
-                    () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-                );
-
-            // TODO: 로그인을 해도 이메일 체크를 해야할까?
-            // this.checkEmail(user.getEmail());
+                .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
             // 구독 정보가 없는 경우
             if (user.getSubscription() == null) {
@@ -108,15 +104,15 @@ public class SubscriptionService {
                 );
                 createSubscriptionHistory(subscription);
                 user.updateSubscription(subscription);
-                return new SubscriptionResponseDto(
-                    subscription.getId(),
-                    subscription.getCategory().getCategoryType(),
-                    subscription.getStartDate(),
-                    subscription.getEndDate(),
-                    subscription.getSubscriptionType()
-                );
+                return SubscriptionResponseDto.builder()
+                    .id(subscription.getId())
+                    .category(subscription.getCategory().getCategoryType())
+                    .startDate(subscription.getStartDate())
+                    .endDate(subscription.getEndDate())
+                    .subscriptionType(subscription.getSubscriptionType())
+                    .build();
             } else {
-                // TODO: 로그인 했을때 구독정보가 있는데 다시 구독하기 눌렀을때 예외 처리
+                // 이미 구독정보가 있으면 예외 처리
                 throw new SubscriptionException(
                     SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
             }
@@ -124,9 +120,7 @@ public class SubscriptionService {
         } else {
             // 이메일 체크
             this.checkEmail(request.getEmail());
-
             try {
-                // FIXME: 이메일인증 완료되었다고 가정
                 LocalDate nowDate = LocalDate.now();
                 Subscription subscription = subscriptionRepository.save(
                     Subscription.builder()
@@ -138,13 +132,13 @@ public class SubscriptionService {
                         .build()
                 );
                 createSubscriptionHistory(subscription);
-                return new SubscriptionResponseDto(
-                    subscription.getId(),
-                    subscription.getCategory().getCategoryType(),
-                    subscription.getStartDate(),
-                    subscription.getEndDate(),
-                    subscription.getSubscriptionType()
-                );
+                return SubscriptionResponseDto.builder()
+                    .id(subscription.getId())
+                    .category(subscription.getCategory().getCategoryType())
+                    .startDate(subscription.getStartDate())
+                    .endDate(subscription.getEndDate())
+                    .subscriptionType(subscription.getSubscriptionType())
+                    .build();
             } catch (DataIntegrityViolationException e) {
                 // UNIQUE 제약조건 위반 시 발생하는 예외처리
                 throw new SubscriptionException(
