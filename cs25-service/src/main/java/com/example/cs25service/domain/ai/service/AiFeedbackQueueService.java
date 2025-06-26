@@ -49,9 +49,4 @@ public class AiFeedbackQueueService {
         emitter.completeWithError(e);
     }
 
-    @PreDestroy
-    public void shutdown() {
-        // 현재 ExecutorService 사용하지 않으므로 불필요하지만,
-        // 추후 확장 가능성을 대비해 템플릿 유지
-    }
 }
