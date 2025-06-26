@@ -6,10 +6,12 @@ import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import com.example.cs25service.domain.ai.service.AiQuestionGeneratorService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +40,9 @@ class AiQuestionGeneratorServiceTest {
 
     @PersistenceContext
     private EntityManager em;
+
+    @Autowired
+    private AiFeedbackStreamWorker aiFeedbackStreamWorker;
 
     @BeforeEach
     void setUp() {
@@ -90,5 +95,10 @@ class AiQuestionGeneratorServiceTest {
             quiz.getCommentary(),
             quiz.getCategory().getCategoryType()
         ));
+    }
+
+    @AfterEach
+    void tearDown() {
+        aiFeedbackStreamWorker.stop();
     }
 }

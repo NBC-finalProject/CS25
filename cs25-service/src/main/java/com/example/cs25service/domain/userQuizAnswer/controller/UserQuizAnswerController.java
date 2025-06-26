@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/quizzes")
 @RequiredArgsConstructor
-public class UserQuizAnswerController {
+public class    UserQuizAnswerController {
 
     private final UserQuizAnswerService userQuizAnswerService;
 

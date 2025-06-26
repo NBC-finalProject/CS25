@@ -1,6 +1,7 @@
 package com.example.cs25entity.domain.userQuizAnswer.repository;
 
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
+import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,6 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
 
     long countByQuizId(Long quizId);
 
-    @Query("SELECT a FROM UserQuizAnswer a JOIN FETCH a.quiz JOIN FETCH a.user WHERE a.id = :id")
-    Optional<UserQuizAnswer> findWithQuizAndUserById(Long id);
+    @Query("SELECT a FROM UserQuizAnswer a JOIN FETCH a.quiz LEFT JOIN FETCH a.user WHERE a.id = :id")
+    Optional<UserQuizAnswer> findWithQuizAndUserById(@Param("id") Long id);
 }
