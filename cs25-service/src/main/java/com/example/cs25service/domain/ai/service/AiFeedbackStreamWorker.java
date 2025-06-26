@@ -57,6 +57,12 @@ public class AiFeedbackStreamWorker {
                         Long answerId = Long.valueOf(message.getValue().get("answerId").toString());
                         SseEmitter emitter = emitterRegistry.get(answerId);
 
+                        if (emitter == null) {
+                            log.warn("No emitter found for answerId: {}", answerId);
+                            redisTemplate.opsForStream().acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
+                            continue;
+                        }
+
                         processor.stream(answerId, emitter);
                         emitterRegistry.remove(answerId);
 
