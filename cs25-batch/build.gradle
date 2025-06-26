@@ -29,7 +29,7 @@ dependencies {
     implementation platform("software.amazon.awssdk:bom:2.25.39")
     implementation 'software.amazon.awssdk:sesv2'
     implementation 'software.amazon.awssdk:netty-nio-client'
-
+    implementation 'com.google.guava:guava:32.1.2-jre'
     //Monitoring
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
