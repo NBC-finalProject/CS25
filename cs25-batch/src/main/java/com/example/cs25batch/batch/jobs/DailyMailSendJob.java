@@ -101,7 +101,6 @@ public class DailyMailSendJob {
         };
     }
 
-
     //Message Queue 적용 후
     @Bean
     public Job mailProducerJob(JobRepository jobRepository,
@@ -147,37 +146,11 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public Job mailConsumerJob(JobRepository jobRepository,
-        @Qualifier("mailConsumerStep") Step mailConsumeStep) {
-        return new JobBuilder("mailConsumerJob", jobRepository)
-            .start(mailConsumeStep)
-            .build();
-    }
-
-    @Bean
-    public Step mailConsumerStep(
-        JobRepository jobRepository,
-        @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
-        @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
-        @Qualifier("mailWriter") ItemWriter<MailDto> writer,
-        PlatformTransactionManager transactionManager,
-        MailStepLogger mailStepLogger
-    ) {
-        return new StepBuilder("mailConsumerStep", jobRepository)
-            .<Map<String, String>, MailDto>chunk(10, transactionManager)
-            .reader(reader)
-            .processor(processor)
-            .writer(writer)
-            .listener(mailStepLogger)
-            .build();
-    }
-
-    @Bean
     public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(4);
-        executor.setQueueCapacity(500);
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(16);
+        executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("mail-step-thread-");
         executor.initialize();
         return executor;
@@ -205,7 +178,7 @@ public class DailyMailSendJob {
         @Qualifier("taskExecutor") ThreadPoolTaskExecutor taskExecutor
     ) {
         return new StepBuilder("mailConsumerWithAsyncStep", jobRepository)
-            .<Map<String, String>, MailDto>chunk(10, transactionManager)
+            .<Map<String, String>, MailDto>chunk(5, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)

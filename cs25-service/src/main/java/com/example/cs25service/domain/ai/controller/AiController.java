@@ -3,6 +3,7 @@ package com.example.cs25service.domain.ai.controller;
 import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25service.domain.ai.dto.response.AiFeedbackResponse;
+import com.example.cs25service.domain.ai.service.AiFeedbackQueueService;
 import com.example.cs25service.domain.ai.service.AiQuestionGeneratorService;
 import com.example.cs25service.domain.ai.service.AiService;
 import com.example.cs25service.domain.ai.service.FileLoaderService;
@@ -22,11 +23,16 @@ public class AiController {
     private final AiService aiService;
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
     private final FileLoaderService fileLoaderService;
+    private final AiFeedbackQueueService aiFeedbackQueueService;
 
     @GetMapping("/{answerId}/feedback")
-    public ApiResponse<AiFeedbackResponse> streamFeedback(@PathVariable Long answerId) {
-        // TODO: aiService.streamFeedback(answerId);로 추후 수정예정
-        return new ApiResponse<>(200, aiService.getFeedback(answerId));
+    public SseEmitter streamFeedback(@PathVariable Long answerId) {
+        SseEmitter emitter = new SseEmitter(60_000L);
+        emitter.onTimeout(emitter::complete);
+        emitter.onError(emitter::completeWithError);
+
+        aiFeedbackQueueService.enqueue(answerId, emitter);
+        return emitter;
     }
 
     @GetMapping("/generate")

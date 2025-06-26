@@ -74,7 +74,7 @@ public class AiService {
         emitter.onTimeout(emitter::complete);
         emitter.onError(emitter::completeWithError);
 
-        feedbackQueueService.enqueue(new FeedbackRequest(answerId, emitter));
+        feedbackQueueService.enqueue(answerId, emitter);
         return emitter;
     }
 }

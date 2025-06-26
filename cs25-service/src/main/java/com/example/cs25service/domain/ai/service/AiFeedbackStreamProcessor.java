@@ -33,24 +33,30 @@ public class AiFeedbackStreamProcessor {
             var answer = userQuizAnswerRepository.findById(answerId)
                 .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
 
+            if (answer.getAiFeedback() != null) {
+                emitter.send(SseEmitter.event().data("이미 처리된 요청입니다."));
+                emitter.complete();
+                return;
+            }
+
             var quiz = answer.getQuiz();
             var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.3);
             String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
             String systemPrompt = promptProvider.getFeedbackSystem();
 
-            send(emitter, "🤖 AI 응답 대기 중...");
-            try {
-                Thread.sleep(300); // ✅ 실제 LLM 호출 대신 300ms 대기
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-            String feedback = "정답입니다. 이 피드백은 테스트용입니다."; // 하드코딩 응답
-//            String feedback = aiChatClient.call(systemPrompt, userPrompt);
+            send(emitter, "AI 응답 대기 중...");
+//            try {
+//                Thread.sleep(300); // ✅ 실제 LLM 호출 대신 300ms 대기
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//
+//            String feedback = "정답입니다. 이 피드백은 테스트용입니다."; // 하드코딩 응답
+            String feedback = aiChatClient.call(systemPrompt, userPrompt);
             String[] lines = feedback.split("(?<=[.!?]|다\\.|습니다\\.|입니다\\.)\\s*");
 
             for (String line : lines) {
-                send(emitter, "🤖 " + line.trim());
+                send(emitter, " " + line.trim());
             }
 
             boolean isCorrect = feedback.startsWith("정답");

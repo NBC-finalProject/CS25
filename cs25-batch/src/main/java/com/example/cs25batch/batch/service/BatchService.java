@@ -12,21 +12,38 @@ import org.springframework.stereotype.Service;
 public class BatchService {
 
     private final JobLauncher jobLauncher;
-    private final Job mailJob;
+    private final Job producerJob;
+    private final Job consumerJob;
 
     @Autowired
-    public BatchService(JobLauncher jobLauncher, @Qualifier("mailJob") Job mailJob) {
+    public BatchService(JobLauncher jobLauncher,
+        @Qualifier("mailProducerJob") Job producerJob,
+        @Qualifier("mailConsumerWithAsyncJob") Job consumerJob
+    ) {
         this.jobLauncher = jobLauncher;
-        this.mailJob = mailJob;
+        this.producerJob = producerJob;
+        this.consumerJob = consumerJob;
     }
 
-    public void activeBatch() {
+    public void activeProducerJob() {
         try {
             JobParameters params = new JobParametersBuilder()
                 .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
 
-            jobLauncher.run(mailJob, params);
+            jobLauncher.run(producerJob, params);
+        } catch (Exception e) {
+            throw new RuntimeException("메일 배치 실행 실패", e);
+        }
+    }
+
+    public void activeConsumerJob() {
+        try {
+            JobParameters params = new JobParametersBuilder()
+                .addLong("timestamp", System.currentTimeMillis())
+                .toJobParameters();
+
+            jobLauncher.run(consumerJob, params);
         } catch (Exception e) {
             throw new RuntimeException("메일 배치 실행 실패", e);
         }

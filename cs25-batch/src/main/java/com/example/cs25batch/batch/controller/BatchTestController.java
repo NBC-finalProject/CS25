@@ -12,10 +12,17 @@ public class BatchTestController {
 
     private final BatchService batchService;
 
-    @PostMapping("/emails/sendTodayQuizzes")
-    public ApiResponse<String> sendTodayQuizzes(
+    @PostMapping("/emails/activeProducerJob")
+    public ApiResponse<String> activeProducerJob(
     ) {
-        batchService.activeBatch();
+        batchService.activeProducerJob();
+        return new ApiResponse<>(200, "스프링 배치 - 큐에 넣기 성공");
+    }
+
+    @PostMapping("/emails/activeConsumerJob")
+    public ApiResponse<String> activeConsumerJob(
+    ) {
+        batchService.activeConsumerJob();
         return new ApiResponse<>(200, "스프링 배치 - 문제 발송 성공");
     }
 }
