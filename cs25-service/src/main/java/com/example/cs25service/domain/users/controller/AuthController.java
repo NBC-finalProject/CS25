@@ -14,6 +14,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final TokenService tokenService;
+
+    @GetMapping("/status")
+    public ApiResponse<Boolean> checkLoginStatus(
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        boolean isAuthenticated = authUser != null;
+        return new ApiResponse<>(200, isAuthenticated);
+    }
 
     @PostMapping("/reissue")
     public ResponseEntity<ApiResponse<TokenResponseDto>> getSubscription(
@@ -40,7 +49,6 @@ public class AuthController {
                 tokenDto
             ));
     }
-
 
     @PostMapping("/logout")
     public ApiResponse<String> logout(@AuthenticationPrincipal AuthUser authUser,

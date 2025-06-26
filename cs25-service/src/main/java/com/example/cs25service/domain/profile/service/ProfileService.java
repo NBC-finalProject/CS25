@@ -106,6 +106,7 @@ public class ProfileService {
             .name(user.getName())
             .rank(myRank)
             .score(user.getScore())
+            .subscriptionId(user.getSubscription() == null ? null : user.getSubscription().getSerialId())
             .build();
     }
 
