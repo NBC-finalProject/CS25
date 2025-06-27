@@ -5,7 +5,7 @@ import com.example.cs25batch.batch.service.JavaMailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component("javaMailSender")
+@Component("javaBatchMailSender")
 @RequiredArgsConstructor
 public class JavaMailSenderStrategy implements MailSenderStrategy{
     private final JavaMailService javaMailService;

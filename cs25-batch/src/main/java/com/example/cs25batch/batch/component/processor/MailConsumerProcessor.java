@@ -24,7 +24,7 @@ public class MailConsumerProcessor {
     private final MailSenderContext mailSenderContext;
     private final StringRedisTemplate redisTemplate;
 
-    @Value("${mail.strategy:sesMailSender}")
+    @Value("${mail.strategy:javaBatchMailSender}")
     private String strategyKey;
 
     public void process(String streamKey) {

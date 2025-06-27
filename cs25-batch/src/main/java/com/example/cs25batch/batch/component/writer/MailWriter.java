@@ -20,7 +20,7 @@ public class MailWriter implements ItemWriter<MailDto> {
     private final MailSenderContext mailSenderContext;
     private final StringRedisTemplate redisTemplate;
 
-    @Value("${mail.strategy:javaMailSender}")
+    @Value("${mail.strategy:javaBatchMailSender}")
     private String strategyKey;
 
     @Override

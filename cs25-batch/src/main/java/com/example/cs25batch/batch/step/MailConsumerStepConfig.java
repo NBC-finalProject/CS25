@@ -18,9 +18,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class MailConsumerStepConfig {
 
-    @Value("${mail.strategy:sesMailSender}")
-    private String strategyKey;
-
     private final MailConsumerProcessor processor;
 
     @Bean

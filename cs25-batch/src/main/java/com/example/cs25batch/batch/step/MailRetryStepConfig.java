@@ -18,9 +18,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class MailRetryStepConfig {
 
-    @Value("${mail.strategy:sesMailSender}")
-    private String strategyKey;
-
     private final MailConsumerProcessor processor;
 
     @Bean
