@@ -31,7 +31,7 @@ public class MailConsumerProcessor {
         while (true) {
             List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
                 StreamReadOptions.empty().count(1),
-                StreamOffset.create(streamKey, ReadOffset.lastConsumed())
+                StreamOffset.create(streamKey, ReadOffset.from("0"))
             );
 
             if (records == null || records.isEmpty()) break;
