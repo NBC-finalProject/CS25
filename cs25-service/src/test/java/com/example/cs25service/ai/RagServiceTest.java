@@ -2,6 +2,7 @@ package com.example.cs25service.ai;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import com.example.cs25service.domain.ai.service.RagService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -26,6 +28,8 @@ class RagServiceTest {
     private VectorStore vectorStore;
     @Autowired
     private RagService ragService;
+    @Autowired
+    private AiFeedbackStreamWorker aiFeedbackStreamWorker;
 
     @Test
     void insertDummyDocumentsAndSearch() {
@@ -74,6 +78,11 @@ class RagServiceTest {
                 tempDir.delete();
             }
         }
+    }
+
+    @AfterEach
+    void tearDown() {
+        aiFeedbackStreamWorker.stop();
     }
 }
 

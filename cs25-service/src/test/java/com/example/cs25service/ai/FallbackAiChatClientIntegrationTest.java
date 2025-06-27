@@ -12,11 +12,13 @@ import com.example.cs25entity.domain.user.entity.SocialType;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import com.example.cs25service.domain.ai.service.AiService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
@@ -38,6 +40,9 @@ class FallbackAiChatClientIntegrationTest {
 
     @PersistenceContext
     private EntityManager em;
+
+    @Autowired
+    private AiFeedbackStreamWorker aiFeedbackStreamWorker;
 
     @Test
     @DisplayName("OpenAI 호출 실패 시 Claude로 폴백하여 피드백 생성한다")
@@ -96,5 +101,10 @@ class FallbackAiChatClientIntegrationTest {
         assertThat(updated.getAiFeedback()).isNotBlank();
         assertThat(updated.getIsCorrect()).isNotNull();
         System.out.println("📢 Claude 기반 피드백: " + updated.getAiFeedback());
+    }
+
+    @AfterEach
+    void tearDown() {
+        aiFeedbackStreamWorker.stop();
     }
 }

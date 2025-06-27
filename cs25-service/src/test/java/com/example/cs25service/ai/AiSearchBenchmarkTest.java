@@ -2,6 +2,7 @@ package com.example.cs25service.ai;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import com.example.cs25service.domain.ai.service.RagService;
 import java.io.PrintWriter;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.document.Document;
@@ -23,6 +25,9 @@ import org.springframework.test.context.ActiveProfiles;
 @Slf4j
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)  // 스프링 컨텍스트 리프레시
 public class AiSearchBenchmarkTest {
+
+    @Autowired
+    private AiFeedbackStreamWorker aiFeedbackStreamWorker;
 
     @Autowired
     private RagService ragService;
@@ -131,5 +136,10 @@ public class AiSearchBenchmarkTest {
                 }
             }
         }
+    }
+
+    @AfterEach
+    void tearDown() {
+        aiFeedbackStreamWorker.stop();
     }
 }

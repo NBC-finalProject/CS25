@@ -1,7 +1,9 @@
 package com.example.cs25service.ai;
 
+import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -16,6 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 @Slf4j
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)  // 스프링 컨텍스트 리프레시
 public class VectorDBDocumentListTest {
+
+    @Autowired
+    private AiFeedbackStreamWorker aiFeedbackStreamWorker;
 
     @Autowired
     private VectorStore vectorStore;
@@ -43,5 +48,9 @@ public class VectorDBDocumentListTest {
             log.info("fileName={}, containsSpring={}", doc.getMetadata().get("fileName"),
                 content.contains("Spring"));
         }
+    }
+    @AfterEach
+    void tearDown() {
+        aiFeedbackStreamWorker.stop();
     }
 }
