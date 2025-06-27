@@ -1,7 +1,11 @@
 package com.example.cs25service.domain.ai.client;
 
+import com.example.cs25service.domain.ai.exception.AiException;
+import com.example.cs25service.domain.ai.exception.AiExceptionCode;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,5 +26,20 @@ public class ClaudeChatClient implements AiChatClient {
     @Override
     public ChatClient raw() {
         return anthropicChatClient;
+    }
+
+    @Override
+    public void stream(String systemPrompt, String userPrompt, Consumer<String> onToken) {
+        try {
+            anthropicChatClient.prompt()
+                .system(systemPrompt)
+                .user(userPrompt)
+                .stream()
+                .content()
+                .doOnNext(onToken)
+                .subscribe();
+                } catch (Exception e) {
+            throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
+        }
     }
 }

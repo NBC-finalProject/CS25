@@ -1,5 +1,6 @@
 package com.example.cs25service.domain.ai.client;
 
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -31,5 +32,17 @@ public class FallbackAiChatClient implements AiChatClient {
     public org.springframework.ai.chat.client.ChatClient raw() {
         return openAiClient.raw(); // 기본은 OpenAI 기준
     }
+
+    @Override
+    public void stream(String systemPrompt, String userPrompt, Consumer<String> onToken) {
+        try {
+            openAiClient.stream(systemPrompt, userPrompt, onToken);
+        } catch (Exception e) {
+            log.warn("OpenAI 스트리밍 실패. Claude로 폴백합니다.", e);
+            claudeClient.stream(systemPrompt, userPrompt, onToken);
+        }
+    }
+
+
 }
 
