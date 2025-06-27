@@ -12,8 +12,10 @@ import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +26,9 @@ public class TestDataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
     private final UserQuizAnswerRepository answerRepository;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     @Transactional
@@ -65,5 +70,6 @@ public class TestDataInitializer implements CommandLineRunner {
                 .build());
         }
         answerRepository.saveAll(answers);
+        redisTemplate.delete("ai-feedback-dedup-set");
     }
 }

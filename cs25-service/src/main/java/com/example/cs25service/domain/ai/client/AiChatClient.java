@@ -2,6 +2,7 @@ package com.example.cs25service.domain.ai.client;
 
 import java.util.function.Consumer;
 import org.springframework.ai.chat.client.ChatClient;
+import reactor.core.publisher.Flux;
 
 public interface AiChatClient {
 
@@ -9,5 +10,5 @@ public interface AiChatClient {
 
     ChatClient raw();
 
-    void  stream(String systemPrompt,String userPrompt, Consumer<String> onToken);
+    Flux<String> stream(String systemPrompt,String userPrompt);
 }

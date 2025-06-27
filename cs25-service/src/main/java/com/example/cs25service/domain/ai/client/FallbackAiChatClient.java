@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 @Component("fallbackAiChatClient")
 @RequiredArgsConstructor
@@ -34,12 +35,12 @@ public class FallbackAiChatClient implements AiChatClient {
     }
 
     @Override
-    public void stream(String systemPrompt, String userPrompt, Consumer<String> onToken) {
+    public Flux<String> stream(String systemPrompt, String userPrompt) {
         try {
-            openAiClient.stream(systemPrompt, userPrompt, onToken);
+            return openAiClient.stream(systemPrompt, userPrompt);
         } catch (Exception e) {
             log.warn("OpenAI 스트리밍 실패. Claude로 폴백합니다.", e);
-            claudeClient.stream(systemPrompt, userPrompt, onToken);
+            return claudeClient.stream(systemPrompt, userPrompt);
         }
     }
 

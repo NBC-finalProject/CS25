@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 @Component
 @RequiredArgsConstructor
@@ -29,15 +30,13 @@ public class ClaudeChatClient implements AiChatClient {
     }
 
     @Override
-    public void stream(String systemPrompt, String userPrompt, Consumer<String> onToken) {
+    public Flux<String> stream(String systemPrompt, String userPrompt) {
         try {
-            anthropicChatClient.prompt()
+            return anthropicChatClient.prompt()
                 .system(systemPrompt)
                 .user(userPrompt)
                 .stream()
-                .content()
-                .doOnNext(onToken)
-                .subscribe();
+                .content();
                 } catch (Exception e) {
             throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
         }
