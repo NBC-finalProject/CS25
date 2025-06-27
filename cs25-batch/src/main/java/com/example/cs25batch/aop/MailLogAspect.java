@@ -1,5 +1,6 @@
 package com.example.cs25batch.aop;
 
+import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.enums.MailStatus;
 import com.example.cs25entity.domain.mail.exception.CustomMailException;
@@ -27,23 +28,21 @@ public class MailLogAspect {
     private final MailLogRepository mailLogRepository;
     private final StringRedisTemplate redisTemplate;
 
-    @Around("execution(* com.example.cs25batch.batch.service.SesMailService.sendQuizEmail(..))")
+    @Around("execution(* com.example.cs25batch.context.MailSenderContext.send(..))")
     public Object logMailSend(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
-        Subscription subscription = (Subscription) args[0];
-        Quiz quiz = (Quiz) args[1];
+        MailDto mailDto = (MailDto) args[0];
+        Subscription subscription = mailDto.getSubscription();
+        Quiz quiz = mailDto.getQuiz();
+
         MailStatus status = null;
         String caused = null;
+
         try {
             Object result = joinPoint.proceed(); // 메서드 실제 실행
             status = MailStatus.SENT;
             return result;
-        } catch (SesV2Exception e) {
-            status = MailStatus.FAILED;
-            caused = e.awsErrorDetails().errorMessage();
-            log.warn("발송 실패 원인 : {}", caused);
-            throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         } catch (Exception e){
             status = MailStatus.FAILED;
             caused = e.getMessage();
