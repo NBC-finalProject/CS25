@@ -28,6 +28,7 @@ jobs:
         run: |
           echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
