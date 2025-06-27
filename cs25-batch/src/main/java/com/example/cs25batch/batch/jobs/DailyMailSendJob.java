@@ -112,17 +112,6 @@ public class DailyMailSendJob {
     }
 
     @Bean
-    public Job mailConsumerWithAsyncJob(JobRepository jobRepository,
-        @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep,
-        ThreadShuttingJobListener threadShuttingJobListener
-    ) {
-        return new JobBuilder("mailConsumerWithAsyncJob", jobRepository)
-            .start(mailConsumeStep)
-            .listener(threadShuttingJobListener)
-            .build();
-    }
-
-    @Bean
     public Step mailConsumerWithAsyncStep(
         JobRepository jobRepository,
         @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
