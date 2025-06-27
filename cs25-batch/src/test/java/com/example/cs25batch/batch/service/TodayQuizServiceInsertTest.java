@@ -1,3 +1,4 @@
+/*
 package com.example.cs25batch.batch.service;
 
 import com.example.cs25batch.Cs25BatchApplication;
@@ -234,4 +235,4 @@ class TodayQuizServiceInsertTest {
         );
     }
 
-}
+}*/

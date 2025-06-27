@@ -10,6 +10,7 @@ import com.example.cs25entity.domain.subscription.entity.Subscription;
 import java.time.LocalDateTime;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 
+@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -40,6 +42,7 @@ public class MailLogAspect {
         } catch (SesV2Exception e) {
             status = MailStatus.FAILED;
             caused = e.awsErrorDetails().errorMessage();
+            log.warn("발송 실패 원인 : {}", caused);
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         } catch (Exception e){
             status = MailStatus.FAILED;
