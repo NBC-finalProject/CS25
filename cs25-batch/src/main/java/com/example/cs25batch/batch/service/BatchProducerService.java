@@ -10,9 +10,10 @@ import org.springframework.stereotype.Service;
 public class BatchProducerService {
     private final StringRedisTemplate redisTemplate;
 
+    private static final String QUIZ_EMAIL_STREAM = "quiz-email-stream";
     //producer
     public void enqueueQuizEmail(Long subscriptionId) {
         redisTemplate.opsForStream()
-            .add("quiz-email-stream", Map.of("subscriptionId", subscriptionId.toString()));
+            .add(QUIZ_EMAIL_STREAM, Map.of("subscriptionId", subscriptionId.toString()));
     }
 }

@@ -30,13 +30,18 @@ public class MailConsumerProcessor {
     private String strategyKey;
 
     public void process(String streamKey) {
-        while (true) {
+
+        int maxIterations = 1000;
+        int iteration = 0;
+
+        while (iteration < maxIterations) {
             List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
                 StreamReadOptions.empty().count(1),
                 StreamOffset.create(streamKey, ReadOffset.from("0"))
             );
 
             if (records == null || records.isEmpty()) break;
+            iteration++;
 
             MapRecord<String, Object, Object> record = records.get(0);
             try {
