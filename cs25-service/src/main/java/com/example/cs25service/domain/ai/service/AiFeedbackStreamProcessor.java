@@ -45,34 +45,32 @@ public class AiFeedbackStreamProcessor {
             String systemPrompt = promptProvider.getFeedbackSystem();
 
             send(emitter, "AI 응답 대기 중...");
-//            try {
-//                Thread.sleep(300); // ✅ 실제 LLM 호출 대신 300ms 대기
-//            } catch (InterruptedException e) {
-//                Thread.currentThread().interrupt();
-//            }
-//
-//            String feedback = "정답입니다. 이 피드백은 테스트용입니다."; // 하드코딩 응답
-            String feedback = aiChatClient.call(systemPrompt, userPrompt);
-            String[] lines = feedback.split("(?<=[.!?]|다\\.|습니다\\.|입니다\\.)\\s*");
 
-            for (String line : lines) {
-                send(emitter, " " + line.trim());
-            }
+            StringBuilder feedbackBuffer = new StringBuilder();
 
-            boolean isCorrect = feedback.startsWith("정답");
+            aiChatClient.stream(systemPrompt, userPrompt)
+                .doOnNext(token -> {
+                    send(emitter, token);
+                    feedbackBuffer.append(token);
+                })
+                .doOnComplete(() -> {
+                    String feedback = feedbackBuffer.toString();
+                    boolean isCorrect = feedback.startsWith("정답");
 
+                    User user = answer.getUser();
+                    if(user != null){
+                        double score = isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp()) : user.getScore() + 1;
+                        user.updateScore(score);
+                    }
 
-            User user = answer.getUser();
-            if(user != null){
-                double score = isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp()) : user.getScore() + 1;
-                user.updateScore(score);
-            }
+                    answer.updateIsCorrect(isCorrect);
+                    answer.updateAiFeedback(feedback);
+                    userQuizAnswerRepository.save(answer);
 
-            answer.updateIsCorrect(isCorrect);
-            answer.updateAiFeedback(feedback);
-            userQuizAnswerRepository.save(answer);
-
-            emitter.complete();
+                    emitter.complete();
+                })
+                .doOnError(emitter::completeWithError)
+                .subscribe();
 
         } catch (Exception e) {
             emitter.completeWithError(e);
