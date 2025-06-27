@@ -1,22 +1,17 @@
 FROM gradle:8.10.2-jdk17 AS builder
 
 # 작업 디렉토리 설정
-WORKDIR /app
+WORKDIR /build
 
-# gradle 설정과 wrapper 복사
+# 소스 복사 (모듈 전체가 아닌 현재 모듈만 복사)
 COPY gradlew settings.gradle build.gradle ./
-COPY gradle gradle
-
-# 모듈별 소스 복사
-COPY cs25-service cs25-service
-
-# 실행 권한 부여
-RUN chmod +x gradlew
+COPY gradle gradle/
+COPY cs25-service cs25-service/
+COPY cs25-entity cs25-entity/
+COPY cs25-common cs25-common/
 
 # 테스트 생략하여 빌드 안정화
-RUN ./gradlew :cs25-service:bootJar --no-daemon
-
-# 실제 실행 이미지
+RUN ./gradlew :cs25-service:bootJar --stacktrace --no-daemon
 FROM openjdk:17
 
 # 메타 정보
