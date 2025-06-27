@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+@Slf4j
 @RequiredArgsConstructor
 @Configuration
 public class MailProducerStepConfig {
@@ -42,7 +43,6 @@ public class MailProducerStepConfig {
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
             //long searchEnd = System.currentTimeMillis();
             //log.info("[1. 발송 리스트 조회] {}개, {}ms", subscriptions.size(), searchEnd - searchStart);
-
             for (SubscriptionMailTargetDto sub : subscriptions) {
                 Long subscriptionId = sub.getSubscriptionId();
                 //메일을 발송해야 할 구독자 정보를 MessageQueue 에 넣음

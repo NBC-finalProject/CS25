@@ -20,8 +20,8 @@ public class MailConsumerAsyncStepConfig {
     @Bean
     public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(16);
+        executor.setCorePoolSize(3);
+        executor.setMaxPoolSize(4);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("mail-step-thread-");
         executor.initialize();
@@ -29,7 +29,7 @@ public class MailConsumerAsyncStepConfig {
     }
 
     @Bean
-    public Step mailConsumerWithAsyncStep(
+    public Step mailConsumerAsyncStep(
         JobRepository jobRepository,
         @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
         @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
@@ -38,8 +38,8 @@ public class MailConsumerAsyncStepConfig {
         MailStepLogger mailStepLogger,
         @Qualifier("taskExecutor") ThreadPoolTaskExecutor taskExecutor
     ) {
-        return new StepBuilder("mailConsumerWithAsyncStep", jobRepository)
-            .<Map<String, String>, MailDto>chunk(5, transactionManager)
+        return new StepBuilder("mailConsumerAsyncStep", jobRepository)
+            .<Map<String, String>, MailDto>chunk(4, transactionManager)
             .reader(reader)
             .processor(processor)
             .writer(writer)

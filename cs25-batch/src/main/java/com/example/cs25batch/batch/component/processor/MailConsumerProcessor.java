@@ -8,6 +8,7 @@ import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MailConsumerProcessor {
@@ -48,7 +50,10 @@ public class MailConsumerProcessor {
                         .quiz(quiz)
                         .build();
 
+                    long sendStart = System.currentTimeMillis();
                     mailSenderContext.send(mailDto, strategyKey);
+                    long sendEnd = System.currentTimeMillis();
+                    log.info("[4. 이메일 발송] {}ms", sendEnd-sendStart);
                 }
 
                 // 메일 발송 성공 시 삭제

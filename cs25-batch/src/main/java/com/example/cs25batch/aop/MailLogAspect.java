@@ -57,6 +57,7 @@ public class MailLogAspect {
                 .build();
 
             mailLogRepository.save(log);
+            mailLogRepository.flush();
 
             if (status == MailStatus.FAILED) {
                 Map<String, String> retryMessage = Map.of(

@@ -12,11 +12,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MailConsumerAsyncJobConfig {
     @Bean
-    public Job mailConsumerWithAsyncJob(JobRepository jobRepository,
-        @Qualifier("mailConsumerWithAsyncStep") Step mailConsumeStep,
+    public Job mailConsumerAsyncJob(JobRepository jobRepository,
+        @Qualifier("mailConsumerAsyncStep") Step mailConsumeStep,
         ThreadShuttingJobListener threadShuttingJobListener
     ) {
-        return new JobBuilder("mailConsumerWithAsyncJob", jobRepository)
+        return new JobBuilder("mailConsumerAsyncJob", jobRepository)
             .start(mailConsumeStep)
             .listener(threadShuttingJobListener)
             .build();
