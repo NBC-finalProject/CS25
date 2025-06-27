@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>OAuth 로그인</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    .btn {
+      display: block;
+      width: 250px;
+      margin: 15px auto;
+      padding: 15px;
+      font-size: 16px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .kakao {
+      background-color: #FEE500;
+      color: #000;
+    }
+
+    .github {
+      background-color: #333;
+    }
+
+    .naver {
+      background-color: #03C75A;
+    }
+  </style>
+</head>
+<body>
+
+<h2>소셜 로그인</h2>
+
+<a href="/oauth2/authorization/kakao">
+  <button class="btn kakao">카카오 로그인</button>
+</a>
+
+<a href="/oauth2/authorization/github">
+  <button class="btn github">깃허브 로그인</button>
+</a>
+
+<a href="/oauth2/authorization/naver">
+  <button class="btn naver">네이버 로그인</button>
+</a>
+
+</body>
+</html>
