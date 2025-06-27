@@ -77,7 +77,7 @@ public class SecurityConfig {
                 .hasRole("ADMIN")//퀴즈 업로드 - 추후 ADMIN으로 변경
 
                 .requestMatchers(HttpMethod.POST, "/auth/**").hasAnyRole(PERMITTED_ROLES)
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                //.requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/quiz-categories/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/quiz-categories/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/quiz-categories/**").hasRole("ADMIN")

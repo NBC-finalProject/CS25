@@ -25,10 +25,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testImplementation 'org.springframework.batch:spring-batch-test'
 
+    //JavaMailSender
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
+
     //AWS SES
     implementation platform("software.amazon.awssdk:bom:2.25.39")
     implementation 'software.amazon.awssdk:sesv2'
     implementation 'software.amazon.awssdk:netty-nio-client'
+    implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.1.0'
 
     //Monitoring
     implementation 'io.micrometer:micrometer-registry-prometheus'
