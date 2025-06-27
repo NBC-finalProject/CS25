@@ -1,10 +1,14 @@
 FROM gradle:8.10.2-jdk17 AS builder
 
 # 작업 디렉토리 설정
-WORKDIR /build
+WORKDIR /app
 
-# 소스 복사 (모듈 전체가 아닌 현재 모듈만 복사)
-COPY . .
+# gradle 설정과 wrapper 복사
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle gradle
+
+# 모듈별 소스 복사
+COPY cs25-service cs25-service
 
 # 실행 권한 부여
 RUN chmod +x gradlew
