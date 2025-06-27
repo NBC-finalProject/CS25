@@ -28,6 +28,6 @@ public enum SubscriptionPeriod {
                 return period;
             }
         }
-        throw new IllegalArgumentException("지원하지 않는 SubscriptionPeriod 입니다.: " + months);
+        throw new IllegalArgumentException("지원하지 않는 구독개월입니다.: " + months);
     }
 }

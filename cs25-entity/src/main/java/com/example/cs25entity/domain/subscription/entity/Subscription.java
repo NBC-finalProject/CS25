@@ -46,7 +46,7 @@ public class Subscription extends BaseEntity {
 
     private boolean isActive;
 
-    private int subscriptionType; // "월화수목금토일" => "1111111"
+    private int subscriptionType; // "월화수목금토일" => "1111111" => 127
 
     @Column(unique = true)
     private String serialId;
@@ -83,6 +83,10 @@ public class Subscription extends BaseEntity {
         return result;
     }
 
+    /**
+     * 오늘이 구독한 날짜인지 확인하는 메서드
+     * @return true/false 반환
+     */
     public boolean isTodaySubscribed() {
         int todayIndex = LocalDate.now().getDayOfWeek().getValue() % 7;
         int todayBit = 1 << todayIndex;
@@ -106,12 +110,15 @@ public class Subscription extends BaseEntity {
     }
 
     /**
-     * 구독취소하는 메서드
+     * 구독 비활성화하는 메서드
      */
     public void updateDisable() {
         this.isActive = false;
     }
 
+    /**
+     * 구독 활성화하는 메서드
+     */
     public void updateEnable() {
         this.isActive = true;
     }

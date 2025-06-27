@@ -23,6 +23,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2'
 
     //queryDSL
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
