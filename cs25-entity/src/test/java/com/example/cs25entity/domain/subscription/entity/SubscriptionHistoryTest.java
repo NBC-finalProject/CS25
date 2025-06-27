@@ -1,5 +1,6 @@
 package com.example.cs25entity.domain.subscription.entity;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
@@ -103,7 +104,7 @@ class SubscriptionHistoryTest {
 		SubscriptionHistoryException ex = assertThrows(SubscriptionHistoryException.class, () ->
 			subscriptionHistoryRepository.findByIdOrElseThrow(subscriptionId)
 		);
-		System.out.println("예외 메시지: " + ex.getMessage());
+		assertThat(ex.getMessage()).contains("존재하지 않는 구독 내역입니다.");
 	}
 
 	@DisplayName("구독 히스토리 기간 검증")

@@ -1,5 +1,6 @@
 package com.example.cs25service.domain.subscription.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.subscription.entity.DayOfWeek;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
@@ -209,8 +211,9 @@ class SubscriptionServiceTest {
 			.willReturn(childCategory);
 		
 		// when & then
-		assertThrows(QuizException.class, 
+		QuizException ex = assertThrows(QuizException.class,
 			() -> subscriptionService.createSubscription(requestDto, authUser));
+		assertThat(ex.getMessage()).contains("대분류 카테고리가 필요합니다.");
 	}
 	
 	@Test
@@ -229,8 +232,9 @@ class SubscriptionServiceTest {
 			.willReturn(Optional.of(userWithSubscription));
 		
 		// when & then
-		assertThrows(SubscriptionException.class, 
+		SubscriptionException ex = assertThrows(SubscriptionException.class,
 			() -> subscriptionService.createSubscription(requestDto, authUser));
+		assertThat(ex.getMessage()).contains("이미 구독중인 이메일입니다.");
 	}
 	
 	@Test
@@ -274,8 +278,9 @@ class SubscriptionServiceTest {
 			.willReturn(quizCategory);
 		
 		// when & then
-		assertThrows(SubscriptionException.class, 
+		SubscriptionException ex = assertThrows(SubscriptionException.class,
 			() -> subscriptionService.updateSubscription("id", overRequestDto));
+		assertThat(ex.getMessage()).contains("구독 시작일로부터 1년 이상 구독할 수 없습니다.");
 	}
 	
 	@Test
@@ -313,10 +318,12 @@ class SubscriptionServiceTest {
 			.willReturn(true);
 		
 		// when & then
-		assertThrows(SubscriptionException.class, 
+		SubscriptionException ex = assertThrows(SubscriptionException.class,
 			() -> subscriptionService.checkEmail(email));
+		assertThat(ex.getMessage()).contains("이미 구독중인 이메일입니다.");
+
 	}
-	
+
 	@Test
 	@DisplayName("존재하지 않는 사용자로 구독 생성 시 예외 발생")
 	void createSubscription_userNotFound_exception() {
@@ -327,7 +334,8 @@ class SubscriptionServiceTest {
 			.willReturn(Optional.empty());
 		
 		// when & then
-		assertThrows(UserException.class, 
+		UserException ex = assertThrows(UserException.class,
 			() -> subscriptionService.createSubscription(requestDto, authUser));
+		assertThat(ex.getMessage()).contains("해당 유저를 찾을 수 없습니다.");
 	}
 }
