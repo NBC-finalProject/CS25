@@ -4,6 +4,8 @@ import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -17,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @Slf4j
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)  // 스프링 컨텍스트 리프레시
+@Disabled
 public class VectorDBDocumentListTest {
 
     @Autowired

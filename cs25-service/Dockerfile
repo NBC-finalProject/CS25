@@ -4,10 +4,14 @@ FROM gradle:8.10.2-jdk17 AS builder
 WORKDIR /build
 
 # 소스 복사 (모듈 전체가 아닌 현재 모듈만 복사)
-COPY . .
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle gradle/
+COPY cs25-service cs25-service/
+COPY cs25-entity cs25-entity/
+COPY cs25-common cs25-common/
 
 # 테스트 생략하여 빌드 안정화
-RUN gradle :cs25-service:bootJar --no-daemon
+RUN ./gradlew :cs25-service:bootJar --stacktrace --no-daemon
 FROM openjdk:17
 
 # 메타 정보
