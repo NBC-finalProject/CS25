@@ -1,0 +1,80 @@
+name: CD - Docker Build & Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build Docker image (cs25-service)
+        run: docker build -t baekjonghyun/cs25-service:latest -f cs25-service/Dockerfile .
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: baekjonghyun
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image to DockerHub
+        run: docker push baekjonghyun/cs25-service:latest
+
+      - name: Create .env from secrets
+        run: |
+          echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
+          echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
+          echo "GH_ID=${{ secrets.GH_ID }}" >> .env
+          echo "GH_SECRET=${{ secrets.GH_SECRET }}" >> .env
+          echo "NAVER_ID=${{ secrets.NAVER_ID }}" >> .env
+          echo "NAVER_SECRET=${{ secrets.NAVER_SECRET }}" >> .env
+          echo "GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}" >> .env
+          echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "CHROMA_HOST=${{ secrets.CHROMA_HOST }}" >> .env
+          echo "FRONT_END_URI=${{ secrets.FRONT_END_URI }}" >> .env
+          echo "CLAUDE_API_KEY=${{ secrets.CLAUDE_API_KEY }}" >> .env
+
+
+      - name: Upload .env to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_KEY }}
+          source: ".env"
+          target: "/home/ec2-user/app"
+
+      - name: Deploy on EC2 (docker run)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/ec2-user/app
+
+            echo "[1] Pull latest Docker image"
+            docker pull baekjonghyun/cs25-service:latest
+      
+            echo "[2] Stop and remove old container"
+            docker stop cs25 || echo "No running container to stop"
+            docker rm cs25 || echo "No container to remove"
+      
+            echo "[3] Run new container"
+            docker run -d \
+            --name cs25 \
+            --env-file .env \
+            -p 8080:8080 \
+            baekjonghyun/cs25-service:latest
+      
+            echo "[✔] Deployment completed successfully"

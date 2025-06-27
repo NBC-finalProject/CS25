@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+ext {
+    set('queryDslVersion', "5.0.0")
+}
+
+dependencies {
+    implementation project(':cs25-common')
+    implementation project(':cs25-entity')
+
+    compileOnly 'org.projectlombok:lombok'  // 롬복 의존성
+    annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.batch:spring-batch-test'
+
+    //JavaMailSender
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
+
+    //AWS SES
+    implementation platform("software.amazon.awssdk:bom:2.25.39")
+    implementation 'software.amazon.awssdk:sesv2'
+    implementation 'software.amazon.awssdk:netty-nio-client'
+    implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.1.0'
+
+    //Monitoring
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    //Test dummy Data
+    implementation 'net.datafaker:datafaker:2.2.2'
+}
+
+bootJar {
+    enabled = true
+}
+jar {
+    enabled = false
+}
