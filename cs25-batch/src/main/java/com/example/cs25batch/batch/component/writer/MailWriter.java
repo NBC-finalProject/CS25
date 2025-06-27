@@ -2,10 +2,12 @@ package com.example.cs25batch.batch.component.writer;
 
 import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.SesMailService;
+import com.example.cs25batch.context.MailSenderContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -15,15 +17,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MailWriter implements ItemWriter<MailDto> {
 
-    private final SesMailService mailService;
+    private final MailSenderContext mailSenderContext;
     private final StringRedisTemplate redisTemplate;
+
+    @Value("${mail.strategy:javaMailSender}")
+    private String strategyKey;
 
     @Override
     public void write(Chunk<? extends MailDto> items) throws Exception {
         for (MailDto mail : items) {
             try {
                 //long start = System.currentTimeMillis();
-                mailService.sendQuizEmail(mail.getSubscription(), mail.getQuiz());
+                mailSenderContext.send(mail, strategyKey);
                 //long end = System.currentTimeMillis();
                 //log.info("[6. 메일 발송] email : {}ms", end - start);
             } catch (Exception e) {
