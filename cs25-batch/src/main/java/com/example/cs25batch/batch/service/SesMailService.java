@@ -3,9 +3,7 @@ package com.example.cs25batch.batch.service;
 import com.example.cs25batch.util.MailLinkGenerator;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -30,6 +28,7 @@ public class SesMailService {
         context.setVariable("toEmail", subscription.getEmail());
         context.setVariable("question", quiz.getQuestion());
         context.setVariable("quizLink", MailLinkGenerator.generateQuizLink(subscription.getSerialId(), quiz.getSerialId()));
+        context.setVariable("subscriptionSettings", MailLinkGenerator.generateSubscriptionSettings(subscription.getSerialId()));
         String htmlContent = templateEngine.process("mail-template", context);
 
         //수신인
