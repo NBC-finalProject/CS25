@@ -6,7 +6,10 @@ import static org.assertj.core.api.Assertions.*;
 import com.example.cs25service.domain.ai.client.ClaudeChatClient;
 import com.example.cs25service.domain.ai.client.FallbackAiChatClient;
 import com.example.cs25service.domain.ai.client.OpenAiChatClient;
+import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class FallbackAiChatClientTest {
 
@@ -34,4 +37,5 @@ public class FallbackAiChatClientTest {
         verify(openAiMock, times(1)).call(anyString(), anyString());
         verify(claudeMock, times(1)).call(anyString(), anyString());
     }
+
 }
