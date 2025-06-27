@@ -1,68 +1,36 @@
-package com.example.cs25batch.batch.jobs;
+package com.example.cs25batch.batch.step;
 
-import com.example.cs25batch.batch.component.logger.MailStepLogger;
-import com.example.cs25batch.batch.dto.MailDto;
-import com.example.cs25batch.batch.service.BatchProducerService;
-import com.example.cs25batch.batch.service.SesMailService;
-import com.example.cs25batch.batch.service.BatchSubscriptionService;
-import com.example.cs25batch.batch.service.TodayQuizService;
-import com.example.cs25batch.config.ThreadShuttingJobListener;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import java.util.List;
-import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Slf4j
-@RequiredArgsConstructor
 @Configuration
-public class DailyMailSendJob {
-
-    private final BatchSubscriptionService subscriptionService;
-    private final TodayQuizService todayQuizService;
-    private final BatchProducerService batchProducerService;
-
-    //Message Queue 적용 후
+public class MailConsumerStepConfig {
     @Bean
-    public Job mailJob(JobRepository jobRepository,
-        @Qualifier("mailStep") Step mailStep) {
-        return new JobBuilder("mailJob", jobRepository)
-            .incrementer(new RunIdIncrementer())
-            .start(mailStep)
-            .build();
-    }
-
-    @Bean
-    public Step mailStep(JobRepository jobRepository,
-        @Qualifier("mailTasklet") Tasklet mailTasklet,
+    public Step mailConsumerStep(JobRepository jobRepository,
+        @Qualifier("mailConsumerTasklet") Tasklet mailTasklet,
         PlatformTransactionManager transactionManager) {
-        return new StepBuilder("mailStep", jobRepository)
+        return new StepBuilder("mailConsumerStep", jobRepository)
             .tasklet(mailTasklet, transactionManager)
             .build();
     }
 
     // TODO: Chunk 방식 고려
     @Bean
-    public Tasklet mailTasklet(SubscriptionRepository subscriptionRepository) {
+    public Tasklet mailConsumerTasklet(SubscriptionRepository subscriptionRepository) {
         return (contribution, chunkContext) -> {
             log.info("[배치 시작] 메일 발송 대상 구독자 선별");
 
@@ -99,5 +67,4 @@ public class DailyMailSendJob {
             return RepeatStatus.FINISHED;
         };
     }
-
 }
