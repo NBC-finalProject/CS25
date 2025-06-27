@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.step;
 
+import com.example.cs25batch.batch.component.logger.MailStepLogger;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.dto.SubscriptionMailTargetDto;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
@@ -16,15 +17,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Slf4j
 @Configuration
 public class MailConsumerStepConfig {
     @Bean
     public Step mailConsumerStep(JobRepository jobRepository,
         @Qualifier("mailConsumerTasklet") Tasklet mailTasklet,
+        MailStepLogger mailStepLogger,
         PlatformTransactionManager transactionManager) {
         return new StepBuilder("mailConsumerStep", jobRepository)
             .tasklet(mailTasklet, transactionManager)
+            .listener(mailStepLogger)
             .build();
     }
 
@@ -32,7 +34,6 @@ public class MailConsumerStepConfig {
     @Bean
     public Tasklet mailConsumerTasklet(SubscriptionRepository subscriptionRepository) {
         return (contribution, chunkContext) -> {
-            log.info("[배치 시작] 메일 발송 대상 구독자 선별");
 
             //long searchStart = System.currentTimeMillis();
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
@@ -63,7 +64,6 @@ public class MailConsumerStepConfig {
                 }
             }
 
-            log.info("[배치 종료] 메일 발송 완료");
             return RepeatStatus.FINISHED;
         };
     }

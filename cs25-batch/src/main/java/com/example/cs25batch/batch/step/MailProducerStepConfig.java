@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.step;
 
+import com.example.cs25batch.batch.component.logger.MailStepLogger;
 import com.example.cs25batch.batch.service.BatchProducerService;
 import com.example.cs25batch.batch.service.BatchSubscriptionService;
 import com.example.cs25entity.domain.subscription.dto.SubscriptionMailTargetDto;
@@ -16,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Slf4j
 @RequiredArgsConstructor
 @Configuration
 public class MailProducerStepConfig {
@@ -26,9 +26,11 @@ public class MailProducerStepConfig {
     @Bean
     public Step mailProducerStep(JobRepository jobRepository,
         @Qualifier("mailProducerTasklet") Tasklet mailTasklet,
+        MailStepLogger mailStepLogger,
         PlatformTransactionManager transactionManager) {
         return new StepBuilder("mailProducerStep", jobRepository)
             .tasklet(mailTasklet, transactionManager)
+            .listener(mailStepLogger)
             .build();
     }
 
@@ -36,8 +38,6 @@ public class MailProducerStepConfig {
     @Bean
     public Tasklet mailProducerTasklet() {
         return (contribution, chunkContext) -> {
-            log.info("[배치 시작] 메일 발송 대상 구독자 선별");
-
             //long searchStart = System.currentTimeMillis();
             List<SubscriptionMailTargetDto> subscriptions = subscriptionService.getTodaySubscriptions();
             //long searchEnd = System.currentTimeMillis();
@@ -52,7 +52,6 @@ public class MailProducerStepConfig {
                 //log.info("[2. Queue에 넣기] {}ms", queueEnd-queueStart);
             }
 
-            log.info("[배치 종료] MessageQueue push 완료");
             return RepeatStatus.FINISHED;
         };
     }
