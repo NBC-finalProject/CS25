@@ -41,6 +41,8 @@ jobs:
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
           echo "CHROMA_HOST=${{ secrets.CHROMA_HOST }}" >> .env
           echo "FRONT_END_URI=${{ secrets.FRONT_END_URI }}" >> .env
+          echo "CLAUDE_API_KEY=${{ secrets.CLAUDE_API_KEY }}" >> .env
+
 
       - name: Upload .env to EC2
         uses: appleboy/scp-action@v0.1.4

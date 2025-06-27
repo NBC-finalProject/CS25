@@ -10,7 +10,6 @@ import com.example.cs25service.domain.ai.service.AiFeedbackStreamWorker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
 public class FallbackAiChatClientTest {
 
     @Test

@@ -1,37 +1,5 @@
 services:
 
-  cs25-service:
-    container_name: cs25-service
-    build:
-      context: .
-      dockerfile: cs25-service/Dockerfile
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-      - redis
-      - chroma
-    ports:
-      - "8080:8080"
-    networks:
-      - monitoring
-
-  cs25-batch:
-    container_name: cs25-batch
-    build:
-      context: .
-      dockerfile: cs25-batch/Dockerfile
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-      - redis
-      - chroma
-    ports:
-      - "8081:8080"
-    networks:
-      - monitoring
-
   mysql:
     container_name: mysql
     image: mysql:8.0
@@ -115,7 +83,7 @@ services:
       - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
     ports:
       - "6565:6565"
-    command: run --out experimental-prometheus-rw /scripts/sse-test.js
+    command: run --out experimental-prometheus-rw /scripts/test.js
     depends_on:
       - prometheus
     extra_hosts:
