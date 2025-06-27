@@ -34,7 +34,7 @@ public class TodayQuizService {
     private final QuizRepository quizRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
-    private final BatchMailService mailService;
+    private final SesMailService mailService;
 
     @Transactional
     public QuizDto getTodayQuiz(Long subscriptionId) {

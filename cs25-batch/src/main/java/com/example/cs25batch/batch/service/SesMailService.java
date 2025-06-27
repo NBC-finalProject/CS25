@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.service;
 
+import com.example.cs25batch.util.MailLinkGenerator;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import java.util.Map;
@@ -19,28 +20,16 @@ import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 
 @Service
 @RequiredArgsConstructor
-public class BatchMailService {
+public class SesMailService {
 
     private final SpringTemplateEngine templateEngine;
-    private final StringRedisTemplate redisTemplate;
     private final SesV2Client sesV2Client;
-
-    //producer
-    public void enqueueQuizEmail(Long subscriptionId) {
-        redisTemplate.opsForStream()
-            .add("quiz-email-stream", Map.of("subscriptionId", subscriptionId.toString()));
-    }
-
-    protected String generateQuizLink(Long subscriptionId, Long quizId) {
-        String domain = "https://cs25.co.kr/todayQuiz";
-        return String.format("%s?subscriptionId=%d&quizId=%d", domain, subscriptionId, quizId);
-    }
 
     public void sendQuizEmail(Subscription subscription, Quiz quiz) throws SesV2Exception {
         Context context = new Context();
         context.setVariable("toEmail", subscription.getEmail());
         context.setVariable("question", quiz.getQuestion());
-        context.setVariable("quizLink", generateQuizLink(subscription.getId(), quiz.getId()));
+        context.setVariable("quizLink", MailLinkGenerator.generateQuizLink(subscription.getSerialId(), quiz.getSerialId()));
         String htmlContent = templateEngine.process("mail-template", context);
 
         //수신인

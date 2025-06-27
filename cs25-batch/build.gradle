@@ -25,6 +25,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testImplementation 'org.springframework.batch:spring-batch-test'
 
+    //JavaMailSender
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
+
     //AWS SES
     implementation platform("software.amazon.awssdk:bom:2.25.39")
     implementation 'software.amazon.awssdk:sesv2'

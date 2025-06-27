@@ -27,7 +27,7 @@ public class MailLogAspect {
     private final MailLogRepository mailLogRepository;
     private final StringRedisTemplate redisTemplate;
 
-    @Around("execution(* com.example.cs25batch.batch.service.BatchMailService.sendQuizEmail(..))")
+    @Around("execution(* com.example.cs25batch.batch.service.SesMailService.sendQuizEmail(..))")
     public Object logMailSend(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 

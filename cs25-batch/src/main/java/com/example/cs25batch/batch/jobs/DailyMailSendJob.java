@@ -2,7 +2,8 @@ package com.example.cs25batch.batch.jobs;
 
 import com.example.cs25batch.batch.component.logger.MailStepLogger;
 import com.example.cs25batch.batch.dto.MailDto;
-import com.example.cs25batch.batch.service.BatchMailService;
+import com.example.cs25batch.batch.service.BatchProducerService;
+import com.example.cs25batch.batch.service.SesMailService;
 import com.example.cs25batch.batch.service.BatchSubscriptionService;
 import com.example.cs25batch.batch.service.TodayQuizService;
 import com.example.cs25batch.config.ThreadShuttingJobListener;
@@ -15,7 +16,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -29,7 +29,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -40,7 +39,7 @@ public class DailyMailSendJob {
 
     private final BatchSubscriptionService subscriptionService;
     private final TodayQuizService todayQuizService;
-    private final BatchMailService mailService;
+    private final BatchProducerService batchProducerService;
 
     //Message Queue 적용 후
     @Bean
@@ -135,7 +134,7 @@ public class DailyMailSendJob {
                 Long subscriptionId = sub.getSubscriptionId();
                 //메일을 발송해야 할 구독자 정보를 MessageQueue 에 넣음
                 //long queueStart = System.currentTimeMillis();
-                mailService.enqueueQuizEmail(subscriptionId);
+                batchProducerService.enqueueQuizEmail(subscriptionId);
                 //long queueEnd = System.currentTimeMillis();
                 //log.info("[2. Queue에 넣기] {}ms", queueEnd-queueStart);
             }
