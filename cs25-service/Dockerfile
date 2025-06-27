@@ -6,8 +6,13 @@ WORKDIR /build
 # 소스 복사 (모듈 전체가 아닌 현재 모듈만 복사)
 COPY . .
 
+# 실행 권한 부여
+RUN chmod +x gradlew
+
 # 테스트 생략하여 빌드 안정화
-RUN gradle :cs25-service:bootJar --no-daemon
+RUN ./gradlew :cs25-service:bootJar --no-daemon
+
+# 실제 실행 이미지
 FROM openjdk:17
 
 # 메타 정보
