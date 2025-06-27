@@ -2,7 +2,7 @@ name: CD - Docker Build & Deploy to EC2
 
 on:
   push:
-    branches: [ feat/180 ]
+    branches: [ main ]
 
 jobs:
   deploy:

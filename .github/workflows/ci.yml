@@ -3,7 +3,7 @@ name: CI - Build & Test
 on:
   pull_request:
     branches:
-      - feat/180
+      - main
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
