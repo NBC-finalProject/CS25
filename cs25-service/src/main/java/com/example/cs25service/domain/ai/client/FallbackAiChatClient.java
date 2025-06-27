@@ -43,7 +43,5 @@ public class FallbackAiChatClient implements AiChatClient {
             return claudeClient.stream(systemPrompt, userPrompt);
         }
     }
-
-
 }
 

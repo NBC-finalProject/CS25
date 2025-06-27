@@ -35,15 +35,14 @@ public class OpenAiChatClient implements AiChatClient {
 
     @Override
     public Flux<String> stream(String systemPrompt, String userPrompt) {
-        try {
-            return openAiChatClient.prompt()
-                .system(systemPrompt)
-                .user(userPrompt)
-                .stream()
-                .content();
-        } catch (Exception e) {
-            throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
-        }
+        return openAiChatClient.prompt()
+            .system(systemPrompt)
+            .user(userPrompt)
+            .stream()
+            .content()
+            .onErrorResume(error -> {
+                throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
+            });
     }
 }
 
