@@ -21,7 +21,7 @@ public class UserQuizAnswerController {
     //정답 제출
     @PostMapping("/{quizId}")
     public ApiResponse<Long> answerSubmit(
-        @PathVariable("quizId") Long quizId,
+        @PathVariable("quizId") String quizId,
         @RequestBody UserQuizAnswerRequestDto requestDto
     ) {
         return new ApiResponse<>(200, userQuizAnswerService.answerSubmit(quizId, requestDto));
