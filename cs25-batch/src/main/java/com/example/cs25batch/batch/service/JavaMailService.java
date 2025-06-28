@@ -37,7 +37,7 @@ public class JavaMailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(subscription.getEmail());
-            helper.setSubject("[CS25] 오늘의 문제 도착");
+            helper.setSubject("[CS25] " + quiz.getQuestion());
             helper.setText(htmlContent, true);
 
             mailSender.send(message);

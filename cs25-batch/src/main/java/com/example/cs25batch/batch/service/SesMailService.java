@@ -38,7 +38,7 @@ public class SesMailService {
 
         //이메일 제목
         Content subject = Content.builder()
-            .data("[CS25] 오늘의 문제 도착")
+            .data("[CS25] " + quiz.getQuestion())
             .charset("UTF-8")
             .build();
 
