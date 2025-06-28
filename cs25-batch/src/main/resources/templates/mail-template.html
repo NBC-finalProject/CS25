@@ -13,48 +13,48 @@
     <td align="center" valign="middle" style="padding: 20px;">
 
       <!-- Email Container -->
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
+      <table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width: 520px; background-color: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
 
-        <!-- Email Header -->
+        <!-- Simple Header -->
         <tr>
-          <td style="background: linear-gradient(135deg, #5B8DEF 0%, #4A7FEB 100%); color: white; padding: 40px; text-align: center;">
-            <h1 style="font-size: 36px; font-weight: 700; margin: 0 0 16px;">CS25</h1>
-            <h2 style="font-size: 24px; font-weight: 500; margin: 0 0 8px;">오늘의 CS 문제</h2>
-            <p style="margin: 0; font-size: 16px; opacity: 0.9;">AI가 준비한 맞춤형 문제를 확인하세요!</p>
-          </td>
-        </tr>
-
-        <!-- Email Body -->
-        <tr>
-          <td style="background-color: white; padding: 60px 40px; text-align: center;">
-
-            <!-- Icon Circle -->
-            <table width="100" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 32px auto;">
+          <td style="background-color: white; padding: 24px 40px; border-bottom: 1px solid #e9ecef;">
+            <!-- Logo and Title in horizontal layout -->
+            <table cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="width: 100px; height: 100px; background-color: #E8F0FE; border-radius: 50%; text-align: center; vertical-align: middle;">
-                  <svg width="50" height="50" fill="none" stroke="#5B8DEF" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                  </svg>
+                <td style="vertical-align: middle; padding-right: 12px;">
+                  <img src="cs25.png" alt="CS25" style="width: 28px; height: 28px;">
+                </td>
+                <td style="vertical-align: middle;">
+                  <h2 style="font-size: 20px; font-weight: 600; margin: 0; color: #1d4ed8;">오늘의 문제</h2>
                 </td>
               </tr>
             </table>
+          </td>
+        </tr>
 
-            <h3 style="font-size: 28px; font-weight: 700; color: #1a1a1a; margin: 0 0 24px;">오늘의 문제를 풀어보세요!</h3>
+        <!-- Main Content Hero -->
+        <tr>
+          <td style="background: linear-gradient(135deg, #5B8DEF 0%, #4A7FEB 100%); color: white; padding: 80px 40px; text-align: center;">
+
+            <!-- Question Box -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 40px 0;">
+              <tr>
+                <td style="color: white; font-weight: 700; font-size: 28px; line-height: 1.6; margin: 0; text-align: center;">
+                  <span th:text="${question}">관계 대수에 대한 설명으로 틀린 것은?</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Content Body -->
+        <tr>
+          <td style="background-color: white; padding: 60px 40px; text-align: center;">
 
             <p style="font-size: 16px; color: #666; line-height: 1.6; margin: 0 0 40px;">
               안녕하세요! CS25에서 오늘의 맞춤형 CS 문제를 보내드립니다.<br>
               AI가 생성한 문제와 상세한 해설로 CS 지식을 향상시켜보세요.
             </p>
-
-            <!-- Question Box -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 15px 0;">
-              <tr>
-                <td style="background-color: #f9f9f9; border: 2px solid #4a90e2; border-radius: 8px; padding: 20px; color: #222222; font-size: 16px; line-height: 1.6;">
-                  <span th:text="${question}">여기에 문제 내용이 들어갑니다.</span>
-                </td>
-              </tr>
-            </table>
 
             <!-- Quiz Button -->
             <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
@@ -73,17 +73,18 @@
         <!-- Footer Section -->
         <tr>
           <td style="background-color: #f8f9fa; padding: 40px; text-align: center; border-top: 1px solid #e9ecef;">
+
+            <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0 0 24px;">
+              이 메일은 <span th:text="${toEmail}">example@email.com</span> 계정으로 발송되었습니다.<br>
+              매일 새로운 CS 지식으로 성장하는 개발자가 되어보세요! <span style="font-size: 20px;">🚀</span>
+            </p>
+
             <!-- Settings Button -->
             <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 40px auto;">
               <tr>
-                <td style="background-color: #f0f2f5; border-radius: 8px; padding: 12px 32px;">
+                <td style="background-color: #f0f2f5; border-radius: 12px; padding: 12px 32px;">
                   <a th:href="${subscriptionSettings}" style="text-decoration: none;">
-                    <span style="color: #495057; font-size: 16px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="#495057">
-                        <path fill-rule="evenodd"
-                              d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                              clip-rule="evenodd"></path>
-                      </svg>
+                    <span style="color: #495057; font-size: 16px; font-weight: 600;">
                       구독 설정
                     </span>
                   </a>
@@ -95,11 +96,8 @@
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e9ecef;">
               <tr>
                 <td style="text-align: center;">
-                  <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0 0 8px;">
-                    이 메일은 <span th:text="${toEmail}">example@email.com</span> 계정으로 발송되었습니다.
-                  </p>
                   <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.5;">
-                    매일 새로운 CS 지식으로 성장하는 개발자가 되어보세요! <span style="font-size: 20px;">🚀</span>
+                    © 2025 CS25. All rights reserved.
                   </p>
                 </td>
               </tr>
