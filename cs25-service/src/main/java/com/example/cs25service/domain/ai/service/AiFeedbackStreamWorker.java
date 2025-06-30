@@ -56,7 +56,15 @@ public class AiFeedbackStreamWorker {
                 if (messages != null) {
                     for (MapRecord<String, Object, Object> message : messages) {
                         Long answerId = Long.valueOf(message.getValue().get("answerId").toString());
-                        String mode = message.getValue().get("mode").toString(); // word/sentence
+                        Object modeObj = message.getValue().get("mode");
+                        if (modeObj == null) {
+                            log.error("Mode is missing for answerId: {}", answerId);
+                            redisTemplate.opsForStream()
+                                .acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME,
+                                    message.getId());
+                            continue;
+                        }
+                        String mode = modeObj.toString();
 
                         SseEmitter emitter = emitterRegistry.get(answerId);
                         if (emitter == null) {
@@ -67,10 +75,19 @@ public class AiFeedbackStreamWorker {
                             continue;
                         }
 
-                        if ("sentence".equals(mode)) {
-                            processor.streamSentence(answerId, emitter);
-                        } else {
-                            processor.streamWord(answerId, emitter);
+                        switch (mode) {
+                            case "sentence":
+                                processor.streamSentence(answerId, emitter);
+                                break;
+                            case "word":
+                                processor.streamWord(answerId, emitter);
+                                break;
+                            default:
+                                log.error("Unknown mode: {} for answerId: {}", mode, answerId);
+                                emitterRegistry.remove(answerId);
+                                redisTemplate.opsForSet()
+                                    .remove(AiFeedbackQueueService.DEDUPLICATION_SET_KEY, answerId);
+                                break;
                         }
 
                         emitterRegistry.remove(answerId);
