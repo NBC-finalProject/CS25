@@ -1,15 +1,12 @@
 package com.example.cs25service.domain.verification.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
-import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.verification.dto.VerificationIssueRequest;
 import com.example.cs25service.domain.verification.dto.VerificationVerifyRequest;
 import com.example.cs25service.domain.verification.service.VerificationPreprocessingService;
 import com.example.cs25service.domain.verification.service.VerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,20 +20,11 @@ public class VerificationController {
     private final VerificationService verificationService;
     private final VerificationPreprocessingService preprocessingService;
 
-    //이메일 인증 전에 검사
-    @GetMapping()
-    public ApiResponse<String> isValidEmailCheck(
-        @Valid @RequestBody VerificationIssueRequest request,
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        preprocessingService.isValidEmailCheck(request.getEmail(), authUser);
-        return new ApiResponse<>(200, "확인 완료");
-    }
-
-
     @PostMapping()
     public ApiResponse<String> issueVerificationCodeByEmail(
         @Valid @RequestBody VerificationIssueRequest request) {
+
+        preprocessingService.isValidEmailCheck(request.getEmail());
         verificationService.issue(request.getEmail());
         return new ApiResponse<>(200, "인증코드가 발급되었습니다.");
     }

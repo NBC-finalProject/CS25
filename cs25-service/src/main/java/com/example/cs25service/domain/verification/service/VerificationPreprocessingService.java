@@ -6,7 +6,6 @@ import com.example.cs25entity.domain.subscription.repository.SubscriptionReposit
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
-import com.example.cs25service.domain.security.dto.AuthUser;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,7 @@ public class VerificationPreprocessingService {
     private final UserRepository userRepository;
 
     public void isValidEmailCheck(
-        @NotBlank(message = "이메일은 필수입니다.") @Email(message = "이메일 형식이 올바르지 않습니다.") String email,
-        AuthUser authUser) {
+        @NotBlank(message = "이메일은 필수입니다.") @Email(message = "이메일 형식이 올바르지 않습니다.") String email) {
 
         if (subscriptionRepository.existsByEmail(email)) {
             throw new SubscriptionException(

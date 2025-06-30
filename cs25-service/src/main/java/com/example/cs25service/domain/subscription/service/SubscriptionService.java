@@ -87,7 +87,7 @@ public class SubscriptionService {
 
         // 로그인을 한 경우
         if (authUser != null) {
-            User user = userRepository.findUserWithSubscriptionByEmail(authUser.getEmail())
+            User user = userRepository.findBySerialId(authUser.getSerialId())
                 .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
             // 구독 정보가 없는 경우
