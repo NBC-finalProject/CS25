@@ -64,17 +64,18 @@ jobs:
             cd /home/ec2-user/app
 
             echo "[1] Pull latest Docker image"
+            docker image prune
             docker pull baekjonghyun/cs25-service:latest
-      
+            
             echo "[2] Stop and remove old container"
             docker stop cs25 || echo "No running container to stop"
             docker rm cs25 || echo "No container to remove"
-      
+            
             echo "[3] Run new container"
             docker run -d \
             --name cs25 \
             --env-file .env \
             -p 8080:8080 \
             baekjonghyun/cs25-service:latest
-      
+            
             echo "[✔] Deployment completed successfully"

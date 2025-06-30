@@ -32,30 +32,4 @@ public class QuizCategoryController {
         return new ApiResponse<>(200, quizCategoryService.getParentQuizCategoryList());
     }
 
-    @PostMapping()
-    public ApiResponse<String> createQuizCategory(
-        @Valid @RequestBody QuizCategoryRequestDto request,
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        quizCategoryService.createQuizCategory(request);
-        return new ApiResponse<>(200, "카테고리 등록 성공");
-    }
-
-    @PutMapping("/{quizCategoryId}")
-    public ApiResponse<QuizCategoryResponseDto> updateQuizCategory(
-        @Valid @RequestBody QuizCategoryRequestDto request,
-        @NotNull @PathVariable Long quizCategoryId,
-        @AuthenticationPrincipal AuthUser authUser
-    ){
-        return new ApiResponse<>(200, quizCategoryService.updateQuizCategory(quizCategoryId, request));
-    }
-
-    @DeleteMapping("/{quizCategoryId}")
-    public ApiResponse<String> deleteQuizCategory(
-        @NotNull @PathVariable Long quizCategoryId,
-        @AuthenticationPrincipal AuthUser authUser
-    ){
-        quizCategoryService.deleteQuizCategory(quizCategoryId);
-        return new ApiResponse<>(200, "카테고리가 삭제되었습니다.");
-    }
 }

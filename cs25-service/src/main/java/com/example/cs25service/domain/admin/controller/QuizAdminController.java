@@ -1,13 +1,17 @@
 package com.example.cs25service.domain.admin.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25service.domain.admin.dto.request.QuizCreateRequestDto;
 import com.example.cs25service.domain.admin.dto.request.QuizUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.QuizDetailDto;
 import com.example.cs25service.domain.admin.service.QuizAdminService;
+import com.example.cs25service.domain.security.dto.AuthUser;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +29,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuizAdminController {
 
     private final QuizAdminService quizAdminService;
+
+    @PostMapping("/upload")
+    public ApiResponse<String> uploadQuizByJsonFile(
+        @RequestParam("file") MultipartFile file,
+        @RequestParam("categoryType") String categoryType,
+        @RequestParam("formatType") QuizFormatType formatType,
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        if (file.isEmpty()) {
+            return new ApiResponse<>(400, "파일이 비어있습니다.");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
+            return new ApiResponse<>(400, "JSON 파일만 업로드 가능합니다.");
+        }
+
+        quizAdminService.uploadQuizJson(file, categoryType, formatType);
+        return new ApiResponse<>(200, "문제 등록 성공");
+    }
 
     //GET	관리자 문제 목록 조회 (기본값: 비추천 오름차순)	/admin/quizzes
     @GetMapping
@@ -34,7 +59,7 @@ public class QuizAdminController {
         return new ApiResponse<>(200, quizAdminService.getAdminQuizDetails(page, size));
     }
 
-    //GET	관리자 문제  상세 조회	/admin/quizzes/{quizId}
+    //GET	관리자 문제 상세 조회	/admin/quizzes/{quizId}
     @GetMapping("/{quizId}")
     public ApiResponse<QuizDetailDto> getQuizDetail(
         @Positive @PathVariable(name = "quizId") Long quizId
