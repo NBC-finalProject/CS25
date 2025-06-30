@@ -81,7 +81,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/quiz-categories/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/quiz-categories/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/quiz-categories/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/quizzes/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/quizzes/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/crawlers/github/**").hasRole("ADMIN")
 

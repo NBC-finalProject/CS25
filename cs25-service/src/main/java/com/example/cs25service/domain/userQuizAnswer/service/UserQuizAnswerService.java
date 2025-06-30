@@ -1,18 +1,14 @@
 package com.example.cs25service.domain.userQuizAnswer.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
-import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
-import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.exception.SubscriptionException;
 import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
-import com.example.cs25entity.domain.user.exception.UserException;
-import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
@@ -21,7 +17,6 @@ import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExce
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.userQuizAnswer.dto.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,9 +34,9 @@ public class UserQuizAnswerService {
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final QuizCategoryRepository quizCategoryRepository;
 
-    public Long answerSubmit(Long quizId, UserQuizAnswerRequestDto requestDto) {
+    @Transactional
+    public Long answerSubmit(String quizId, UserQuizAnswerRequestDto requestDto) {
 
         // 구독 정보 조회
         Subscription subscription = subscriptionRepository.findBySerialId(
@@ -49,19 +44,19 @@ public class UserQuizAnswerService {
             .orElseThrow(() -> new SubscriptionException(
                 SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
+        // 퀴즈 조회
+        Quiz quiz = quizRepository.findBySerialId(quizId)
+            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+
         // 중복 답변 제출 막음
-        boolean isDuplicate = userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId,
-            subscription.getId());
+        boolean isDuplicate = userQuizAnswerRepository
+            .existsByQuizIdAndSubscriptionId(quiz.getId(), subscription.getId());
         if (isDuplicate) {
             throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
         }
 
         // 유저 정보 조회
         User user = userRepository.findBySubscription(subscription).orElse(null);
-
-        // 퀴즈 조회
-        Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
 
         UserQuizAnswer answer = userQuizAnswerRepository.save(
             UserQuizAnswer.builder()
