@@ -3,6 +3,7 @@ package com.example.cs25service.domain.admin.service;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
+import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
@@ -11,7 +12,19 @@ import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRep
 import com.example.cs25service.domain.admin.dto.request.QuizCreateRequestDto;
 import com.example.cs25service.domain.admin.dto.request.QuizUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.QuizDetailDto;
+import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import jakarta.validation.constraints.Positive;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +42,74 @@ public class QuizAdminService {
     private final UserQuizAnswerRepository quizAnswerRepository;
 
     private final QuizCategoryRepository quizCategoryRepository;
+
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
+
+    @Transactional
+    public void uploadQuizJson(
+        MultipartFile file,
+        String categoryType,
+        QuizFormatType formatType
+    ) {
+
+        try {
+            //대분류 확인
+            QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)
+                .orElseThrow(
+                    () -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
+
+            //소분류 조회하기
+            List<QuizCategory> childCategory = category.getChildren();
+
+            //file 내용을 읽어 Dto 로 만들기
+            CreateQuizDto[] quizArray = objectMapper.readValue(file.getInputStream(),
+                CreateQuizDto[].class);
+
+            //유효성 검증
+            for (CreateQuizDto dto : quizArray) {
+                //유효성 검증에 실패한 데이터를 Set 에 저장
+                Set<ConstraintViolation<CreateQuizDto>> violations = validator.validate(dto);
+                if (!violations.isEmpty()) {
+                    throw new ConstraintViolationException("유효성 검증 실패", violations);
+                }
+            }
+
+            // 1. 소분류 카테고리 맵으로 변환
+            Map<String, QuizCategory> categoryMap = childCategory.stream()
+                .collect(Collectors.toMap(
+                    QuizCategory::getCategoryType,
+                    Function.identity()
+                ));
+
+            // 2. 퀴즈 DTO → 엔티티로 변환
+            List<Quiz> quizzes = Arrays.stream(quizArray)
+                .map(dto -> {
+                    QuizCategory subCategory = categoryMap.get(dto.getCategory());
+                    if (subCategory == null) {
+                        throw new IllegalArgumentException(
+                            "소분류 카테고리가 존재하지 않습니다: " + dto.getCategory());
+                    }
+
+                    return Quiz.builder()
+                        .type(formatType)
+                        .question(dto.getQuestion())
+                        .choice(dto.getChoice())
+                        .answer(dto.getAnswer())
+                        .commentary(dto.getCommentary())
+                        .category(subCategory)
+                        .level(QuizLevel.valueOf(dto.getLevel()))
+                        .build();
+                })
+                .toList();
+
+            quizRepository.saveAll(quizzes);
+        } catch (IOException e) {
+            throw new QuizException(QuizExceptionCode.JSON_PARSING_FAILED_ERROR);
+        } catch (ConstraintViolationException e) {
+            throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
+        }
+    }
 
     @Transactional(readOnly = true)
     public Page<QuizDetailDto> getAdminQuizDetails(int page, int size) {
