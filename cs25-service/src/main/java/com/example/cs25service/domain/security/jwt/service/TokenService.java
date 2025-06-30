@@ -19,10 +19,10 @@ public class TokenService {
 
     public TokenResponseDto generateAndSaveTokenPair(AuthUser authUser) {
         String accessToken = jwtTokenProvider.generateAccessToken(
-            authUser.getSerialId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
+            authUser.getSerialId(), authUser.getName(), authUser.getRole()
         );
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-            authUser.getSerialId(), authUser.getEmail(), authUser.getName(), authUser.getRole()
+            authUser.getSerialId(), authUser.getName(), authUser.getRole()
         );
         refreshTokenService.save(authUser.getSerialId(), refreshToken,
             jwtTokenProvider.getRefreshTokenDuration());

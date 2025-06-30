@@ -23,7 +23,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final TokenService tokenService;
 
-    private boolean cookieSecure = true; // 배포시에는 true로 변경해야함
+    private final boolean cookieSecure = true; // 배포시에는 true로 변경해야함
 
     @Value("${FRONT_END_URI:http://localhost:5173}")
     private String frontEndUri;
@@ -41,7 +41,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         try {
             AuthUser authUser = (AuthUser) authentication.getPrincipal();
-            log.info("OAuth 로그인 성공: {}", authUser.getEmail());
+            log.info("OAuth 로그인 성공: {}", authUser.getName());
 
             TokenResponseDto tokenResponse = tokenService.generateAndSaveTokenPair(authUser);
 

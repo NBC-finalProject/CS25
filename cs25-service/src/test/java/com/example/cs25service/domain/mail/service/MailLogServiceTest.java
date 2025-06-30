@@ -1,6 +1,10 @@
 package com.example.cs25service.domain.mail.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
@@ -28,8 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MailLogServiceTest {
@@ -44,7 +46,7 @@ class MailLogServiceTest {
     private AuthUser authUser;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         User user = User.builder()
             .email("test@test.com")
             .name("test")
@@ -81,7 +83,8 @@ class MailLogServiceTest {
         when(mailLogRepository.search(condition, pageable)).thenReturn(mockPage);
 
         //when
-        Page<MailLogResponse> result = mailLogService.getMailLogs(authUserAdmin, condition, pageable);
+        Page<MailLogResponse> result = mailLogService.getMailLogs(authUserAdmin, condition,
+            pageable);
 
         //then
         assertEquals(1, result.getContent().size());
@@ -102,8 +105,8 @@ class MailLogServiceTest {
             .build();
 
         MailLogSearchDto condition = MailLogSearchDto.builder()
-            .startDate(LocalDate.of(2025,7,1))
-            .endDate(LocalDate.of(2024, 7,1))
+            .startDate(LocalDate.of(2025, 7, 1))
+            .endDate(LocalDate.of(2024, 7, 1))
             .build();
 
         //when
@@ -125,7 +128,7 @@ class MailLogServiceTest {
             mailLogService.getMailLogs(authUser, condition, Pageable.ofSize(10)));
 
         //then
-        assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
+        assertEquals(UserExceptionCode.UNAUTHORIZED_ROLE, ex.getErrorCode());
     }
 
     @Test
@@ -157,7 +160,7 @@ class MailLogServiceTest {
         UserException ex = assertThrows(UserException.class, () ->
             mailLogService.getMailLog(authUser, 1L));
 
-        assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
+        assertEquals(UserExceptionCode.UNAUTHORIZED_ROLE, ex.getErrorCode());
     }
 
     @Test
@@ -187,6 +190,6 @@ class MailLogServiceTest {
         UserException ex = assertThrows(UserException.class, () ->
             mailLogService.deleteMailLogs(authUser, ids));
 
-        assertEquals(UserExceptionCode.UNAUTHORIZE_ROLE, ex.getErrorCode());
+        assertEquals(UserExceptionCode.UNAUTHORIZED_ROLE, ex.getErrorCode());
     }
 }

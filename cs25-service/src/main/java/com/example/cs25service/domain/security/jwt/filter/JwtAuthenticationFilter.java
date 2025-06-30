@@ -32,11 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 if (jwtTokenProvider.validateToken(token)) {
                     String userId = jwtTokenProvider.getAuthorId(token);
-                    String email = jwtTokenProvider.getEmail(token);
+                    //String email = jwtTokenProvider.getEmail(token);
                     String nickname = jwtTokenProvider.getNickname(token);
                     Role role = jwtTokenProvider.getRole(token);
 
-                    AuthUser authUser = new AuthUser(email, nickname, userId, role);
+                    AuthUser authUser = new AuthUser(nickname, userId, role);
 
                     UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(authUser, null,
