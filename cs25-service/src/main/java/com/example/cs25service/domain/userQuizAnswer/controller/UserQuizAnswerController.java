@@ -18,27 +18,28 @@ public class UserQuizAnswerController {
 
     private final UserQuizAnswerService userQuizAnswerService;
 
-    //정답 제출
+    // 정답 제출
     @PostMapping("/{quizId}")
-    public ApiResponse<Long> answerSubmit(
-        @PathVariable("quizId") String quizId,
+    public ApiResponse<Long> submitAnswer(
+        @PathVariable("quizId") String quizSerialId,
         @RequestBody UserQuizAnswerRequestDto requestDto
     ) {
-        return new ApiResponse<>(200, userQuizAnswerService.answerSubmit(quizId, requestDto));
+        Long userQuizAnswerId = userQuizAnswerService.submitAnswer(quizSerialId, requestDto);
+        return new ApiResponse<>(200, userQuizAnswerId);
     }
 
-    //객관식 or 주관식 채점
+    // 객관식 or 주관식 채점
     @PostMapping("/simpleAnswer/{userQuizAnswerId}")
-    public ApiResponse<CheckSimpleAnswerResponseDto> checkSimpleAnswer(
+    public ApiResponse<CheckSimpleAnswerResponseDto> evaluateAnswer(
             @PathVariable("userQuizAnswerId") Long userQuizAnswerId
     ){
-        return new ApiResponse<>(200, userQuizAnswerService.checkSimpleAnswer(userQuizAnswerId));
+        return new ApiResponse<>(200, userQuizAnswerService.evaluateAnswer(userQuizAnswerId));
     }
 
+    // 특정 퀴즈의 선택률을 계산
     @GetMapping("/{quizId}/select-rate")
-    public ApiResponse<SelectionRateResponseDto> getSelectionRateByOption(
-        @PathVariable Long quizId) {
-        return new ApiResponse<>(200, userQuizAnswerService.getSelectionRateByOption(quizId));
+    public ApiResponse<SelectionRateResponseDto> calculateSelectionRateByOption(
+        @PathVariable("quizId") String quizSerialId) {
+        return new ApiResponse<>(200, userQuizAnswerService.calculateSelectionRateByOption(quizSerialId));
     }
-
 }
