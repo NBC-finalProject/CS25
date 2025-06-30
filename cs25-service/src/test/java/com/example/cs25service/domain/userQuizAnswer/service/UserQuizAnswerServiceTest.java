@@ -126,7 +126,7 @@ class UserQuizAnswerServiceTest {
     }
 
     @Test
-    void answerSubmit_정상_저장된다() {
+    void submitAnswer_정상_저장된다() {
         // given
         when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
         when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
@@ -134,7 +134,7 @@ class UserQuizAnswerServiceTest {
         when(userQuizAnswerRepository.save(any())).thenReturn(userQuizAnswer);
 
         // when
-        Long answer = userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto);
+        Long answer = userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto);
 
         // then
 
@@ -142,43 +142,43 @@ class UserQuizAnswerServiceTest {
     }
 
     @Test
-    void answerSubmit_구독없음_예외() {
+    void submitAnswer_구독없음_예외() {
         // given
         when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto))
+        assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(SubscriptionException.class)
                 .hasMessageContaining("구독 정보를 불러올 수 없습니다.");
     }
 
     @Test
-    void answerSubmit_중복답변_예외(){
+    void submitAnswer_중복답변_예외(){
         //give
         when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
         when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(choiceQuiz.getId(), subscription.getId())).thenReturn(true);
         when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
 
         //when & then
-        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto))
+        assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(UserQuizAnswerException.class)
                 .hasMessageContaining("이미 제출한 문제입니다.");
     }
 
     @Test
-    void answerSubmit_퀴즈없음_예외() {
+    void submitAnswer_퀴즈없음_예외() {
         // given
         when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
         when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto))
+        assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(QuizException.class)
                 .hasMessageContaining("해당 퀴즈를 찾을 수 없습니다");
     }
 
     @Test
-    void checkSimpleAnswer_비회원_객관식_정답(){
+    void evaluateAnswer_비회원_객관식_정답(){
         //given
         UserQuizAnswer choiceAnswer = UserQuizAnswer.builder()
                 .userAnswer("1")
@@ -189,14 +189,14 @@ class UserQuizAnswerServiceTest {
         when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(choiceAnswer.getId());
+        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
 
         //then
         assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
     }
 
     @Test
-    void checkSimpleAnswer_비회원_주관식_정답(){
+    void evaluateAnswer_비회원_주관식_정답(){
         //given
         UserQuizAnswer shortAnswer = UserQuizAnswer.builder()
                 .subscription(subscription)
@@ -207,14 +207,14 @@ class UserQuizAnswerServiceTest {
         when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(shortAnswer.getId());
+        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
 
         //then
         assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
     }
 
     @Test
-    void checkSimpleAnswer_회원_객관식_정답_점수부여(){
+    void evaluateAnswer_회원_객관식_정답_점수부여(){
         //given
         UserQuizAnswer choiceAnswer = UserQuizAnswer.builder()
                 .userAnswer("1")
@@ -226,7 +226,7 @@ class UserQuizAnswerServiceTest {
         when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(choiceAnswer.getId());
+        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
 
         //then
         assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
@@ -234,7 +234,7 @@ class UserQuizAnswerServiceTest {
     }
 
     @Test
-    void checkSimpleAnswer_회원_주관식_정답_점수부여(){
+    void evaluateAnswer_회원_주관식_정답_점수부여(){
         //given
         UserQuizAnswer shortAnswer = UserQuizAnswer.builder()
                 .subscription(subscription)
@@ -246,7 +246,7 @@ class UserQuizAnswerServiceTest {
         when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(shortAnswer.getId());
+        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
 
         //then
         assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
@@ -254,7 +254,7 @@ class UserQuizAnswerServiceTest {
     }
 
     @Test
-    void checkSimpleAnswer_오답(){
+    void evaluateAnswer_오답(){
         //given
         UserQuizAnswer shortAnswer = UserQuizAnswer.builder()
                 .subscription(subscription)
@@ -265,7 +265,7 @@ class UserQuizAnswerServiceTest {
         when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.checkSimpleAnswer(shortAnswer.getId());
+        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
 
         //then
         assertThat(checkSimpleAnswerResponseDto.isCorrect()).isFalse();
@@ -273,10 +273,9 @@ class UserQuizAnswerServiceTest {
 
 
     @Test
-    void getSelectionRateByOption_조회_성공(){
+    void calculateSelectionRateByOption_조회_성공(){
 
         //given
-        Long quizId = 1L;
         List<UserAnswerDto> answers = List.of(
                 new UserAnswerDto("1"),
                 new UserAnswerDto("1"),
@@ -290,10 +289,11 @@ class UserQuizAnswerServiceTest {
                 new UserAnswerDto("4")
         );
 
-        when(userQuizAnswerRepository.findUserAnswerByQuizId(quizId)).thenReturn(answers);
+        when(userQuizAnswerRepository.findUserAnswerByQuizId(choiceQuiz.getId())).thenReturn(answers);
+        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
 
         //when
-        SelectionRateResponseDto selectionRateByOption = userQuizAnswerService.getSelectionRateByOption(quizId);
+        SelectionRateResponseDto selectionRateByOption = userQuizAnswerService.calculateSelectionRateByOption(choiceQuiz.getSerialId());
 
         //then
         assertThat(selectionRateByOption.getTotalCount()).isEqualTo(10);
