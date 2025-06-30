@@ -115,8 +115,7 @@ public class AiFeedbackStreamProcessor {
                 send(emitter, buffer.toString());
             }
 
-            String feedback =
-                answer.getAiFeedback() != null ? answer.getAiFeedback() : buffer.toString();
+            String feedback = buffer.toString();
             boolean isCorrect = feedback.startsWith("정답");
 
             User user = answer.getUser();
