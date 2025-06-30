@@ -27,7 +27,6 @@ public class MailService {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
         helper.setTo(toEmail);
         helper.setSubject("[CS25] 이메일 인증코드");
         helper.setText(htmlContent, true); // true = HTML
