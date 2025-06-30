@@ -35,6 +35,7 @@ public class UserQuizAnswerService {
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
 
+    @Transactional
     public Long answerSubmit(String quizId, UserQuizAnswerRequestDto requestDto) {
 
         // 구독 정보 조회
