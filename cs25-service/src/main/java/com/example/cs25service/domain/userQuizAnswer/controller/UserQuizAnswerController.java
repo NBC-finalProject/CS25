@@ -19,9 +19,9 @@ public class UserQuizAnswerController {
     private final UserQuizAnswerService userQuizAnswerService;
 
     // 정답 제출
-    @PostMapping("/{quizId}")
+    @PostMapping("/{quizSerialId}")
     public ApiResponse<Long> submitAnswer(
-        @PathVariable("quizId") String quizSerialId,
+        @PathVariable("quizSerialId") String quizSerialId,
         @RequestBody UserQuizAnswerRequestDto requestDto
     ) {
         Long userQuizAnswerId = userQuizAnswerService.submitAnswer(quizSerialId, requestDto);
@@ -37,9 +37,9 @@ public class UserQuizAnswerController {
     }
 
     // 특정 퀴즈의 선택률을 계산
-    @GetMapping("/{quizId}/select-rate")
+    @GetMapping("/{quizSerialId}/select-rate")
     public ApiResponse<SelectionRateResponseDto> calculateSelectionRateByOption(
-        @PathVariable("quizId") String quizSerialId) {
+        @PathVariable("quizSerialId") String quizSerialId) {
         return new ApiResponse<>(200, userQuizAnswerService.calculateSelectionRateByOption(quizSerialId));
     }
 }
