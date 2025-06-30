@@ -68,7 +68,7 @@ public class SubscriptionService {
     /**
      * 구독정보를 생성하는 메서드
      *
-     * @param request 사용자를 통해 받은 생성할 구독 정보
+     * @param request  사용자를 통해 받은 생성할 구독 정보
      * @param authUser 로그인 정보
      * @return 구독 응답 DTO를 반환
      */
@@ -87,7 +87,7 @@ public class SubscriptionService {
 
         // 로그인을 한 경우
         if (authUser != null) {
-            User user = userRepository.findUserWithSubscriptionByEmail(authUser.getEmail())
+            User user = userRepository.findBySerialId(authUser.getSerialId())
                 .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
             // 구독 정보가 없는 경우
@@ -95,7 +95,7 @@ public class SubscriptionService {
                 LocalDate nowDate = LocalDate.now();
                 Subscription subscription = subscriptionRepository.save(
                     Subscription.builder()
-                        .email(user.getEmail())
+                        .email(request.getEmail())
                         .category(quizCategory)
                         .startDate(nowDate)
                         .endDate(nowDate.plusMonths(request.getPeriod().getMonths()))
