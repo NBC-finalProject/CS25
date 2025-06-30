@@ -27,7 +27,7 @@ public class AuthService {
         String refreshToken = reissueRequestDto.getRefreshToken();
 
         String userId = jwtTokenProvider.getAuthorId(refreshToken);
-        String email = jwtTokenProvider.getEmail(refreshToken);
+        //String email = jwtTokenProvider.getEmail(refreshToken);
         String nickname = jwtTokenProvider.getNickname(refreshToken);
         Role role = jwtTokenProvider.getRole(refreshToken);
 
@@ -38,8 +38,7 @@ public class AuthService {
         }
 
         // 4. 새 토큰 발급
-        TokenResponseDto newToken = jwtTokenProvider.generateTokenPair(userId, email, nickname,
-            role);
+        TokenResponseDto newToken = jwtTokenProvider.generateTokenPair(userId, nickname, role);
 
         // 5. Redis 갱신
         refreshTokenService.save(userId, newToken.getRefreshToken(),

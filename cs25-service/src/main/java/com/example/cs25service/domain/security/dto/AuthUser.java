@@ -17,13 +17,11 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @RequiredArgsConstructor
 public class AuthUser implements OAuth2User {
 
-    private final String email;
     private final String name;
     private final String serialId;
     private final Role role;
 
     public AuthUser(User user) {
-        this.email = user.getEmail();
         this.name = user.getName();
         this.role = user.getRole();
         this.serialId = user.getSerialId();

@@ -122,14 +122,13 @@ class ProfileServiceTest {
             .build();
 
         authUser = AuthUser.builder()
-            .email("test@naver.com")
             .name("test")
             .role(Role.USER)
             .serialId(serialId)
             .build();
 
         user = User.builder()
-            .email(authUser.getEmail())
+            .email("test@naver.com")
             .name(authUser.getName())
             .role(authUser.getRole())
             .subscription(subscription)
@@ -233,7 +232,7 @@ class ProfileServiceTest {
         @BeforeEach
         void setUp() {
             user = User.builder()
-                .email(authUser.getEmail())
+                .email("test@naver.com")
                 .name(authUser.getName())
                 .role(authUser.getRole())
                 .subscription(subscription)

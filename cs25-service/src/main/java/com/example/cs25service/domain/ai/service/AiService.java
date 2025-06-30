@@ -3,17 +3,13 @@ package com.example.cs25service.domain.ai.service;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
-import com.example.cs25entity.domain.user.exception.UserException;
-import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.ai.client.AiChatClient;
-import com.example.cs25service.domain.ai.dto.request.FeedbackRequest;
 import com.example.cs25service.domain.ai.dto.response.AiFeedbackResponse;
 import com.example.cs25service.domain.ai.exception.AiException;
 import com.example.cs25service.domain.ai.exception.AiExceptionCode;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,8 +48,10 @@ public class AiService {
         boolean isCorrect = feedback.startsWith("정답");
 
         User user = answer.getUser();
-        if(user != null){
-            double score = isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp()) : user.getScore() + 1;
+        if (user != null) {
+            double score =
+                isCorrect ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp())
+                    : user.getScore() + 1;
             user.updateScore(score);
         }
 
@@ -69,12 +67,12 @@ public class AiService {
             .build();
     }
 
-    public SseEmitter streamFeedback(Long answerId) {
+    public SseEmitter streamFeedback(Long answerId, String mode) {
         SseEmitter emitter = new SseEmitter(60_000L);
         emitter.onTimeout(emitter::complete);
         emitter.onError(emitter::completeWithError);
 
-        feedbackQueueService.enqueue(answerId, emitter);
+        feedbackQueueService.enqueue(answerId, emitter, mode);
         return emitter;
     }
 }

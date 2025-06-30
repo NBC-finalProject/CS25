@@ -38,22 +38,22 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(String userId, String email, String nickname, Role role) {
-        return createToken(userId, email, nickname, role, accessTokenExpiration);
+    public String generateAccessToken(String userId, String nickname, Role role) {
+        return createToken(userId, nickname, role, accessTokenExpiration);
     }
 
-    public String generateRefreshToken(String userId, String email, String nickname, Role role) {
-        return createToken(userId, email, nickname, role, refreshTokenExpiration);
+    public String generateRefreshToken(String userId, String nickname, Role role) {
+        return createToken(userId, nickname, role, refreshTokenExpiration);
     }
 
-    public TokenResponseDto generateTokenPair(String userId, String email, String nickname,
+    public TokenResponseDto generateTokenPair(String userId, String nickname,
         Role role) {
-        String accessToken = generateAccessToken(userId, email, nickname, role);
-        String refreshToken = generateRefreshToken(userId, email, nickname, role);
+        String accessToken = generateAccessToken(userId, nickname, role);
+        String refreshToken = generateRefreshToken(userId, nickname, role);
         return new TokenResponseDto(accessToken, refreshToken);
     }
 
-    private String createToken(String subject, String email, String nickname, Role role,
+    private String createToken(String subject, String nickname, Role role,
         long expirationMs) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
@@ -63,9 +63,9 @@ public class JwtTokenProvider {
             .issuedAt(now)
             .expiration(expiry);
 
-        if (email != null) {
-            builder.claim("email", email);
-        }
+//        if (email != null) {
+//            builder.claim("email", email);
+//        }
         if (nickname != null) {
             builder.claim("nickname", nickname);
         }
@@ -115,9 +115,9 @@ public class JwtTokenProvider {
         return parseClaims(token).getSubject();
     }
 
-    public String getEmail(String token) throws JwtAuthenticationException {
-        return parseClaims(token).get("email", String.class);
-    }
+//    public String getEmail(String token) throws JwtAuthenticationException {
+//        return parseClaims(token).get("email", String.class);
+//    }
 
     public String getNickname(String token) throws JwtAuthenticationException {
         return parseClaims(token).get("nickname", String.class);
