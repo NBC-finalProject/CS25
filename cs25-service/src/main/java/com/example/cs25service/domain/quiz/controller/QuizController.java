@@ -55,42 +55,4 @@ public class QuizController {
         return new ApiResponse<>(200, "문제 등록 성공");
     }
 
-    //단일 퀴즈 생성
-    @PostMapping
-    public ApiResponse<String> createQuiz(
-        @Valid @RequestBody CreateQuizDto request,
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        quizService.createQuiz(request);
-        return new ApiResponse<>(200, "문제 등록 성공");
-    }
-
-    //퀴즈 목록 조회
-    @GetMapping
-    public ApiResponse<Page<QuizResponseDto>> getQuizzes(
-        @ModelAttribute QuizSearchDto condition,
-        @PageableDefault(size = 20, sort = "category", direction = Direction.ASC) Pageable pageable,
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        return new ApiResponse<>(200, quizService.getQuizzes(condition, pageable));
-    }
-
-    //단일 퀴즈 조회
-    @GetMapping("/{quizId}")
-    public ApiResponse<QuizResponseDto> getQuiz(
-        @PathVariable @NotNull Long quizId,
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        return new ApiResponse<>(200, quizService.getQuiz(quizId));
-    }
-
-    @DeleteMapping
-    public ApiResponse<String> deleteQuizzes(
-        @RequestBody List<Long> quizIds,
-        @AuthenticationPrincipal AuthUser authUser
-    ) {
-        quizService.deleteQuizzes(quizIds);
-        return new ApiResponse<>(200, "문제 삭제 완료");
-    }
-
 }
