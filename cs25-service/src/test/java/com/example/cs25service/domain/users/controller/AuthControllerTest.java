@@ -32,7 +32,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -59,7 +58,6 @@ class AuthControllerTest {
 
     @Nested
     @DisplayName("POST /auth/reissue")
-    @WithMockUser(username = "tofha")
     class Reissue {
 
         @Test
@@ -85,7 +83,6 @@ class AuthControllerTest {
 
     @Nested
     @DisplayName("GET /auth/status")
-    @WithMockUser(username = "tofha")
     class Status {
 
         @Test
@@ -93,7 +90,7 @@ class AuthControllerTest {
         void loginStatus_authenticated() throws Exception {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                mockUser,  // ← principal 자리에 반드시 AuthUser 직접 넣기
+                mockUser,  // AuthUser 직접 넣기
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
             );
@@ -101,7 +98,6 @@ class AuthControllerTest {
 
             mockMvc.perform(get("/auth/status")
                     .with(authentication(auth))
-                    //.with(authentication(new TestingAuthenticationToken(mockUser, null)))
                     .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(true));
@@ -120,7 +116,6 @@ class AuthControllerTest {
 
     @Nested
     @DisplayName("POST /auth/logout")
-    @WithMockUser(username = "tofha")
     class Logout {
 
         @Test
@@ -128,7 +123,7 @@ class AuthControllerTest {
         void logout_success() throws Exception {
 
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                mockUser,  // ← principal 자리에 반드시 AuthUser 직접 넣기
+                mockUser,  // AuthUser 직접 넣기
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
             );
@@ -138,7 +133,6 @@ class AuthControllerTest {
 
             mockMvc.perform(post("/auth/logout")
                     .with(authentication(auth))
-                    //.with(authentication(new TestingAuthenticationToken(mockUser, null)))
                     .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value("로그아웃 완료"));
