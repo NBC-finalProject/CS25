@@ -67,8 +67,6 @@ class UserQuizAnswerServiceTest {
     private Quiz choiceQuiz;
     private User user;
     private UserQuizAnswerRequestDto requestDto;
-    private final Long quizId = 1L;
-    private final String serialId = "uuid";
 
     @BeforeEach
     void setUp() {
@@ -96,6 +94,9 @@ class UserQuizAnswerServiceTest {
                 .category(category)
                 .level(QuizLevel.EASY)
                 .build();
+        ReflectionTestUtils.setField(choiceQuiz, "id", 1L);
+        ReflectionTestUtils.setField(choiceQuiz, "serialId", "sub-uuid-2");
+
 
         // 주관식 퀴즈
         shortAnswerQuiz = Quiz.builder()
@@ -106,10 +107,13 @@ class UserQuizAnswerServiceTest {
                 .category(category)
                 .level(QuizLevel.EASY)
                 .build();
+        ReflectionTestUtils.setField(shortAnswerQuiz, "id", 1L);
+        ReflectionTestUtils.setField(shortAnswerQuiz, "serialId", "sub-uuid-3");
 
         userQuizAnswer = UserQuizAnswer.builder()
                 .userAnswer("1")
                 .build();
+        ReflectionTestUtils.setField(userQuizAnswer, "id", 1L);
 
         user = User.builder()
                 .email("test@naver.com")
@@ -118,19 +122,19 @@ class UserQuizAnswerServiceTest {
                 .build();
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        requestDto = new UserQuizAnswerRequestDto("1", serialId);
+        requestDto = new UserQuizAnswerRequestDto("1", subscription.getSerialId());
     }
 
     @Test
     void answerSubmit_정상_저장된다() {
         // given
-        when(subscriptionRepository.findBySerialId(serialId)).thenReturn(Optional.of(subscription));
-        when(quizRepository.findById(quizId)).thenReturn(Optional.of(choiceQuiz));
-        when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, subscription.getId())).thenReturn(false);
+        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
+        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
+        when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(choiceQuiz.getId(), subscription.getId())).thenReturn(false);
         when(userQuizAnswerRepository.save(any())).thenReturn(userQuizAnswer);
 
         // when
-        Long answer = userQuizAnswerService.answerSubmit(quizId, requestDto);
+        Long answer = userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto);
 
         // then
 
@@ -140,10 +144,10 @@ class UserQuizAnswerServiceTest {
     @Test
     void answerSubmit_구독없음_예외() {
         // given
-        when(subscriptionRepository.findBySerialId(serialId)).thenReturn(Optional.empty());
+        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(quizId, requestDto))
+        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(SubscriptionException.class)
                 .hasMessageContaining("구독 정보를 불러올 수 없습니다.");
     }
@@ -151,11 +155,12 @@ class UserQuizAnswerServiceTest {
     @Test
     void answerSubmit_중복답변_예외(){
         //give
-        when(subscriptionRepository.findBySerialId(serialId)).thenReturn(Optional.of(subscription));
-        when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(quizId, subscription.getId())).thenReturn(true);
+        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
+        when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(choiceQuiz.getId(), subscription.getId())).thenReturn(true);
+        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
 
         //when & then
-        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(quizId, requestDto))
+        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(UserQuizAnswerException.class)
                 .hasMessageContaining("이미 제출한 문제입니다.");
     }
@@ -163,11 +168,11 @@ class UserQuizAnswerServiceTest {
     @Test
     void answerSubmit_퀴즈없음_예외() {
         // given
-        when(subscriptionRepository.findBySerialId(serialId)).thenReturn(Optional.of(subscription));
-        when(quizRepository.findById(quizId)).thenReturn(Optional.empty());
+        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
+        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(quizId, requestDto))
+        assertThatThrownBy(() -> userQuizAnswerService.answerSubmit(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(QuizException.class)
                 .hasMessageContaining("해당 퀴즈를 찾을 수 없습니다");
     }
