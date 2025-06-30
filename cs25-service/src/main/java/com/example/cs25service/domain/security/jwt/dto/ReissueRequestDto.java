@@ -8,4 +8,8 @@ import lombok.NoArgsConstructor;
 public class ReissueRequestDto {
 
     private String refreshToken;
+
+    public ReissueRequestDto(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }
