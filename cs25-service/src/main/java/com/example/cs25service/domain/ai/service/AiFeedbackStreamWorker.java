@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -51,23 +50,32 @@ public class AiFeedbackStreamWorker {
                 List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
                     .read(Consumer.from(GROUP_NAME, consumerName),
                         StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
-                        StreamOffset.create(RedisStreamConfig.STREAM_KEY, ReadOffset.lastConsumed()));
+                        StreamOffset.create(RedisStreamConfig.STREAM_KEY,
+                            ReadOffset.lastConsumed()));
 
                 if (messages != null) {
                     for (MapRecord<String, Object, Object> message : messages) {
                         Long answerId = Long.valueOf(message.getValue().get("answerId").toString());
-                        SseEmitter emitter = emitterRegistry.get(answerId);
+                        String mode = message.getValue().get("mode").toString(); // word/sentence
 
+                        SseEmitter emitter = emitterRegistry.get(answerId);
                         if (emitter == null) {
                             log.warn("No emitter found for answerId: {}", answerId);
-                            redisTemplate.opsForStream().acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
+                            redisTemplate.opsForStream()
+                                .acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME,
+                                    message.getId());
                             continue;
                         }
 
-                        processor.stream(answerId, emitter);
-                        emitterRegistry.remove(answerId);
+                        if ("sentence".equals(mode)) {
+                            processor.streamSentence(answerId, emitter);
+                        } else {
+                            processor.streamWord(answerId, emitter);
+                        }
 
-                        redisTemplate.opsForSet().remove(AiFeedbackQueueService.DEDUPLICATION_SET_KEY, answerId);
+                        emitterRegistry.remove(answerId);
+                        redisTemplate.opsForSet()
+                            .remove(AiFeedbackQueueService.DEDUPLICATION_SET_KEY, answerId);
 
                         redisTemplate.opsForStream()
                             .acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
