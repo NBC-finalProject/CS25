@@ -3,10 +3,10 @@ package com.example.cs25service.domain.mail.service;
 import com.example.cs25entity.domain.mail.dto.MailLogSearchDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.repository.MailLogRepository;
-import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
+import com.example.cs25service.domain.mail.dto.MailLogDetailResponse;
 import com.example.cs25service.domain.mail.dto.MailLogResponse;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.List;
@@ -24,11 +24,12 @@ public class MailLogService {
 
     //전체 로그 페이징 조회
     @Transactional(readOnly = true)
-    public Page<MailLogResponse> getMailLogs(AuthUser authUser, MailLogSearchDto condition, Pageable pageable) {
+    public Page<MailLogResponse> getMailLogs(AuthUser authUser, MailLogSearchDto condition,
+        Pageable pageable) {
 
         //유저 권한 확인
-        if(authUser.getRole() != Role.ADMIN){
-            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+        if (authUser.getRole() != Role.ADMIN) {
+            throw new UserException(UserExceptionCode.UNAUTHORIZED_ROLE);
         }
 
         //시작일과 종료일 모두 설정했을 때
@@ -46,8 +47,8 @@ public class MailLogService {
     @Transactional(readOnly = true)
     public MailLogDetailResponse getMailLog(AuthUser authUser, Long id) {
 
-        if(authUser.getRole() != Role.ADMIN){
-            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+        if (authUser.getRole() != Role.ADMIN) {
+            throw new UserException(UserExceptionCode.UNAUTHORIZED_ROLE);
         }
 
         MailLog mailLog = mailLogRepository.findByIdOrElseThrow(id);
@@ -57,8 +58,8 @@ public class MailLogService {
     @Transactional
     public void deleteMailLogs(AuthUser authUser, List<Long> ids) {
 
-        if(authUser.getRole() != Role.ADMIN){
-            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
+        if (authUser.getRole() != Role.ADMIN) {
+            throw new UserException(UserExceptionCode.UNAUTHORIZED_ROLE);
         }
 
         if (ids == null || ids.isEmpty()) {
