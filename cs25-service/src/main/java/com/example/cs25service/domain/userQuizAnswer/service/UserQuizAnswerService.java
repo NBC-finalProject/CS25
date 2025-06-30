@@ -96,11 +96,9 @@ public class UserQuizAnswerService {
         );
 
         Quiz quiz = userQuizAnswer.getQuiz();
-
         boolean isAnswerCorrect = getIsAnswerCorrect(quiz, userQuizAnswer);
 
         userQuizAnswer.updateIsCorrect(isAnswerCorrect);
-
         return new CheckSimpleAnswerResponseDto(
                 quiz.getQuestion(),
                 userQuizAnswer.getUserAnswer(),
@@ -144,10 +142,8 @@ public class UserQuizAnswerService {
     }
 
     /**
-     * 사용자의 답변이 정답인지 검수하고, 점수를 업데이트하는 메서드
-     * 퀴즈 타입에 따라 다른 채점 로직을 적용
-     * - 객관식 (score=1): 첫 글자만 비교
-     * - 주관식 (score=3): 전체 답변을 trim 비교
+     * 사용자의 답변이 정답인지 확인하고 점수를 업데이트하는 메서드
+     * 채점 로직을 실행한 후 회원인 경우 점수를 업데이트
      * 
      * @param quiz 퀴즈 정보
      * @param userQuizAnswer 사용자 답변 정보
@@ -155,30 +151,54 @@ public class UserQuizAnswerService {
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
     private boolean getIsAnswerCorrect(Quiz quiz, UserQuizAnswer userQuizAnswer) {
-        boolean answerCorrectness;
+        boolean isAnswerCorrect = checkAnswer(quiz, userQuizAnswer);
+        updateUserScore(userQuizAnswer.getUser(), quiz, isAnswerCorrect);
+        return isAnswerCorrect;
+    }
+
+    /**
+     * 퀴즈 타입에 따라 사용자 답변의 정답 여부를 채점하는 메서드
+     * - 객관식 (score=1): 사용자 답변과 정답의 첫 글자를 비교
+     * - 주관식 (score=3): 사용자 답변과 정답을 공백 제거하여 비교
+     * 
+     * @param quiz 퀴즈 정보
+     * @param userQuizAnswer 사용자 답변 정보
+     * @return 답변 정답 여부 (true: 정답, false: 오답)
+     * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
+     */
+    private boolean checkAnswer(Quiz quiz, UserQuizAnswer userQuizAnswer) {
         if(quiz.getType().getScore() == 1){
-            // 객관식: 첫 글자만 비교
-            answerCorrectness = userQuizAnswer.getUserAnswer().equals(quiz.getAnswer().substring(0, 1));
+            // 객관식: 첫 글자만 비교 (예: "1" vs "1번")
+            return userQuizAnswer.getUserAnswer().equals(quiz.getAnswer().substring(0, 1));
         }else if(quiz.getType().getScore() == 3){
-            // 주관식: 전체 답변 비교 (공백 제거)
-            answerCorrectness = userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
+            // 주관식: 전체 답변을 공백 제거하여 비교
+            return userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
         }else{
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
+    }
 
-        User user = userQuizAnswer.getUser();
-        // 회원인 경우에만 점수 부여
+    /**
+     * 회원 사용자의 점수를 업데이트하는 메서드
+     * 정답/오답 여부와 퀴즈 난이도에 따라 점수를 부여
+     * - 정답: 퀴즈 타입 점수 × 난이도 경험치
+     * - 오답: 기본 점수 1점
+     * 
+     * @param user 사용자 정보 (null인 경우 비회원으로 점수 업데이트 안함)
+     * @param quiz 퀴즈 정보
+     * @param isAnswerCorrect 답변 정답 여부
+     */
+    private void updateUserScore(User user, Quiz quiz, boolean isAnswerCorrect) {
         if(user != null){
             double updatedScore;
-            if(answerCorrectness){
-                // 정답: 퀴즈 타입 점수 × 난이도 경험치
+            if(isAnswerCorrect){
+                // 정답: 퀴즈 타입 점수 × 난이도 경험치 획득
                 updatedScore = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
             }else{
-                // 오답: 기본 점수 1점
+                // 오답: 참여 점수 1점 획득
                 updatedScore = user.getScore() + 1;
             }
             user.updateScore(updatedScore);
         }
-        return answerCorrectness;
     }
 }
