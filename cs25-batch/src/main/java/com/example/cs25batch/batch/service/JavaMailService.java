@@ -31,6 +31,7 @@ public class JavaMailService {
             context.setVariable("toEmail", subscription.getEmail());
             context.setVariable("question", quiz.getQuestion());
             context.setVariable("quizLink", MailLinkGenerator.generateQuizLink(subscription.getSerialId(), quiz.getSerialId()));
+            context.setVariable("subscriptionSettings", MailLinkGenerator.generateSubscriptionSettings(subscription.getSerialId()));
             String htmlContent = templateEngine.process("mail-template", context);
 
             MimeMessage message = mailSender.createMimeMessage();

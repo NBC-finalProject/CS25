@@ -73,9 +73,8 @@ public class ProfileService {
     // 유저 틀린 문제 다시보기
     public ProfileWrongQuizResponseDto getWrongQuiz(AuthUser authUser, Pageable pageable) {
 
-        User user = userRepository.findBySerialId(authUser.getSerialId())
-            .orElseThrow(() ->
-                new UserException(UserExceptionCode.NOT_FOUND_USER));
+        User user = userRepository.findBySerialId(authUser.getSerialId()).orElseThrow(
+                () -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
         // 유저 아이디로 내가 푼 문제 조회
         Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserId(user.getId(), pageable);
@@ -90,7 +89,7 @@ public class ProfileService {
             ))
             .collect(Collectors.toList());
 
-        return new ProfileWrongQuizResponseDto(authUser.getSerialId(), wrongQuizList);
+        return new ProfileWrongQuizResponseDto(authUser.getSerialId(), wrongQuizList, page);
     }
 
     public ProfileResponseDto getProfile(AuthUser authUser) {
@@ -117,6 +116,11 @@ public class ProfileService {
         User user = userRepository.findBySerialId(authUser.getSerialId()).orElseThrow(
             () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
         );
+
+        // 사용자에게 구독정보가 없으면 예외처리
+        if(user.getSubscription() == null) {
+            throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
+        }
 
         Long userId = user.getId();
 
