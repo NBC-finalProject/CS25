@@ -1,11 +1,10 @@
 package com.example.cs25batch.batch.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import com.example.cs25batch.batch.dto.QuizDto;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
@@ -16,7 +15,6 @@ import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -95,41 +93,41 @@ class TodayQuizServiceTest {
                 createAnswer(2L, QuizLevel.NORMAL, subCategories.get(4))
             );
 
-            Set<Long> recentCategoryIds = Set.of(5L);
             Set<Long> solvedQuizIds = Set.of(1L, 2L);
 
             List<Quiz> availableQuizzes = List.of(
-                createQuiz(3L, QuizFormatType.MULTIPLE_CHOICE, QuizLevel.HARD,
+                createQuiz(3L, QuizFormatType.SUBJECTIVE, QuizLevel.HARD,
                     subCategories.get(0)),
-                createQuiz(4L, QuizFormatType.SHORT_ANSWER, QuizLevel.EASY, subCategories.get(1)),
-                createQuiz(5L, QuizFormatType.MULTIPLE_CHOICE, QuizLevel.NORMAL,
+                createQuiz(4L, QuizFormatType.SUBJECTIVE, QuizLevel.EASY,
+                    subCategories.get(1)),
+                createQuiz(5L, QuizFormatType.SUBJECTIVE, QuizLevel.NORMAL,
                     subCategories.get(2)),
-                createQuiz(6L, QuizFormatType.SHORT_ANSWER, QuizLevel.EASY, subCategories.get(3))
+                createQuiz(6L, QuizFormatType.SUBJECTIVE, QuizLevel.EASY, subCategories.get(3))
             );
 
-            given(subscriptionRepository.findByIdOrElseThrow(subscriptionId)).willReturn(
-                subscription);
+            //given(subscriptionRepository.findByIdOrElseThrow(subscriptionId)).willReturn(
+            //    subscription);
             given(userQuizAnswerRepository.findByUserIdAndQuizCategoryId(subscriptionId,
                 parentCategoryId)).willReturn(answerHistory);
-            given(userQuizAnswerRepository.findRecentSolvedCategoryIds(eq(subscriptionId),
-                eq(parentCategoryId), any(
-                    LocalDate.class)))
-                .willReturn(recentCategoryIds);
-            given(quizRepository.findAvailableQuizzesUnderParentCategory(eq(parentCategoryId),
-                eq(List.of(QuizLevel.NORMAL, QuizLevel.EASY))
-                , eq(solvedQuizIds)
-                , eq(List.of(QuizFormatType.SHORT_ANSWER,
-                    QuizFormatType.MULTIPLE_CHOICE)))).willReturn(
-                availableQuizzes);
+//            given(userQuizAnswerRepository.findRecentSolvedCategoryIds(eq(subscriptionId),
+//                eq(parentCategoryId), any(
+//                    LocalDate.class)))
+//                .willReturn(recentCategoryIds);
+            given(quizRepository.findAvailableQuizzesUnderParentCategory(
+                eq(1L),
+                eq(List.of(QuizLevel.EASY, QuizLevel.NORMAL, QuizLevel.HARD)),
+                eq(solvedQuizIds),
+                anyList()
+            )).willReturn(availableQuizzes);
 
             //when
-            QuizDto todayQuizDto = quizService.getTodayQuiz(subscriptionId);
+            Quiz todayQuiz = quizService.getTodayQuizBySubscription(subscription);
 
             //then
-            assertThat(todayQuizDto).isNotNull();
-            assertThat(todayQuizDto.getId()).isEqualTo(
-                5L); // offset = 2 % 4 = 2
-            assertThat(todayQuizDto.getType()).isEqualTo(QuizFormatType.MULTIPLE_CHOICE);
+            assertThat(todayQuiz).isNotNull();
+            assertThat(todayQuiz.getId()).isEqualTo(
+                5L); // offset = 2 % 2 = 0
+            assertThat(todayQuiz.getType()).isEqualTo(QuizFormatType.SUBJECTIVE);
         }
 
     }
@@ -153,7 +151,7 @@ class TodayQuizServiceTest {
             .level(level)
             .category(category)
             .question("sample Question " + id)
-            .choice("1. A // 2. B")
+            .choice(null)
             .answer("1")
             .build();
         ReflectionTestUtils.setField(quiz, "id", id);
