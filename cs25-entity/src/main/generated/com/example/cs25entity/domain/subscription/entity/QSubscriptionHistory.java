@@ -52,7 +52,7 @@ public class QSubscriptionHistory extends EntityPathBase<SubscriptionHistory> {
 
     public QSubscriptionHistory(Class<? extends SubscriptionHistory> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.category = inits.isInitialized("category") ? new com.example.cs25entity.domain.quiz.entity.QQuizCategory(forProperty("category")) : null;
+        this.category = inits.isInitialized("category") ? new com.example.cs25entity.domain.quiz.entity.QQuizCategory(forProperty("category"), inits.get("category")) : null;
         this.subscription = inits.isInitialized("subscription") ? new QSubscription(forProperty("subscription"), inits.get("subscription")) : null;
     }
 

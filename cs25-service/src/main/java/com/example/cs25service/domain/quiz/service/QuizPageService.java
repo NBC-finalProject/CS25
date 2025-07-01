@@ -26,7 +26,7 @@ public class QuizPageService {
 
         return switch (quiz.getType()) {
             case MULTIPLE_CHOICE -> getMultipleQuiz(quiz);
-            case SUBJECTIVE -> getSubjectiveQuiz(quiz);
+            case SUBJECTIVE, SHORT_ANSWER -> getSubjectiveQuiz(quiz);
             default -> throw new QuizException(QuizExceptionCode.QUIZ_TYPE_NOT_FOUND_ERROR);
         };
     }

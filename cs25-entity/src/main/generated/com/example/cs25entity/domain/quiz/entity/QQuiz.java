@@ -2,8 +2,6 @@ package com.example.cs25entity.domain.quiz.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
-import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
-import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
@@ -41,11 +39,13 @@ public class QQuiz extends EntityPathBase<Quiz> {
 
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
-    public final EnumPath<QuizLevel> level = createEnum("level", QuizLevel.class);
+    public final EnumPath<com.example.cs25entity.domain.quiz.enums.QuizLevel> level = createEnum("level", com.example.cs25entity.domain.quiz.enums.QuizLevel.class);
 
     public final StringPath question = createString("question");
 
-    public final EnumPath<QuizFormatType> type = createEnum("type", QuizFormatType.class);
+    public final StringPath serialId = createString("serialId");
+
+    public final EnumPath<com.example.cs25entity.domain.quiz.enums.QuizFormatType> type = createEnum("type", com.example.cs25entity.domain.quiz.enums.QuizFormatType.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
