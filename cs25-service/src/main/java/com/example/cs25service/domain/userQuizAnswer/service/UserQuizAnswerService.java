@@ -65,12 +65,15 @@ public class UserQuizAnswerService {
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
                 .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
 
+            boolean subjectiveQuestion = isSubjectiveQuestion(userQuizAnswer);
+
             return UserQuizAnswerResponseDto.builder()
                 .userQuizAnswerId(userQuizAnswer.getId())
                 .isCorrect(userQuizAnswer.getIsCorrect())
                 .question(quiz.getQuestion())
                 .commentary(quiz.getCommentary())
                 .userAnswer(userQuizAnswer.getUserAnswer())
+                .aiFeedback(subjectiveQuestion ? userQuizAnswer.getAiFeedback() : null)
                 .answer(quiz.getAnswer())
                 .duplicated(true)
                 .build();
@@ -214,5 +217,14 @@ public class UserQuizAnswerService {
             }
             user.updateScore(updatedScore);
         }
+    }
+
+    /**
+     * 서술형에 대한 답변인지 확인하는 메서드
+     * @param userQuizAnswer 답변 객체
+     * @return true/false 반환
+     */
+    private boolean isSubjectiveQuestion(UserQuizAnswer userQuizAnswer) {
+        return userQuizAnswer.getAiFeedback() == null;
     }
 }

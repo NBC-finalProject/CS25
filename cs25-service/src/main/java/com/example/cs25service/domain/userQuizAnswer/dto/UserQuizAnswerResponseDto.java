@@ -16,5 +16,6 @@ public class UserQuizAnswerResponseDto {
     private boolean isCorrect; // 문제 맞춤 여부
 
     private final String userAnswer; // 사용자가 답변한 텍스트
+    private final String aiFeedback; // 서술형의 경우, AI 피드백
     private final boolean duplicated; // 중복답변 여부
 }
