@@ -3,11 +3,9 @@ package com.example.cs25service.domain.verification.service;
 
 import com.example.cs25entity.domain.mail.exception.CustomMailException;
 import com.example.cs25entity.domain.mail.exception.MailExceptionCode;
-import com.example.cs25service.domain.mail.service.JavaMailService;
 import com.example.cs25service.domain.mailSender.context.MailSenderServiceContext;
 import com.example.cs25service.domain.verification.exception.VerificationException;
 import com.example.cs25service.domain.verification.exception.VerificationExceptionCode;
-import jakarta.mail.MessagingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -16,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -75,7 +72,7 @@ public class VerificationService {
         if (count == 1) {
             redisTemplate.expire(LIMITFIX + email, Duration.ofDays(1));
         }
-        else if (count > 3) {
+        else if (count > MAX_ISSUE_ATTEMPTS) {
             throw new VerificationException(VerificationExceptionCode.TOO_MANY_REQUESTS_DAILY);
         }
 
