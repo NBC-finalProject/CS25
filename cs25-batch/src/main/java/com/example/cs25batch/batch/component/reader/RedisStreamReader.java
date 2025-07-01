@@ -37,15 +37,15 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
     }
 
     @Override
-    public Map<String, String> read() {
+    public Map<String, String> read() throws InterruptedException {
         //long start = System.currentTimeMillis();
-        if (!bucket.tryConsume(1)) {
-            return null;
+        while (!bucket.tryConsume(1)) {
+            Thread.sleep(200); //토큰을 얻을 때까지 간격을 두고 재시도
         }
 
         List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
             Consumer.from(GROUP, CONSUMER),
-            StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
+            StreamReadOptions.empty().count(1).block(Duration.ofMillis(500)),
             StreamOffset.create(STREAM, ReadOffset.lastConsumed())
         );
 

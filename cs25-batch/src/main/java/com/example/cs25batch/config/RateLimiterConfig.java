@@ -16,7 +16,10 @@ public class RateLimiterConfig {
     @Value("${mail.ratelimiter.capacity:14}")
     private Long capacity;
 
-    @Value("${mail.ratelimiter.millis}")
+    @Value("${mail.ratelimiter.refill:7}")
+    private Long refill;
+
+    @Value("${mail.ratelimiter.millis:500}")
     private Long millis;
 
     @Bean(name = "bucketEmail")
@@ -25,7 +28,7 @@ public class RateLimiterConfig {
             .addLimit(limit ->
                 limit
                     .capacity(capacity)
-                    .refillIntervally(capacity, Duration.ofMillis(millis))
+                    .refillIntervally(refill, Duration.ofMillis(millis))
             )
             .build();
     }
