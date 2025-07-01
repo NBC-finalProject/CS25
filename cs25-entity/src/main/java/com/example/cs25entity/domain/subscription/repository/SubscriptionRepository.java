@@ -50,8 +50,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     Optional<Subscription> findBySerialId(String serialId);
 
-    default Subscription findBySerialIdOrElseThrow(String subscriptionId) {
-        return findBySerialId(subscriptionId)
+    default Subscription findBySerialIdOrElseThrow(String serialId) {
+        return findBySerialId(serialId)
             .orElseThrow(() ->
                 new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
     }
