@@ -38,7 +38,7 @@ public class ProfileController {
     @GetMapping("/wrong-quiz")
     public ApiResponse<ProfileWrongQuizResponseDto> getWrongQuiz(
             @AuthenticationPrincipal AuthUser authUser,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ){
 
         return new ApiResponse<>(200, profileService.getWrongQuiz(authUser, pageable));
