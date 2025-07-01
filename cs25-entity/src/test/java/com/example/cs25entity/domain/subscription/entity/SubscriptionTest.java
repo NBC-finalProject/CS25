@@ -22,7 +22,7 @@ import com.example.cs25entity.domain.subscription.repository.SubscriptionReposit
 
 @DataJpaTest
 @Import({QuerydslConfig.class, JpaAuditingConfig.class}) // QueryDsl, Jpa 설정
-@ActiveProfiles("test") // application.test.properties 사용 선언
+@ActiveProfiles("test") // application-test.properties 사용 선언
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // DB 설정이 그대로 사용됨 (application-test.properties 기반)
 class SubscriptionTest {
 	@Autowired SubscriptionRepository subscriptionRepository;
