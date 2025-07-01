@@ -2,7 +2,7 @@ package com.example.cs25batch.batch.component.processor;
 
 import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.TodayQuizService;
-import com.example.cs25batch.context.MailSenderContext;
+import com.example.cs25batch.sender.context.MailSenderContext;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
@@ -55,10 +55,10 @@ public class MailConsumerProcessor {
                         .quiz(quiz)
                         .build();
 
-                    long sendStart = System.currentTimeMillis();
+                    //long sendStart = System.currentTimeMillis();
                     mailSenderContext.send(mailDto, strategyKey);
-                    long sendEnd = System.currentTimeMillis();
-                    log.info("[4. 이메일 발송] {}ms", sendEnd-sendStart);
+                    //long sendEnd = System.currentTimeMillis();
+                    //log.info("[4. 이메일 발송] {}ms", sendEnd-sendStart);
                 }
 
                 // 메일 발송 성공 시 삭제

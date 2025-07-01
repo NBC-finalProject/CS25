@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.component.reader;
 
+import io.github.bucket4j.Bucket;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component("redisConsumeReader")
-@RequiredArgsConstructor
 public class RedisStreamReader implements ItemReader<Map<String, String>> {
 
     private static final String STREAM = "quiz-email-stream";
@@ -25,14 +26,26 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
     private static final String CONSUMER = "mail-worker";
 
     private final StringRedisTemplate redisTemplate;
+    private final Bucket bucket;
+
+    public RedisStreamReader(
+        StringRedisTemplate redisTemplate,
+        @Qualifier("bucketEmail") Bucket bucket
+    ) {
+        this.redisTemplate = redisTemplate;
+        this.bucket = bucket;
+    }
 
     @Override
-    public Map<String, String> read() {
+    public Map<String, String> read() throws InterruptedException {
         //long start = System.currentTimeMillis();
+        while (!bucket.tryConsume(1)) {
+            Thread.sleep(200); //토큰을 얻을 때까지 간격을 두고 재시도
+        }
 
         List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
             Consumer.from(GROUP, CONSUMER),
-            StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
+            StreamReadOptions.empty().count(1).block(Duration.ofMillis(500)),
             StreamOffset.create(STREAM, ReadOffset.lastConsumed())
         );
 

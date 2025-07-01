@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.verification.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,7 +56,7 @@ class VerificationControllerTest {
             AuthUser authUser = null;
 
             // when
-            doNothing().when(preprocessingService).isValidEmailCheck(anyString(), authUser);
+            doNothing().when(preprocessingService).isValidEmailCheck(anyString(), eq(authUser));
             doNothing().when(verificationService).issue(anyString());
 
             // then
