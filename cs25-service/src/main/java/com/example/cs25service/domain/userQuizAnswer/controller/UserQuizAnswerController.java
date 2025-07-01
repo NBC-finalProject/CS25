@@ -20,17 +20,16 @@ public class UserQuizAnswerController {
 
     // 정답 제출
     @PostMapping("/{quizSerialId}")
-    public ApiResponse<Long> submitAnswer(
+    public ApiResponse<UserQuizAnswerResponseDto> submitAnswer(
         @PathVariable("quizSerialId") String quizSerialId,
         @RequestBody UserQuizAnswerRequestDto requestDto
     ) {
-        Long userQuizAnswerId = userQuizAnswerService.submitAnswer(quizSerialId, requestDto);
-        return new ApiResponse<>(200, userQuizAnswerId);
+        return new ApiResponse<>(200, userQuizAnswerService.submitAnswer(quizSerialId, requestDto));
     }
 
     // 객관식 or 주관식 채점
     @PostMapping("/evaluate/{userQuizAnswerId}")
-    public ApiResponse<CheckSimpleAnswerResponseDto> evaluateAnswer(
+    public ApiResponse<UserQuizAnswerResponseDto> evaluateAnswer(
             @PathVariable("userQuizAnswerId") Long userQuizAnswerId
     ){
         return new ApiResponse<>(200, userQuizAnswerService.evaluateAnswer(userQuizAnswerId));
