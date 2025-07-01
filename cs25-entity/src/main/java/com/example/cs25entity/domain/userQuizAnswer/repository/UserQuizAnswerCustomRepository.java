@@ -13,4 +13,6 @@ public interface UserQuizAnswerCustomRepository {
     List<UserQuizAnswer> findByUserIdAndQuizCategoryId(Long userId, Long quizCategoryId);
 
     Set<Long> findRecentSolvedCategoryIds(Long userId, Long parentCategoryId, LocalDate afterDate);
+
+    UserQuizAnswer findUserQuizAnswerBySerialIds(String quizId, String subscriptionId);
 }

@@ -48,5 +48,12 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     Page<Subscription> findAllByOrderByIdAsc(Pageable pageable);
 
-    Optional<Subscription> findBySerialId(String subscriptionId);
+    Optional<Subscription> findBySerialId(String serialId);
+
+    default Subscription findBySerialIdOrElseThrow(String subscriptionId) {
+        return findBySerialId(subscriptionId)
+            .orElseThrow(() ->
+                new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
+    }
+
 }

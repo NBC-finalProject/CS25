@@ -2,6 +2,7 @@ package com.example.cs25entity.domain.userQuizAnswer.repository;
 
 import com.example.cs25entity.domain.quiz.entity.QQuiz;
 import com.example.cs25entity.domain.quiz.entity.QQuizCategory;
+import com.example.cs25entity.domain.subscription.entity.QSubscription;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.QUserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
@@ -17,24 +18,6 @@ import lombok.RequiredArgsConstructor;
 public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomRepository {
 
     private final JPAQueryFactory queryFactory;
-
-//    @Override
-//    public List<UserQuizAnswer> findByUserIdAndCategoryId(Long userId, Long categoryId) {
-//        QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
-//        QSubscription subscription = QSubscription.subscription;
-//        QQuizCategory category = QQuizCategory.quizCategory;
-//        //테이블이 세개 싹 조인갈겨
-//
-//        return queryFactory
-//            .selectFrom(answer)
-//            .join(answer.subscription, subscription)
-//            .join(subscription.category, category)
-//            .where(
-//                answer.user.id.eq(userId),
-//                category.id.eq(categoryId)
-//            )
-//            .fetch();
-//    }
 
     @Override
     public List<UserAnswerDto> findUserAnswerByQuizId(Long quizId) {
@@ -82,5 +65,21 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
                 answer.createdAt.goe(afterDate.atStartOfDay())
             )
             .fetch());
+    }
+
+    @Override
+    public UserQuizAnswer findUserQuizAnswerBySerialIds(String quizId, String subscriptionId) {
+        QUserQuizAnswer userQuizAnswer = QUserQuizAnswer.userQuizAnswer;
+        QQuiz quiz = QQuiz.quiz;
+        QSubscription subscription = QSubscription.subscription;
+
+        return queryFactory.selectFrom(userQuizAnswer)
+            .join(userQuizAnswer.quiz, quiz)
+            .join(userQuizAnswer.subscription, subscription)
+            .where(
+                quiz.serialId.eq(quizId),
+                subscription.serialId.eq(subscriptionId)
+            )
+            .fetchOne();
     }
 }
