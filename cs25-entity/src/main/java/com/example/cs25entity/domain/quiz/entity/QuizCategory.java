@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor
 public class QuizCategory extends BaseEntity {
@@ -27,14 +26,17 @@ public class QuizCategory extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String categoryType;
+    @Setter
+	private String categoryType;
 
     //대분류면 null
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private QuizCategory parent;
 
     //소분류
+    @Setter
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizCategory> children = new ArrayList<>();
 
@@ -51,4 +53,5 @@ public class QuizCategory extends BaseEntity {
     public boolean isChildCategory(){
         return parent != null;
     }
+
 }
