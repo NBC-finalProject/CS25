@@ -27,7 +27,6 @@ public class AuthService {
         String refreshToken = reissueRequestDto.getRefreshToken();
 
         String userId = jwtTokenProvider.getAuthorId(refreshToken);
-        //String email = jwtTokenProvider.getEmail(refreshToken);
         String nickname = jwtTokenProvider.getNickname(refreshToken);
         Role role = jwtTokenProvider.getRole(refreshToken);
 

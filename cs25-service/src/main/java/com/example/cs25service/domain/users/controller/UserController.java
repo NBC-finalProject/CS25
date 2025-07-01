@@ -13,17 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-//
-//    /**
-//     * FIXME: [임시] 로그인페이지 리다이렉트 페이지 컨트롤러
-//     *
-//     * @return 소셜로그인 페이지
-//     */
-//    @GetMapping("/")
-//    public ResponseEntity<Void> redirectToLogin(HttpServletResponse response) throws IOException {
-//        response.sendRedirect("/login");
-//        return ResponseEntity.status(HttpStatus.FOUND).build();
-//    }
 
     @PatchMapping("/users")
     public ApiResponse<Void> deleteUser(

@@ -17,4 +17,9 @@ public class VerificationVerifyRequest {
     @NotBlank(message = "인증코드는 필수 입니다.")
     @Pattern(regexp = "\\d{6}", message = "인증코드는 6자리의 숫자여야 합니다.")
     private String code;
+
+    public VerificationVerifyRequest(String email, String code) {
+        this.email = email;
+        this.code = code;
+    }
 }
