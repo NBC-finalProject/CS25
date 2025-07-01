@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
@@ -24,6 +25,7 @@ public class AiFeedbackStreamProcessor {
     private final RagService ragService;
     private final UserRepository userRepository;
     private final AiChatClient aiChatClient;
+    private final TransactionTemplate transactionTemplate;
 
     @Transactional
     public void stream(Long answerId, SseEmitter emitter) {
@@ -42,13 +44,19 @@ public class AiFeedbackStreamProcessor {
             String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
             String systemPrompt = promptProvider.getFeedbackSystem();
 
+            User user = answer.getUser();
+            Double userScore = user != null ? user.getScore() : null;
+
             send(emitter, "AI 응답 대기 중...");
 
             StringBuilder sentenceBuffer = new StringBuilder();
+            StringBuilder fullFeedbackBuffer = new StringBuilder();
 
             aiChatClient.stream(systemPrompt, userPrompt)
                 .doOnNext(token -> {
                     sentenceBuffer.append(token);
+                    fullFeedbackBuffer.append(token);
+
                     if (token.matches("[.!?]")) {
                         send(emitter, sentenceBuffer.toString());
                         sentenceBuffer.setLength(0);
@@ -60,21 +68,22 @@ public class AiFeedbackStreamProcessor {
                             send(emitter, sentenceBuffer.toString());
                         }
                         send(emitter, "[종료]");
-                        String feedback = sentenceBuffer.toString();
+
+                        String feedback = fullFeedbackBuffer.toString();
                         boolean isCorrect = feedback.startsWith("정답");
 
-                        User user = answer.getUser();
-                        if (user != null) {
-                            double score = isCorrect
-                                ? user.getScore() + (quiz.getType().getScore() * quiz.getLevel()
-                                .getExp())
-                                : user.getScore() + 1;
-                            user.updateScore(score);
-                        }
-
-                        answer.updateIsCorrect(isCorrect);
-                        answer.updateAiFeedback(feedback);
-                        userQuizAnswerRepository.save(answer);
+                        transactionTemplate.executeWithoutResult(status -> {
+                            if (user != null && userScore != null) {
+                                double score = isCorrect
+                                    ? userScore + (quiz.getType().getScore() * quiz.getLevel().getExp())
+                                    : userScore + 1;
+                                user.updateScore(score);
+                                userRepository.save(user);
+                            }
+                            answer.updateIsCorrect(isCorrect);
+                            answer.updateAiFeedback(feedback);
+                            userQuizAnswerRepository.save(answer);
+                        });
 
                         emitter.complete();
                     } catch (Exception e) {
