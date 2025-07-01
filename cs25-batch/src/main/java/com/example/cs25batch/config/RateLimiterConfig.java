@@ -19,9 +19,8 @@ public class RateLimiterConfig {
     @Value("${mail.ratelimiter.millis}")
     private Long millis;
 
-
     @Bean(name = "bucketEmail")
-    public Bucket bucketA() {
+    public Bucket bucket() {
         return Bucket.builder()
             .addLimit(limit ->
                 limit
