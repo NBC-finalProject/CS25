@@ -23,7 +23,6 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
 
     boolean existsByQuizIdAndSubscriptionId(Long quizId, Long subscriptionId);
 
-
     Page<UserQuizAnswer> findAllByUserId(Long id, Pageable pageable);
 
     long countByQuizId(Long quizId);
