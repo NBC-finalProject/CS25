@@ -6,16 +6,17 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("RefreshTokenService")
 class RefreshTokenServiceTest {
 
@@ -27,11 +28,6 @@ class RefreshTokenServiceTest {
 
     @Mock
     private ValueOperations<String, String> valueOperations;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     private final String userId = "user123";
     private final String token = "refresh-token";

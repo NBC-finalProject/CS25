@@ -11,17 +11,18 @@ import com.example.cs25service.domain.security.jwt.dto.TokenResponseDto;
 import com.example.cs25service.domain.security.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("TokenService")
 class TokenServiceTest {
 
@@ -33,11 +34,6 @@ class TokenServiceTest {
 
     @InjectMocks
     private TokenService tokenService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Nested
     @DisplayName("generateAndSaveTokenPair()")
