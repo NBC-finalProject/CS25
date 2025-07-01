@@ -25,8 +25,11 @@ import org.springframework.stereotype.Service;
 public class VerificationService {
 
     private static final String PREFIX = "VERIFY:";
+    private static final String LIMITFIX = "VERIFY_DAILY_LIMIT:";
     private final StringRedisTemplate redisTemplate;
     private final MailSenderServiceContext mailSenderContext;
+
+    private static final int MAX_ISSUE_ATTEMPTS = 3;
 
     private static final String ATTEMPT_PREFIX = "VERIFY_ATTEMPT:";
     private static final int MAX_ATTEMPTS = 5;
@@ -66,7 +69,18 @@ public class VerificationService {
 
     public void issue(String email) {
         String verificationCode = create();
-        save(email, verificationCode, Duration.ofMinutes(3));
+        redisTemplate.opsForValue().set(PREFIX + email, verificationCode, Duration.ofMinutes(3));
+
+        Long count = redisTemplate.opsForValue().increment(LIMITFIX + email);
+        if (count == 1) {
+            redisTemplate.expire(LIMITFIX + email, Duration.ofDays(1));
+        }
+        else if (count > 3) {
+            throw new VerificationException(VerificationExceptionCode.TOO_MANY_REQUESTS_DAILY);
+        }
+
+        redisTemplate.opsForValue().set(PREFIX + email, verificationCode, Duration.ofMinutes(3));
+
         try {
             mailSenderContext.send(email, verificationCode, strategy);
         } catch (Exception e) {
