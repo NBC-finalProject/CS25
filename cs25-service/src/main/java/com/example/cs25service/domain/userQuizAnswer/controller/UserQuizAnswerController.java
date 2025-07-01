@@ -29,7 +29,7 @@ public class UserQuizAnswerController {
     }
 
     // 객관식 or 주관식 채점
-    @PostMapping("/simpleAnswer/{userQuizAnswerId}")
+    @PostMapping("/evaluate/{userQuizAnswerId}")
     public ApiResponse<CheckSimpleAnswerResponseDto> evaluateAnswer(
             @PathVariable("userQuizAnswerId") Long userQuizAnswerId
     ){
