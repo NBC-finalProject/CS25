@@ -20,7 +20,12 @@ public class QuizPageService {
 
     private final QuizRepository quizRepository;
 
-    public TodayQuizResponseDto setTodayQuizPage(String quizId, Model model) {
+    /**
+     * 오늘의 문제를 반환해주는 메서드
+     * @param quizId 문제 id
+     * @return 오늘의 문제 응답 DTO를 반환
+     */
+    public TodayQuizResponseDto showTodayQuizPage(String quizId) {
         Quiz quiz = quizRepository.findBySerialId(quizId)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
 
