@@ -11,6 +11,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
@@ -68,18 +69,18 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
     }
 
     @Override
-    public UserQuizAnswer findUserQuizAnswerBySerialIds(String quizId, String subscriptionId) {
+    public Optional<UserQuizAnswer> findUserQuizAnswerBySerialIds(String quizSerialId, String subSerialId) {
         QUserQuizAnswer userQuizAnswer = QUserQuizAnswer.userQuizAnswer;
         QQuiz quiz = QQuiz.quiz;
         QSubscription subscription = QSubscription.subscription;
 
-        return queryFactory.selectFrom(userQuizAnswer)
+        return Optional.ofNullable(queryFactory.selectFrom(userQuizAnswer)
             .join(userQuizAnswer.quiz, quiz)
             .join(userQuizAnswer.subscription, subscription)
             .where(
-                quiz.serialId.eq(quizId),
-                subscription.serialId.eq(subscriptionId)
+                quiz.serialId.eq(quizSerialId),
+                subscription.serialId.eq(subSerialId)
             )
-            .fetchOne();
+            .fetchOne());
     }
 }

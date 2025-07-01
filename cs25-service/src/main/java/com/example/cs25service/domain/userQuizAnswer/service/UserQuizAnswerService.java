@@ -61,8 +61,9 @@ public class UserQuizAnswerService {
 
         // 이미 답변했으면
         if(isDuplicate){
-            UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findUserQuizAnswerBySerialIds(
-                quizSerialId, requestDto.getSubscriptionId());
+            UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
+                .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
+                .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
 
             return UserQuizAnswerResponseDto.builder()
                 .userQuizAnswerId(userQuizAnswer.getId())
