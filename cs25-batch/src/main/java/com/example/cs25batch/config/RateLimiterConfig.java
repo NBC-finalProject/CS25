@@ -25,7 +25,7 @@ public class RateLimiterConfig {
             .addLimit(limit ->
                 limit
                     .capacity(capacity)
-                    .refillIntervally(capacity/2, Duration.ofMillis(500))
+                    .refillIntervally(capacity, Duration.ofMillis(millis))
             )
             .build();
     }

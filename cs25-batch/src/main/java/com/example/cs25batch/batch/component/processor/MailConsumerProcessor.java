@@ -55,10 +55,10 @@ public class MailConsumerProcessor {
                         .quiz(quiz)
                         .build();
 
-                    long sendStart = System.currentTimeMillis();
+                    //long sendStart = System.currentTimeMillis();
                     mailSenderContext.send(mailDto, strategyKey);
-                    long sendEnd = System.currentTimeMillis();
-                    log.info("[4. 이메일 발송] {}ms", sendEnd-sendStart);
+                    //long sendEnd = System.currentTimeMillis();
+                    //log.info("[4. 이메일 발송] {}ms", sendEnd-sendStart);
                 }
 
                 // 메일 발송 성공 시 삭제
