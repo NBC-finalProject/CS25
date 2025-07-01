@@ -118,6 +118,11 @@ public class ProfileService {
             () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
         );
 
+        // 사용자에게 구독정보가 없으면 예외처리
+        if(user.getSubscription() == null) {
+            throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
+        }
+
         Long userId = user.getId();
 
         //유저 Id에 따른 구독 정보의 대분류 카테고리 조회

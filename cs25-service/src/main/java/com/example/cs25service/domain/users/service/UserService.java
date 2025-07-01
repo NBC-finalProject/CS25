@@ -26,6 +26,10 @@ public class UserService {
                 new UserException(UserExceptionCode.NOT_FOUND_USER));
 
         user.updateDisableUser();
-        subscriptionService.cancelSubscription(user.getSubscription().getSerialId());
+
+        if (user.getSubscription() != null) {
+            subscriptionService.cancelSubscription(user.getSubscription().getSerialId());
+        }
+
     }
 }
