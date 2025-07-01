@@ -60,6 +60,9 @@ public class AiFeedbackStreamProcessor {
                             send(emitter, sentenceBuffer.toString());
                         }
                         send(emitter, "[종료]");
+
+                        Thread.sleep(100);
+
                         String feedback = sentenceBuffer.toString();
                         boolean isCorrect = feedback.startsWith("정답");
 
