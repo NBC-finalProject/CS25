@@ -177,8 +177,7 @@ public class UserQuizAnswerService {
 
     /**
      * 퀴즈 타입에 따라 사용자 답변의 정답 여부를 채점하는 메서드
-     * - 객관식 (score=1): 사용자 답변과 정답의 첫 글자를 비교
-     * - 주관식 (score=3): 사용자 답변과 정답을 공백 제거하여 비교
+     * - 객관식/주관식 (score=1,3): 사용자 답변과 정답을 공백 제거하여 비교
      * 
      * @param quiz 퀴즈 정보
      * @param userQuizAnswer 사용자 답변 정보
@@ -186,11 +185,7 @@ public class UserQuizAnswerService {
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
     private boolean checkAnswer(Quiz quiz, UserQuizAnswer userQuizAnswer) {
-        if(quiz.getType().getScore() == 1){
-            // 객관식: 첫 글자만 비교 (예: "1" vs "1번")
-            return userQuizAnswer.getUserAnswer().equals(quiz.getAnswer());
-        }else if(quiz.getType().getScore() == 3){
-            // 주관식: 전체 답변을 공백 제거하여 비교
+        if(quiz.getType().getScore() == 1 || quiz.getType().getScore() == 3){
             return userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
         }else{
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
