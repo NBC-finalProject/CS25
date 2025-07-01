@@ -8,7 +8,6 @@ import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,12 +54,12 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
         return queryFactory
             .selectFrom(quiz)
             .where(builder)
-            .limit(100)
+            .limit(20)
             .fetch();
     }
 
     @Override
-    public Page<Quiz> searchQuizzes(QuizSearchDto condition, Pageable pageable){
+    public Page<Quiz> searchQuizzes(QuizSearchDto condition, Pageable pageable) {
 
         QQuiz quiz = QQuiz.quiz;
 

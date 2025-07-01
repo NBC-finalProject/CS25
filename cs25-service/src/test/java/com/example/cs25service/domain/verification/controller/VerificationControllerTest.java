@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.verification.dto.VerificationIssueRequest;
 import com.example.cs25service.domain.verification.dto.VerificationVerifyRequest;
@@ -54,7 +53,7 @@ class VerificationControllerTest {
         void issueVerificationCode_success() throws Exception {
             // given
             VerificationIssueRequest request = new VerificationIssueRequest("test@example.com");
-            AuthUser authUser = new AuthUser("name", "serial-user-001", Role.USER);
+            AuthUser authUser = null;
 
             // when
             doNothing().when(preprocessingService).isValidEmailCheck(anyString(), eq(authUser));
