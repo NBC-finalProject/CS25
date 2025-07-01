@@ -44,11 +44,11 @@ class UserQuizAnswerControllerTest {
     @WithMockUser(username = "testUser")
     void submitAnswer() throws Exception {
         //given
-        String quizSeralId = "uuid_quiz";
+        String quizSerialId = "uuid_quiz";
 
         Long userQuizAnswerId = 1L;
 
-        given(userQuizAnswerService.submitAnswer(eq(quizSeralId), any(UserQuizAnswerRequestDto.class)))
+        given(userQuizAnswerService.submitAnswer(eq(quizSerialId), any(UserQuizAnswerRequestDto.class)))
                 .willReturn(userQuizAnswerId);
 
         //when & then
@@ -57,8 +57,8 @@ class UserQuizAnswerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "answer":"정답",
-                      "subscriptionId": "uuid_subscription"
+                          "answer":"정답",
+                          "subscriptionId": "uuid_subscription"
                     }
                 """)
                 .with(csrf()))
@@ -82,11 +82,11 @@ class UserQuizAnswerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "question":"퀴즈",
-                      "userAnswer": "내가 제출한 정답",
-                      "answer": "정답",
-                      "commentary": "해설",
-                      "isCorrect": true
+                          "question":"퀴즈",
+                          "userAnswer": "내가 제출한 정답",
+                          "answer": "정답",
+                          "commentary": "해설",
+                          "isCorrect": true
                     }
                 """)
                 .with(csrf()))
@@ -101,7 +101,6 @@ class UserQuizAnswerControllerTest {
     void calculateSelectionRateByOption() throws Exception {
         //given
         String quizSerialId = "uuid_quiz";
-
         given(userQuizAnswerService.calculateSelectionRateByOption(eq(quizSerialId))).willReturn(any(SelectionRateResponseDto.class));
 
         //when & then
