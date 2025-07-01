@@ -73,7 +73,7 @@ public class SecurityConfig {
 
                 //로그인이 필요한 서비스만 여기다가 추가하기 (permaiAll 은 패싱 ㄱㄱ)
                 .requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole(PERMITTED_ROLES)
-                .requestMatchers(HttpMethod.POST, "/auth/**").hasAnyRole(PERMITTED_ROLES)
+                .requestMatchers(HttpMethod.POST, "/auth/logout/**").hasAnyRole(PERMITTED_ROLES)
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/crawlers/github/**").hasRole("ADMIN")
 

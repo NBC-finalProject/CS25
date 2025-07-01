@@ -23,23 +23,13 @@ public class AiController {
     private final FileLoaderService fileLoaderService;
     private final AiFeedbackQueueService aiFeedbackQueueService;
 
-    @GetMapping("/answers/{answerId}/feedback-word")
-    public SseEmitter streamWordFeedback(@PathVariable Long answerId) {
+    @GetMapping("/{answerId}/feedback")
+    public SseEmitter streamFeedback(@PathVariable Long answerId) {
         SseEmitter emitter = new SseEmitter(60_000L);
         emitter.onTimeout(emitter::complete);
         emitter.onError(emitter::completeWithError);
 
-        aiFeedbackQueueService.enqueue(answerId, emitter, "word");
-        return emitter;
-    }
-
-    @GetMapping("/answers/{answerId}/feedback-sentence")
-    public SseEmitter streamSentenceFeedback(@PathVariable Long answerId) {
-        SseEmitter emitter = new SseEmitter(60_000L);
-        emitter.onTimeout(emitter::complete);
-        emitter.onError(emitter::completeWithError);
-
-        aiFeedbackQueueService.enqueue(answerId, emitter, "sentence");
+        aiFeedbackQueueService.enqueue(answerId, emitter);
         return emitter;
     }
 

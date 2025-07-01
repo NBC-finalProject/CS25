@@ -97,7 +97,7 @@ public class JwtTokenProvider {
         }
     }
 
-    private Claims parseClaims(String token) throws JwtAuthenticationException {
+    Claims parseClaims(String token) throws JwtAuthenticationException {
         try {
             return Jwts.parser()
                 .verifyWith(key)
@@ -114,10 +114,6 @@ public class JwtTokenProvider {
     public String getAuthorId(String token) throws JwtAuthenticationException {
         return parseClaims(token).getSubject();
     }
-
-//    public String getEmail(String token) throws JwtAuthenticationException {
-//        return parseClaims(token).get("email", String.class);
-//    }
 
     public String getNickname(String token) throws JwtAuthenticationException {
         return parseClaims(token).get("nickname", String.class);
