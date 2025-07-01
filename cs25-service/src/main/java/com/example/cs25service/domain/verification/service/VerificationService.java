@@ -3,18 +3,17 @@ package com.example.cs25service.domain.verification.service;
 
 import com.example.cs25entity.domain.mail.exception.CustomMailException;
 import com.example.cs25entity.domain.mail.exception.MailExceptionCode;
-import com.example.cs25service.domain.mail.service.MailService;
+import com.example.cs25service.domain.mailSender.context.MailSenderServiceContext;
 import com.example.cs25service.domain.verification.exception.VerificationException;
 import com.example.cs25service.domain.verification.exception.VerificationExceptionCode;
-import jakarta.mail.MessagingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,11 +22,17 @@ import org.springframework.stereotype.Service;
 public class VerificationService {
 
     private static final String PREFIX = "VERIFY:";
+    private static final String LIMITFIX = "VERIFY_DAILY_LIMIT:";
     private final StringRedisTemplate redisTemplate;
-    private final MailService mailService;
+    private final MailSenderServiceContext mailSenderContext;
+
+    private static final int MAX_ISSUE_ATTEMPTS = 3;
 
     private static final String ATTEMPT_PREFIX = "VERIFY_ATTEMPT:";
     private static final int MAX_ATTEMPTS = 5;
+
+    @Value("${mail.strategy:javaServiceMailSender}")
+    private String strategy;
 
     private String create() {
         int length = 6;
@@ -61,10 +66,21 @@ public class VerificationService {
 
     public void issue(String email) {
         String verificationCode = create();
-        save(email, verificationCode, Duration.ofMinutes(3));
+        redisTemplate.opsForValue().set(PREFIX + email, verificationCode, Duration.ofMinutes(3));
+
+        Long count = redisTemplate.opsForValue().increment(LIMITFIX + email);
+        if (count == 1) {
+            redisTemplate.expire(LIMITFIX + email, Duration.ofDays(1));
+        }
+        else if (count > MAX_ISSUE_ATTEMPTS) {
+            throw new VerificationException(VerificationExceptionCode.TOO_MANY_REQUESTS_DAILY);
+        }
+
+        redisTemplate.opsForValue().set(PREFIX + email, verificationCode, Duration.ofMinutes(3));
+
         try {
-            mailService.sendVerificationCodeEmail(email, verificationCode);
-        } catch (MailException | MessagingException e) {
+            mailSenderContext.send(email, verificationCode, strategy);
+        } catch (Exception e) {
             delete(email);
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         }

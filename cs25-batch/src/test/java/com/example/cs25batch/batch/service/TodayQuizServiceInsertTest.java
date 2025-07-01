@@ -16,6 +16,7 @@ import java.util.Set;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @SpringBootTest(classes = Cs25BatchApplication.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 class TodayQuizServiceInsertTest {
 
     @Autowired

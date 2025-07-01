@@ -6,6 +6,7 @@ import com.example.cs25service.domain.oauth2.service.CustomOAuth2UserService;
 import com.example.cs25service.domain.security.jwt.filter.JwtAuthenticationFilter;
 import com.example.cs25service.domain.security.jwt.provider.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -89,6 +91,7 @@ public class SecurityConfig {
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     ErrorResponseUtil.writeJsonError(response, 403, "접근 권한이 없습니다.");
                     //response.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
+                    log.error("접근 권한이 없습니다.");
                 })
             )
 

@@ -1,4 +1,4 @@
-package com.example.cs25batch.config;
+package com.example.cs25common.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,7 @@ public class AwsSesConfig {
     private String secretKey;
 
     @Bean
-    public SesV2Client amazonSesClient() {	// SES V2 사용 시 SesV2Client
+    public SesV2Client amazonSesClient() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
         return SesV2Client.builder()
             .credentialsProvider(StaticCredentialsProvider.create(credentials))

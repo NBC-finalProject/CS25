@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MailMessageProcessor implements ItemProcessor<Map<String, String>, MailDto> {
+public class MailConsumerAsyncProcessor implements ItemProcessor<Map<String, String>, MailDto> {
 
     private final SubscriptionRepository subscriptionRepository;
     private final TodayQuizService todayQuizService;

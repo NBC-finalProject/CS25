@@ -26,7 +26,7 @@ public class QuizPageService {
 
         return switch (quiz.getType()) {
             case MULTIPLE_CHOICE -> getMultipleQuiz(quiz);
-            case SUBJECTIVE, SHORT_ANSWER -> getSubjectiveQuiz(quiz);
+            case SHORT_ANSWER, SUBJECTIVE -> getDescriptiveQuiz(quiz);
             default -> throw new QuizException(QuizExceptionCode.QUIZ_TYPE_NOT_FOUND_ERROR);
         };
     }
@@ -58,13 +58,14 @@ public class QuizPageService {
             .build();
     }
 
+
     /**
      * 주관식인 오늘의 문제를 만들어서 반환해주는 메서드
      *
      * @param quiz 문제 객체
      * @return 주관식 문제를 DTO로 반환
      */
-    private TodayQuizResponseDto getSubjectiveQuiz(Quiz quiz) {
+    private TodayQuizResponseDto getDescriptiveQuiz(Quiz quiz) {
         return TodayQuizResponseDto.builder()
             .question(quiz.getQuestion())
             .quizType(quiz.getQuestion())
