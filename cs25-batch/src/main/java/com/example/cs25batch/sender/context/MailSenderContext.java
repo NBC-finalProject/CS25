@@ -1,4 +1,4 @@
-package com.example.cs25batch.context;
+package com.example.cs25batch.sender.context;
 
 import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.sender.MailSenderStrategy;

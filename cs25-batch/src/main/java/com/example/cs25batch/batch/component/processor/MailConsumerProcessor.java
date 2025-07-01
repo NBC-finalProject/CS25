@@ -2,7 +2,7 @@ package com.example.cs25batch.batch.component.processor;
 
 import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.TodayQuizService;
-import com.example.cs25batch.context.MailSenderContext;
+import com.example.cs25batch.sender.context.MailSenderContext;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
