@@ -34,8 +34,8 @@ dependencies {
     implementation 'software.amazon.awssdk:netty-nio-client'
     implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.1.0'
 
-    //Guava
-    implementation 'com.google.guava:guava:32.1.3-jre'
+    //Bucket4J
+    implementation 'com.bucket4j:bucket4j_jdk17-core:8.14.0'
 
     //Monitoring
     implementation 'io.micrometer:micrometer-registry-prometheus'
