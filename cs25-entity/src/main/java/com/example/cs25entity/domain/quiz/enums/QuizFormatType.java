@@ -1,5 +1,8 @@
 package com.example.cs25entity.domain.quiz.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum QuizFormatType {
     MULTIPLE_CHOICE(1),   // 객관식
     SHORT_ANSWER(3),    // 단답식
@@ -9,9 +12,5 @@ public enum QuizFormatType {
 
     QuizFormatType(int score) {
         this.score = score;
-    }
-
-    public int getScore() {
-        return score;
     }
 }

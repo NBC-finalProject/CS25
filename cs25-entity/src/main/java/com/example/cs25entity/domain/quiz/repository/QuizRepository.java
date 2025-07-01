@@ -22,6 +22,11 @@ public interface QuizRepository extends JpaRepository<Quiz, Long>, QuizCustomRep
 
     Optional<Quiz> findBySerialId(String quizId);
 
+    default Quiz findBySerialIdOrElseThrow(String quizId){
+        return findBySerialId(quizId)
+            .orElseThrow(()-> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+    }
+
     Optional<Quiz> findById(Long id);
 
     default Quiz findByIdOrElseThrow(Long id) {

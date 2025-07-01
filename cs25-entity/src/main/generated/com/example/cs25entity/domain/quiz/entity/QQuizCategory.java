@@ -2,7 +2,6 @@ package com.example.cs25entity.domain.quiz.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
-import com.example.cs25common.global.entity.QBaseEntity;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
@@ -23,7 +22,7 @@ public class QQuizCategory extends EntityPathBase<QuizCategory> {
 
     public static final QQuizCategory quizCategory = new QQuizCategory("quizCategory");
 
-    public final QBaseEntity _super = new QBaseEntity(this);
+    public final com.example.cs25common.global.entity.QBaseEntity _super = new com.example.cs25common.global.entity.QBaseEntity(this);
 
     public final StringPath categoryType = createString("categoryType");
 

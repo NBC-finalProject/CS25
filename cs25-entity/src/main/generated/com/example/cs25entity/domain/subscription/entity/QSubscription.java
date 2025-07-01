@@ -37,6 +37,8 @@ public class QSubscription extends EntityPathBase<Subscription> {
 
     public final BooleanPath isActive = createBoolean("isActive");
 
+    public final StringPath serialId = createString("serialId");
+
     public final DatePath<java.time.LocalDate> startDate = createDate("startDate", java.time.LocalDate.class);
 
     public final NumberPath<Integer> subscriptionType = createNumber("subscriptionType", Integer.class);
@@ -62,7 +64,7 @@ public class QSubscription extends EntityPathBase<Subscription> {
 
     public QSubscription(Class<? extends Subscription> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.category = inits.isInitialized("category") ? new com.example.cs25entity.domain.quiz.entity.QQuizCategory(forProperty("category")) : null;
+        this.category = inits.isInitialized("category") ? new com.example.cs25entity.domain.quiz.entity.QQuizCategory(forProperty("category"), inits.get("category")) : null;
     }
 
 }

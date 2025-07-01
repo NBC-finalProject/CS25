@@ -22,6 +22,8 @@ public class QMailLog extends EntityPathBase<MailLog> {
 
     public static final QMailLog mailLog = new QMailLog("mailLog");
 
+    public final StringPath caused = createString("caused");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final com.example.cs25entity.domain.quiz.entity.QQuiz quiz;
