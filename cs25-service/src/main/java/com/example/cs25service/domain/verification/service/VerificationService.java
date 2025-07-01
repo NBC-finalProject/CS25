@@ -31,7 +31,7 @@ public class VerificationService {
     private static final String ATTEMPT_PREFIX = "VERIFY_ATTEMPT:";
     private static final int MAX_ATTEMPTS = 5;
 
-    @Value("${mail.strategy:javaMailSenderStrategy}")
+    @Value("${mail.strategy:javaServiceMailSender}")
     private String strategy;
 
     private String create() {

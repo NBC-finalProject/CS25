@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class MailSenderServiceContext {
-    private final Map<String, MailSenderServiceContext> strategyMap;
+    private final Map<String, MailSenderServiceStrategy> strategyMap;
 
     public void send(String toEmail, String code, String strategyKey) {
-        MailSenderServiceStrategy strategy = (MailSenderServiceStrategy) strategyMap.get(strategyKey);
+        MailSenderServiceStrategy strategy = strategyMap.get(strategyKey);
         if (strategy == null) {
             throw new IllegalArgumentException("메일 전략이 존재하지 않습니다: " + strategyKey);
         }
