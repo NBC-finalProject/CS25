@@ -22,7 +22,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class Quiz extends BaseEntity {
 
     @Id

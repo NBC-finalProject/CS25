@@ -61,15 +61,15 @@ public class AiServiceTest {
         em.persist(quizCategory);
 
         // 퀴즈 생성
-        quiz = new Quiz(
-            QuizFormatType.SUBJECTIVE,
-            "HTTP와 HTTPS의 차이점을 설명하세요.",
-            "HTTPS는 암호화, HTTP는 암호화X",
-            "HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.",
-            null,
-            quizCategory,
-            QuizLevel.EASY
-        );
+        quiz = Quiz.builder()
+            .type(QuizFormatType.SUBJECTIVE)
+            .question("HTTP와 HTTPS의 차이점을 설명하세요.")
+            .answer("HTTPS는 암호화, HTTP는 암호화X")
+            .commentary("HTTPS는 SSL/TLS로 암호화되어 보안성이 높다.")
+            .choice(null)
+            .category(quizCategory)
+            .level(QuizLevel.EASY)
+            .build();
         quizRepository.save(quiz);
 
         // 구독 생성 (회원, 비회원)
