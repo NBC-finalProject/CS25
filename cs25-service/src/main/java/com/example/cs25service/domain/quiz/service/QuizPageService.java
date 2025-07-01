@@ -9,11 +9,8 @@ import com.example.cs25service.domain.quiz.dto.TodayQuizResponseDto;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuizPageService {
@@ -26,13 +23,15 @@ public class QuizPageService {
      * @return 오늘의 문제 응답 DTO를 반환
      */
     public TodayQuizResponseDto showTodayQuizPage(String quizId) {
-        Quiz quiz = quizRepository.findBySerialId(quizId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
 
+        Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizId);
+
+        if(quiz.getType() == null) {
+            throw new QuizException(QuizExceptionCode.QUIZ_TYPE_NOT_FOUND_ERROR);
+        }
         return switch (quiz.getType()) {
             case MULTIPLE_CHOICE -> getMultipleQuiz(quiz);
             case SHORT_ANSWER, SUBJECTIVE -> getDescriptiveQuiz(quiz);
-            default -> throw new QuizException(QuizExceptionCode.QUIZ_TYPE_NOT_FOUND_ERROR);
         };
     }
 
