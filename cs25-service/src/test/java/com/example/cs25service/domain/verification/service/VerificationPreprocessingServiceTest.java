@@ -6,8 +6,6 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.cs25entity.domain.subscription.exception.SubscriptionException;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
-import com.example.cs25entity.domain.user.exception.UserException;
-import com.example.cs25entity.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,9 +20,6 @@ class VerificationPreprocessingServiceTest {
     @Mock
     private SubscriptionRepository subscriptionRepository;
 
-    @Mock
-    private UserRepository userRepository;
-
     @InjectMocks
     private VerificationPreprocessingService emailValidationService;
 
@@ -38,7 +33,6 @@ class VerificationPreprocessingServiceTest {
             // given
             String email = "test@example.com";
             given(subscriptionRepository.existsByEmail(email)).willReturn(false);
-            given(userRepository.existsByEmail(email)).willReturn(false);
 
             // when & then
             assertDoesNotThrow(() -> emailValidationService.isValidEmailCheck(email));
@@ -53,19 +47,6 @@ class VerificationPreprocessingServiceTest {
 
             // when & then
             assertThrows(SubscriptionException.class,
-                () -> emailValidationService.isValidEmailCheck(email));
-        }
-
-        @Test
-        @DisplayName("회원 테이블에 이메일이 이미 존재하면 UserException을 던진다")
-        void duplicateEmailInUser_throwsUserException() {
-            // given
-            String email = "user@cs25.co.kr";
-            given(subscriptionRepository.existsByEmail(email)).willReturn(false);
-            given(userRepository.existsByEmail(email)).willReturn(true);
-
-            // when & then
-            assertThrows(UserException.class,
                 () -> emailValidationService.isValidEmailCheck(email));
         }
     }
