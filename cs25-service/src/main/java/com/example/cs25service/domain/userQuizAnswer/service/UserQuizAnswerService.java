@@ -139,8 +139,7 @@ public class UserQuizAnswerService {
      * @throws QuizException 퀴즈를 찾을 수 없는 경우
      */
     public SelectionRateResponseDto calculateSelectionRateByOption(String quizSerialId) {
-        Quiz quiz = quizRepository.findBySerialId(quizSerialId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizSerialId);
         List<UserAnswerDto> answers = userQuizAnswerRepository.findUserAnswerByQuizId(quiz.getId());
 
         //보기별 선택 수 집계
@@ -225,6 +224,6 @@ public class UserQuizAnswerService {
      * @return true/false 반환
      */
     private boolean isSubjectiveQuestion(UserQuizAnswer userQuizAnswer) {
-        return userQuizAnswer.getAiFeedback() == null;
+        return userQuizAnswer.getAiFeedback() != null;
     }
 }
