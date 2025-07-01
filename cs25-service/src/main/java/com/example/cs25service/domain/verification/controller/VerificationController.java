@@ -20,7 +20,7 @@ public class VerificationController {
     private final VerificationService verificationService;
     private final VerificationPreprocessingService preprocessingService;
 
-    @PostMapping()
+    @PostMapping
     public ApiResponse<String> issueVerificationCodeByEmail(
         @Valid @RequestBody VerificationIssueRequest request) {
 
