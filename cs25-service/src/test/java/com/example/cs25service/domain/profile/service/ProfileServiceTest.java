@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.profile.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
@@ -146,7 +147,7 @@ class ProfileServiceTest {
     @Test
     void getUserSubscription_구독_정보_조회() {
         //given
-        when(userRepository.findBySerialId(authUser.getSerialId())).thenReturn(Optional.of(user));
+        when(userRepository.findBySerialIdOrElseThrow(authUser.getSerialId())).thenReturn(user);
 
         SubscriptionInfoDto subscriptionInfoDto = SubscriptionInfoDto.builder()
             .category(subscription.getCategory().getCategoryType())
@@ -178,34 +179,31 @@ class ProfileServiceTest {
     @Test
     void getWrongQuiz_틀린_문제_다시보기() {
         //given
-        when(userRepository.findBySerialId(authUser.getSerialId())).thenReturn(Optional.of(user));
+        when(userRepository.findBySerialIdOrElseThrow(authUser.getSerialId())).thenReturn(user);
 
         List<UserQuizAnswer> userQuizAnswers = List.of(
-            new UserQuizAnswer("정답1", null, true, user, quiz, subscription),
-            new UserQuizAnswer("정답2", null, false, user, quiz1, subscription)
+                new UserQuizAnswer("정답2", null, false, user, quiz1, subscription),
+                new UserQuizAnswer("정답3", null, false, user, quiz1, subscription)
         );
 
-        Page<UserQuizAnswer> page = new PageImpl<>(userQuizAnswers, PageRequest.of(0, 10),
+        Page<UserQuizAnswer> page = new PageImpl<>(userQuizAnswers, PageRequest.of(0, 5),
             userQuizAnswers.size());
-        when(userQuizAnswerRepository.findAllByUserId(user.getId(),
-            PageRequest.of(0, 10))).thenReturn(page);
+        when(userQuizAnswerRepository.findAllByUserIdAndIsCorrectFalse(user.getId(),
+            PageRequest.of(0, 5))).thenReturn(page);
 
         //when
         ProfileWrongQuizResponseDto wrongQuiz = profileService.getWrongQuiz(authUser,
-            PageRequest.of(0, 10));
+            PageRequest.of(0, 5));
 
         //then
         assertThat(wrongQuiz.getUserId()).isEqualTo(authUser.getSerialId());
-        assertThat(wrongQuiz.getWrongQuizList())
-            .hasSize(1)
-            .extracting("userAnswer")
-            .containsExactly("정답2");
+        assertThat(wrongQuiz.getWrongQuizList()).hasSize(2);
     }
 
     @Test
     void getProfile_사용자_정보_조회() {
         //given
-        when(userRepository.findBySerialId(authUser.getSerialId())).thenReturn(Optional.of(user));
+        when(userRepository.findBySerialIdOrElseThrow(authUser.getSerialId())).thenReturn(user);
         when(userRepository.findRankByScore(user.getScore())).thenReturn(1);
 
         //when
@@ -271,8 +269,7 @@ class ProfileServiceTest {
                     .user(user).userAnswer("2").build()
             );
 
-            when(userRepository.findBySerialId(authUser.getSerialId())).thenReturn(
-                Optional.of(user));
+            when(userRepository.findBySerialIdOrElseThrow(authUser.getSerialId())).thenReturn(user);
             when(quizCategoryRepository.findQuizCategoryByUserId(user.getId())).thenReturn(
                 parentCategory);
             when(userQuizAnswerRepository.findByUserIdAndQuizCategoryId(user.getId(),
@@ -293,8 +290,7 @@ class ProfileServiceTest {
         @DisplayName("성공 - 퀴즈 로그가 없는 경우 0%로 계산")
         void getUserQuizAnswerCorrectRate_noAnswers() {
             // given
-            when(userRepository.findBySerialId(authUser.getSerialId())).thenReturn(
-                Optional.of(user));
+            when(userRepository.findBySerialIdOrElseThrow(authUser.getSerialId())).thenReturn(user);
             when(quizCategoryRepository.findQuizCategoryByUserId(user.getId())).thenReturn(
                 parentCategory);
             when(userQuizAnswerRepository.findByUserIdAndQuizCategoryId(user.getId(),
