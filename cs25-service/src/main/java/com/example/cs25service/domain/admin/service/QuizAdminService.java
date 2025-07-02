@@ -52,7 +52,6 @@ public class QuizAdminService {
         String categoryType,
         QuizFormatType formatType
     ) {
-
         try {
             //대분류 확인
             QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
@@ -133,7 +132,6 @@ public class QuizAdminService {
     }
 
     @Transactional(readOnly = true)
-    //GET	관리자 문제  상세 조회	/admin/quizzes/{quizId}
     public QuizDetailDto getAdminQuizDetail(Long quizId) {
         Quiz quiz = quizRepository.findByIdOrElseThrow(quizId);
 
@@ -150,7 +148,6 @@ public class QuizAdminService {
             .build();
     }
 
-    //POST	관리자 문제 등록	/admin/quizzes
     @Transactional
     public Long createQuiz(QuizCreateRequestDto requestDto) {
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(
@@ -167,7 +164,6 @@ public class QuizAdminService {
         return quizRepository.save(newQuiz).getId();
     }
 
-    //PATCH	관리자 문제 수정	/admin/quizzes/{quizId}
     @Transactional
     public QuizDetailDto updateQuiz(@Positive Long quizId, QuizUpdateRequestDto requestDto) {
         Quiz quiz = quizRepository.findByIdOrElseThrow(quizId);
@@ -226,7 +222,6 @@ public class QuizAdminService {
             .build();
     }
 
-    //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
     @Transactional
     public void deleteQuiz(@Positive Long quizId) {
         Quiz quiz = quizRepository.findByIdOrElseThrow(quizId);
