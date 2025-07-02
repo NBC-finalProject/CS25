@@ -46,8 +46,7 @@ public class SubscriptionService {
      */
     @Transactional(readOnly = true)
     public SubscriptionInfoDto getSubscription(String subscriptionId) {
-        Subscription subscription = subscriptionRepository.findBySerialId(subscriptionId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId);
 
         //구독 시작, 구독 종료 날짜 기반으로 구독 기간 계산
         LocalDate start = subscription.getStartDate();
@@ -87,12 +86,12 @@ public class SubscriptionService {
 
         // 로그인을 한 경우
         if (authUser != null) {
-            User user = userRepository.findBySerialId(authUser.getSerialId())
-                .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
+            User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
 
             // 구독 정보가 없는 경우
             if (user.getSubscription() == null) {
                 LocalDate nowDate = LocalDate.now();
+
                 Subscription subscription = subscriptionRepository.save(
                     Subscription.builder()
                         .email(request.getEmail())
@@ -102,8 +101,10 @@ public class SubscriptionService {
                         .subscriptionType(request.getDays())
                         .build()
                 );
+
                 createSubscriptionHistory(subscription);
                 user.updateSubscription(subscription);
+
                 return SubscriptionResponseDto.builder()
                     .id(subscription.getId())
                     .category(subscription.getCategory().getCategoryType())
@@ -116,12 +117,13 @@ public class SubscriptionService {
                 throw new SubscriptionException(
                     SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
             }
-            // 비로그인 회원일 경우
+        // 비로그인일 경우
         } else {
             // 이메일 체크
             this.checkEmail(request.getEmail());
             try {
                 LocalDate nowDate = LocalDate.now();
+
                 Subscription subscription = subscriptionRepository.save(
                     Subscription.builder()
                         .email(request.getEmail())
@@ -131,7 +133,9 @@ public class SubscriptionService {
                         .subscriptionType(request.getDays())
                         .build()
                 );
+
                 createSubscriptionHistory(subscription);
+
                 return SubscriptionResponseDto.builder()
                     .id(subscription.getId())
                     .category(subscription.getCategory().getCategoryType())
@@ -156,14 +160,16 @@ public class SubscriptionService {
     @Transactional
     public void updateSubscription(String subscriptionId,
         SubscriptionRequestDto requestDto) {
-        Subscription subscription = subscriptionRepository.findBySerialId(subscriptionId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+
+        Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId);
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             requestDto.getCategory());
 
         LocalDate requestDate = subscription.getEndDate()
             .plusMonths(requestDto.getPeriod().getMonths());
+
         LocalDate maxSubscriptionDate = subscription.getStartDate().plusYears(1);
+
         if (requestDate.isAfter(maxSubscriptionDate)) {
             throw new SubscriptionException(
                 SubscriptionExceptionCode.ILLEGAL_SUBSCRIPTION_PERIOD_ERROR);

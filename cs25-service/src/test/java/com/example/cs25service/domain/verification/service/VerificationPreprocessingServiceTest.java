@@ -93,8 +93,8 @@ class VerificationPreprocessingServiceTest {
                 .build();
 
             given(subscriptionRepository.existsByEmail(email)).willReturn(false);
-            given(userRepository.findBySerialId(authUser.getSerialId())).willReturn(
-                Optional.ofNullable(user));
+            given(userRepository.findBySerialIdOrElseThrow(authUser.getSerialId()))
+                .willReturn(user);
 
             // when & then
             assertThrows(UserException.class,
