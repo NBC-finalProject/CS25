@@ -3,7 +3,6 @@ package com.example.cs25batch.batch.component.reader;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.any;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,7 +53,7 @@ class RedisStreamReaderTest {
         MapRecord<String, Object, Object> record =
             StreamRecords.newRecord()
             .in("quiz-email-stream")
-            .withId(RecordId.of("123-0"))
+            .withId(RecordId.of("test-123"))
             .ofMap(value);
 
         when(streamOps.read(
@@ -69,7 +68,7 @@ class RedisStreamReaderTest {
         // then
         assertThat(result)
             .containsEntry("subscriptionId", "123")
-            .containsEntry("recordId", "123-0");
+            .containsEntry("recordId", "test-123");
 
         verify(streamOps).acknowledge("quiz-email-stream", "mail-consumer-group", record.getId());
     }
