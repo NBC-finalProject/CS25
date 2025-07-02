@@ -12,7 +12,7 @@ import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRep
 import com.example.cs25service.domain.admin.dto.request.QuizCreateRequestDto;
 import com.example.cs25service.domain.admin.dto.request.QuizUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.QuizDetailDto;
-import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
+import com.example.cs25service.domain.admin.dto.request.CreateQuizDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -49,7 +49,8 @@ public class QuizAdminService {
     @Transactional
     public void uploadQuizJson(
         MultipartFile file,
-        String categoryType
+        String categoryType,
+        QuizFormatType formatType
     ) {
 
         try {
@@ -91,7 +92,7 @@ public class QuizAdminService {
                     }
 
                     return Quiz.builder()
-                        .type(QuizFormatType.valueOf(dto.getType()))
+                        .type(formatType)
                         .question(dto.getQuestion())
                         .choice(dto.getChoice())
                         .answer(dto.getAnswer())
