@@ -62,7 +62,6 @@ public class QuizPageService {
             .build();
     }
 
-
     /**
      * 주관식인 오늘의 문제를 만들어서 반환해주는 메서드
      *
