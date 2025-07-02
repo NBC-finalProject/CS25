@@ -216,7 +216,7 @@ class UserQuizAnswerServiceTest {
                 .subscription(subscription)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(choiceAnswer.getId())).thenReturn(choiceAnswer);
 
         //when
         UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
@@ -234,7 +234,7 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(shortAnswer.getId())).thenReturn(shortAnswer);
 
         //when
         UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
@@ -253,7 +253,7 @@ class UserQuizAnswerServiceTest {
                 .subscription(subscription)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(choiceAnswer.getId())).thenReturn(choiceAnswer);
 
         //when
         UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
@@ -273,7 +273,7 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(shortAnswer.getId())).thenReturn(shortAnswer);
 
         //when
         UserQuizAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
@@ -292,7 +292,7 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(shortAnswer.getId())).thenReturn(shortAnswer);
 
         //when
         UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
