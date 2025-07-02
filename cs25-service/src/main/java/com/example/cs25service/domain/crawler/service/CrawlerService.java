@@ -1,9 +1,7 @@
 package com.example.cs25service.domain.crawler.service;
 
-import com.example.cs25service.domain.ai.service.RagService;
 import com.example.cs25service.domain.crawler.github.GitHubRepoInfo;
 import com.example.cs25service.domain.crawler.github.GitHubUrlParser;
-import com.example.cs25service.domain.security.dto.AuthUser;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.document.Document;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -26,19 +26,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrawlerService {
 
-    private final RagService ragService;
     private final RestTemplate restTemplate;
     private String githubToken;
 
-    public void crawlingGithubDocument(AuthUser authUser, String url) {
-//
-//        if(authUser.getRole() != Role.ADMIN){
-//            throw new UserException(UserExceptionCode.UNAUTHORIZE_ROLE);
-//        }
+    public void crawlingGithubDocument(String url) {
 
         //url 에서 필요 정보 추출
         GitHubRepoInfo repoInfo = GitHubUrlParser.parseGitHubUrl(url);
@@ -52,7 +48,6 @@ public class CrawlerService {
             repoInfo.getRepo(), repoInfo.getPath());
 
         //List 에 저장된 문서 ChromaVectorDB에 저장
-        //ragService.saveDocumentsToVectorStore(documentList);
         saveToFile(documentList);
     }
 
@@ -88,16 +83,15 @@ public class CrawlerService {
             else if ("file".equals(type) && name.endsWith(".md") && filePath.contains("/")) {
                 String downloadUrl = (String) item.get("download_url");
                 downloadUrl = URLDecoder.decode(downloadUrl, StandardCharsets.UTF_8);
-                //System.out.println("DOWNLOAD URL: " + downloadUrl);
+
                 try {
                     String content = restTemplate.getForObject(downloadUrl, String.class);
                     Document doc = makeDocument(name, filePath, content);
                     docs.add(doc);
                 } catch (HttpClientErrorException e) {
-                    System.err.println(
-                        "다운로드 실패: " + downloadUrl + " → " + e.getStatusCode());
+					log.error("다운로드 실패: {} → {}", downloadUrl, e.getStatusCode());
                 } catch (Exception e) {
-                    System.err.println("예외: " + downloadUrl + " → " + e.getMessage());
+					log.error("예외: {} → {}", downloadUrl, e.getMessage());
                 }
             }
         }
@@ -120,7 +114,7 @@ public class CrawlerService {
         try {
             Files.createDirectories(Paths.get(SAVE_DIR));
         } catch (IOException e) {
-            System.err.println("디렉토리 생성 실패: " + e.getMessage());
+			log.error("디렉토리 생성 실패: {}", e.getMessage());
             return;
         }
 
@@ -134,8 +128,7 @@ public class CrawlerService {
                 Files.writeString(filePath, document.getText(),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
-                System.err.println(
-                    "파일 저장 실패 (" + document.getMetadata().get("path") + "): " + e.getMessage());
+				log.error("파일 저장 실패 ({}): {}", document.getMetadata().get("path"), e.getMessage());
             }
         }
     }
