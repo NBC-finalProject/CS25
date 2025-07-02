@@ -1,12 +1,12 @@
 package com.example.cs25service.domain.userQuizAnswer.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.exception.SubscriptionException;
-import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
@@ -49,13 +49,11 @@ public class UserQuizAnswerService {
     @Transactional
     public UserQuizAnswerResponseDto submitAnswer(String quizSerialId, UserQuizAnswerRequestDto requestDto) {
 
-        // 구독 정보 조회
         Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(
                 requestDto.getSubscriptionId());
-
-        // 퀴즈 조회
         Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizSerialId);
 
+        // 이미 답변했는지 여부 조회
         boolean isDuplicate = userQuizAnswerRepository
             .existsByQuizIdAndSubscriptionId(quiz.getId(), subscription.getId());
 
@@ -65,7 +63,8 @@ public class UserQuizAnswerService {
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
                 .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
 
-            boolean subjectiveQuestion = isSubjectiveQuestion(userQuizAnswer);
+            // 서술형 답변인지 확인
+            boolean isSubjectiveAnswer = getSubjectiveAnswerStatus(userQuizAnswer,quiz);
 
             return UserQuizAnswerResponseDto.builder()
                 .userQuizAnswerId(userQuizAnswer.getId())
@@ -73,14 +72,13 @@ public class UserQuizAnswerService {
                 .question(quiz.getQuestion())
                 .commentary(quiz.getCommentary())
                 .userAnswer(userQuizAnswer.getUserAnswer())
-                .aiFeedback(subjectiveQuestion ? userQuizAnswer.getAiFeedback() : null)
+                .aiFeedback(isSubjectiveAnswer ? userQuizAnswer.getAiFeedback() : null)
                 .answer(quiz.getAnswer())
                 .duplicated(true)
                 .build();
         }
-        // 처음 답변한 경우
+        // 처음 답변한 경우 답변 생성하여 저장
         else {
-            // 유저 정보 조회
             User user = userRepository.findBySubscription(subscription).orElse(null);
 
             UserQuizAnswer savedUserQuizAnswer = userQuizAnswerRepository.save(
@@ -116,11 +114,12 @@ public class UserQuizAnswerService {
         UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findWithQuizAndUserById(userQuizAnswerId)
             .orElseThrow(() -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
         );
-
         Quiz quiz = userQuizAnswer.getQuiz();
-        boolean isAnswerCorrect = getIsAnswerCorrect(quiz, userQuizAnswer);
 
+        // 정답인지 채점하고 업데이트
+        boolean isAnswerCorrect = getAnswerCorrectStatus(quiz, userQuizAnswer);
         userQuizAnswer.updateIsCorrect(isAnswerCorrect);
+
         return UserQuizAnswerResponseDto.builder()
             .userQuizAnswerId(userQuizAnswerId)
             .question(quiz.getQuestion())
@@ -171,7 +170,7 @@ public class UserQuizAnswerService {
      * @return 답변 정답 여부
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
-    private boolean getIsAnswerCorrect(Quiz quiz, UserQuizAnswer userQuizAnswer) {
+    private boolean getAnswerCorrectStatus(Quiz quiz, UserQuizAnswer userQuizAnswer) {
         boolean isAnswerCorrect = checkAnswer(quiz, userQuizAnswer);
         updateUserScore(userQuizAnswer.getUser(), quiz, isAnswerCorrect);
         return isAnswerCorrect;
@@ -220,10 +219,16 @@ public class UserQuizAnswerService {
 
     /**
      * 서술형에 대한 답변인지 확인하는 메서드
+     * 퀴즈객체의 타입이 서술형이고, 답변객체의 AI 피드백이 널이 아니어야 한다.
+     *
      * @param userQuizAnswer 답변 객체
+     * @param quiz 퀴즈 객체
      * @return true/false 반환
      */
-    private boolean isSubjectiveQuestion(UserQuizAnswer userQuizAnswer) {
-        return userQuizAnswer.getAiFeedback() != null;
+    private boolean getSubjectiveAnswerStatus(UserQuizAnswer userQuizAnswer, Quiz quiz) {
+        if(quiz.getType() == null){
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+        return userQuizAnswer.getAiFeedback() != null && quiz.getType().equals(QuizFormatType.SUBJECTIVE);
     }
 }
