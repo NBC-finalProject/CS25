@@ -68,7 +68,7 @@ public class UserQuizAnswerService {
         if(isDuplicate) {
             UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
-                .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
+                .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER));
 
             // 유효한 답변객체인지 검증
             validateUserQuizAnswer(userQuizAnswer);
