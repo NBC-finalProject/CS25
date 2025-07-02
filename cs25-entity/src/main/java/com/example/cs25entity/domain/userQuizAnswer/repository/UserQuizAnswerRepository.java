@@ -19,10 +19,11 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
 
     boolean existsByQuizIdAndSubscriptionId(Long quizId, Long subscriptionId);
 
-    Page<UserQuizAnswer> findAllByUserId(Long id, Pageable pageable);
-
     long countByQuizId(Long quizId);
 
     @Query("SELECT a FROM UserQuizAnswer a JOIN FETCH a.quiz LEFT JOIN FETCH a.user WHERE a.id = :id")
     Optional<UserQuizAnswer> findWithQuizAndUserById(@Param("id") Long id);
+
+    @Query("SELECT a FROM UserQuizAnswer a WHERE a.isCorrect = false")
+    Page<UserQuizAnswer> findAllByUserIdAndIsCorrectFalse(Long id, Pageable pageable);
 }
