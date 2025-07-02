@@ -43,7 +43,7 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             .join(quiz.category, category)
             .where(
                 answer.user.id.eq(userId),
-                category.parent.id.eq(quizCategoryId)
+                category.id.eq(quizCategoryId)
             )
             .fetch();
     }
