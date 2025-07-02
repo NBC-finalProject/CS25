@@ -7,6 +7,7 @@ import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.exception.SubscriptionException;
+import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
@@ -62,6 +63,9 @@ public class UserQuizAnswerService {
             UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
                 .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
+
+            // 유효한 답변객체인지 검증
+            validateUserQuizAnswer(userQuizAnswer);
 
             // 서술형 답변인지 확인
             boolean isSubjectiveAnswer = getSubjectiveAnswerStatus(userQuizAnswer,quiz);
@@ -214,6 +218,26 @@ public class UserQuizAnswerService {
                 updatedScore = user.getScore() + 1;
             }
             user.updateScore(updatedScore);
+        }
+    }
+
+    /**
+     * 답변 객체를 검증하는 메서드
+     * @param userQuizAnswer 답변 객체
+     */
+    private void validateUserQuizAnswer(UserQuizAnswer userQuizAnswer) {
+        if(userQuizAnswer.getUser() == null){
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+        if(userQuizAnswer.getQuiz() == null){
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+        if(userQuizAnswer.getSubscription() == null){
+            throw new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR);
+        }
+        // AI 피드백 작성 도중에 종료하는 경우 & 비정상적인 종료 (aiFeedback or isCorrect null)
+        if(userQuizAnswer.getAiFeedback() == null || userQuizAnswer.getIsCorrect() == null){
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.INVALID_ANSWER);
         }
     }
 
