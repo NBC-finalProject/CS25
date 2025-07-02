@@ -133,22 +133,22 @@ class QuizTest {
 	}
 
 	@Test
-	@DisplayName("")
+	@DisplayName("코멘터리 업데이트")
 	void updateCommentary() {
 	    // given
 		String newCommentary = "코멘타리 업데이트";
 
 		// when
-		subjectiveQuiz.updateQuestion(newCommentary);
-		multipleChoiceQuiz.updateQuestion(newCommentary);
+		subjectiveQuiz.updateCommentary(newCommentary);
+		multipleChoiceQuiz.updateCommentary(newCommentary);
 
 		// then
-		assertEquals(newCommentary, subjectiveQuiz.getQuestion());
-		assertEquals(newCommentary, multipleChoiceQuiz.getQuestion());
+		assertEquals(newCommentary, subjectiveQuiz.getCommentary());
+		assertEquals(newCommentary, multipleChoiceQuiz.getCommentary());
 	}
 
 	@Test
-	@DisplayName("")
+	@DisplayName("카테고리타입 업데이트")
 	void updateType() {
 	    // given
 		QuizFormatType subjectiveQuizType = QuizFormatType.SUBJECTIVE;
