@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor
 public class QuizCategory extends BaseEntity {
@@ -27,14 +26,15 @@ public class QuizCategory extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String categoryType;
+	private String categoryType;
 
-    //대분류면 null
+    // 내가 대분류면 null
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private QuizCategory parent;
 
-    //소분류
+    // 소분류
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizCategory> children = new ArrayList<>();
 
@@ -50,5 +50,13 @@ public class QuizCategory extends BaseEntity {
      */
     public boolean isChildCategory(){
         return parent != null;
+    }
+
+    /**
+     * 카테고리 타입명을 수정하는 메서드
+     * @param categoryType 수정하고자 하는 카테고리 타입명
+     */
+    public void updateCategoryType(String categoryType){
+        this.categoryType = categoryType;
     }
 }

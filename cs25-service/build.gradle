@@ -19,6 +19,7 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'com.h2database:h2'
 
     // ai
     implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
