@@ -21,8 +21,6 @@ public interface QuizCategoryRepository extends JpaRepository<QuizCategory, Long
                 new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
     }
 
-    Optional<QuizCategory> findById(Long id);
-
     default QuizCategory findByIdOrElseThrow(Long id){
         return findById(id)
             .orElseThrow(() ->

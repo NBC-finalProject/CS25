@@ -19,16 +19,13 @@ public class QuizCategoryAdminService {
     @Transactional
     public void createQuizCategory(QuizCategoryRequestDto request) {
 
-        quizCategoryRepository.findByCategoryType(request.getCategory())
-            .ifPresent(c -> {
-                throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
-            });
+        if(quizCategoryRepository.existsByCategoryType(request.getCategory())){
+            throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_ALREADY_EXISTS_ERROR);
+        }
 
         QuizCategory parent = null;
         if (request.getParentId() != null) {
-            parent = quizCategoryRepository.findById(request.getParentId())
-                .orElseThrow(() ->
-                    new QuizException(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR));
+            parent = quizCategoryRepository.findByIdOrElseThrow(request.getParentId());
         }
 
         QuizCategory quizCategory = QuizCategory.builder()

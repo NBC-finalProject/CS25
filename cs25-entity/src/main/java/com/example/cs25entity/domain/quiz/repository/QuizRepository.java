@@ -27,8 +27,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long>, QuizCustomRep
             .orElseThrow(()-> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
     }
 
-    Optional<Quiz> findById(Long id);
-
     default Quiz findByIdOrElseThrow(Long id) {
         return findById(id)
             .orElseThrow(() -> new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR));
