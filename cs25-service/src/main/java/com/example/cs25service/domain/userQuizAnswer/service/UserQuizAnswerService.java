@@ -54,6 +54,7 @@ public class UserQuizAnswerService {
         Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(
             requestDto.getSubscriptionId());
 
+        // 구독 활성화 상태인지 조회
         if (!subscription.isActive()) {
             throw new SubscriptionException(SubscriptionExceptionCode.DISABLED_SUBSCRIPTION_ERROR);
         }
@@ -67,8 +68,7 @@ public class UserQuizAnswerService {
         // 이미 답변했으면
         if(isDuplicate) {
             UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
-                .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
-                .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER));
+                .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId());
 
             // 유효한 답변객체인지 검증
             validateUserQuizAnswer(userQuizAnswer);
@@ -79,16 +79,7 @@ public class UserQuizAnswerService {
             // 서술형 답변인지 확인
             boolean isSubjectiveAnswer = getSubjectiveAnswerStatus(userQuizAnswer, quiz);
 
-            return UserQuizAnswerResponseDto.builder()
-                .userQuizAnswerId(userQuizAnswer.getId())
-                .isCorrect(userQuizAnswer.getIsCorrect())
-                .question(quiz.getQuestion())
-                .commentary(quiz.getCommentary())
-                .userAnswer(userQuizAnswer.getUserAnswer())
-                .aiFeedback(isSubjectiveAnswer ? userQuizAnswer.getAiFeedback() : null)
-                .answer(quiz.getAnswer())
-                .duplicated(true)
-                .build();
+            return toAnswerDto(userQuizAnswer, quiz, isSubjectiveAnswer);
         }
         // 처음 답변한 경우 답변 생성하여 저장
         else {
@@ -103,14 +94,7 @@ public class UserQuizAnswerService {
                     .subscription(subscription)
                     .build()
             );
-            return UserQuizAnswerResponseDto.builder()
-                .userQuizAnswerId(savedUserQuizAnswer.getId())
-                .question(quiz.getQuestion())
-                .commentary(quiz.getCommentary())
-                .userAnswer(savedUserQuizAnswer.getUserAnswer())
-                .answer(quiz.getAnswer())
-                .duplicated(false)
-                .build();
+            return toAnswerDto(savedUserQuizAnswer, quiz, isDuplicate);
         }
     }
 
@@ -171,6 +155,26 @@ public class UserQuizAnswerService {
             ));
 
         return new SelectionRateResponseDto(selectionRates, totalResponses);
+    }
+
+    /**
+     * 답변 DTO를 생성하여 반환하는 메서드
+     * @param userQuizAnswer 답변 객체
+     * @param quiz 문제 객체
+     * @param isDuplicate 중복 여부
+     * @return 답변 DTO를 반환
+     */
+    private UserQuizAnswerResponseDto toAnswerDto (
+        UserQuizAnswer userQuizAnswer, Quiz quiz, boolean isDuplicate
+    ) {
+        return UserQuizAnswerResponseDto.builder()
+            .userQuizAnswerId(userQuizAnswer.getId())
+            .question(quiz.getQuestion())
+            .commentary(quiz.getCommentary())
+            .userAnswer(userQuizAnswer.getUserAnswer())
+            .answer(quiz.getAnswer())
+            .duplicated(isDuplicate)
+            .build();
     }
 
     /**

@@ -6,6 +6,8 @@ import com.example.cs25entity.domain.subscription.entity.QSubscription;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.QUserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -69,18 +71,23 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
     }
 
     @Override
-    public Optional<UserQuizAnswer> findUserQuizAnswerBySerialIds(String quizSerialId, String subSerialId) {
+    public UserQuizAnswer findUserQuizAnswerBySerialIds(String quizSerialId, String subSerialId) {
         QUserQuizAnswer userQuizAnswer = QUserQuizAnswer.userQuizAnswer;
         QQuiz quiz = QQuiz.quiz;
         QSubscription subscription = QSubscription.subscription;
 
-        return Optional.ofNullable(queryFactory.selectFrom(userQuizAnswer)
+        UserQuizAnswer result = queryFactory.selectFrom(userQuizAnswer)
             .join(userQuizAnswer.quiz, quiz)
             .join(userQuizAnswer.subscription, subscription)
             .where(
                 quiz.serialId.eq(quizSerialId),
                 subscription.serialId.eq(subSerialId)
             )
-            .fetchOne());
+            .fetchOne();
+
+        if(result == null) {
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
+        }
+        return result;
     }
 }
