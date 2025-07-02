@@ -11,6 +11,7 @@ import io.github.bucket4j.Bucket;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -43,7 +44,8 @@ class RedisStreamReaderTest {
     }
 
     @Test
-    void record가_있으면_subscriptionId와_recordId를_반환한다() {
+    @DisplayName("record가_있으면_subscriptionId와_recordId를_반환한다.")
+    void record_isExist_thenReturn_subscriptionId_recordId() {
         // given
         when(bucket.tryConsume(1)).thenReturn(true);
         when(redisTemplate.opsForStream()).thenReturn(streamOps);
