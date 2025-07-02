@@ -94,4 +94,19 @@ class QuizCategoryTest {
 		assertTrue(child1.isChildCategory());
 		assertTrue(child2.isChildCategory());
 	}
+
+	@Test
+	@DisplayName("")
+	void updateQuizCategoryType() {
+	    // given
+		String newCategoryType = "FRONTEND";
+
+	    // when
+		parentQuizCategory.updateCategoryType(newCategoryType);
+
+	    // then
+		assertEquals(newCategoryType, parentQuizCategory.getCategoryType());
+		assertFalse(parentQuizCategory.isChildCategory());
+		assertNull(parentQuizCategory.getParent());
+	}
 }
