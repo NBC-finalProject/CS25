@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ActiveProfiles("test")
 @WebMvcTest(UserController.class)
@@ -46,6 +48,7 @@ class UserControllerTest {
     @Test
     @DisplayName("유저 탈퇴 요청 성공 시 204 반환")
     @WithMockUser(username = "tofha")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteUser_success() throws Exception {
         // given
         AuthUser mockUser = mock(AuthUser.class);
