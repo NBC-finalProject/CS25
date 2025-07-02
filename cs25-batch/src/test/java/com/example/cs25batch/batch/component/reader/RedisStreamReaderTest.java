@@ -24,7 +24,7 @@ import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-@ExtendWith(MockitoExtension .class)
+@ExtendWith(MockitoExtension.class)
 class RedisStreamReaderTest {
     @Mock
     private StringRedisTemplate redisTemplate;
