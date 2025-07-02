@@ -4,7 +4,6 @@ import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25service.domain.admin.service.QuizCategoryAdminService;
 import com.example.cs25service.domain.quiz.dto.QuizCategoryRequestDto;
 import com.example.cs25service.domain.quiz.dto.QuizCategoryResponseDto;
-import com.example.cs25service.domain.quiz.service.QuizCategoryService;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +24,7 @@ public class QuizCategoryAdminController {
 
     private final QuizCategoryAdminService quizCategoryService;
 
-    @PostMapping()
+    @PostMapping
     public ApiResponse<String> createQuizCategory(
         @Valid @RequestBody QuizCategoryRequestDto request,
         @AuthenticationPrincipal AuthUser authUser

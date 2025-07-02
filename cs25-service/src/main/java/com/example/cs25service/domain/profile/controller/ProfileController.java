@@ -24,30 +24,31 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
-    public ApiResponse<ProfileResponseDto> getProfile(@AuthenticationPrincipal AuthUser authUser){
+    public ApiResponse<ProfileResponseDto> getProfile(
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
         return new ApiResponse<>(200, profileService.getProfile(authUser));
     }
 
     @GetMapping("/subscription")
     public ApiResponse<UserSubscriptionResponseDto> getUserSubscription(
-            @AuthenticationPrincipal AuthUser authUser
+        @AuthenticationPrincipal AuthUser authUser
     ) {
         return new ApiResponse<>(200, profileService.getUserSubscription(authUser));
     }
 
     @GetMapping("/wrong-quiz")
     public ApiResponse<ProfileWrongQuizResponseDto> getWrongQuiz(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ){
-
+        @AuthenticationPrincipal AuthUser authUser,
+        @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         return new ApiResponse<>(200, profileService.getWrongQuiz(authUser, pageable));
     }
 
     @GetMapping("/correct-rate")
     public ApiResponse<CategoryUserAnswerRateResponse> getCorrectRateByCategory(
-            @AuthenticationPrincipal AuthUser authUser
-    ){
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
         return new ApiResponse<>(200, profileService.getUserQuizAnswerCorrectRate(authUser));
     }
 }

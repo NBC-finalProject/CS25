@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.subscription.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
@@ -17,10 +19,12 @@ import com.example.cs25entity.domain.subscription.entity.DayOfWeek;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.entity.SubscriptionPeriod;
 import com.example.cs25entity.domain.subscription.exception.SubscriptionException;
+import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
@@ -108,10 +112,10 @@ class SubscriptionServiceTest {
     void getSubscription_success() {
         // given
         String subscriptionId = "id";
-        given(subscriptionRepository.findBySerialId(subscriptionId))
-            .willReturn(Optional.of(subscription));
 
         // when
+        when(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId))
+            .thenReturn(subscription);
         SubscriptionInfoDto result = subscriptionService.getSubscription(subscriptionId);
 
         // then
@@ -127,12 +131,13 @@ class SubscriptionServiceTest {
     void getSubscription_notFound() {
         // given
         String subscriptionId = "id";
-        given(subscriptionRepository.findBySerialId(subscriptionId))
-            .willReturn(Optional.empty());
+        given(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId))
+            .willThrow(new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
         // when & then
-        assertThrows(QuizException.class,
-            () -> subscriptionService.getSubscription(subscriptionId));
+        assertThatThrownBy(() -> subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId))
+            .isInstanceOf(SubscriptionException.class)
+            .hasMessageContaining(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR.getMessage());
     }
 
     @Test
@@ -141,8 +146,8 @@ class SubscriptionServiceTest {
         // given
         given(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
             .willReturn(quizCategory);
-        given(userRepository.findBySerialId("user-serial-id"))
-            .willReturn(Optional.of(user));
+        given(userRepository.findBySerialIdOrElseThrow("user-serial-id"))
+            .willReturn(user);
         given(subscriptionRepository.save(any(Subscription.class)))
             .willAnswer(invocation -> {
                 Subscription savedSubscription = invocation.getArgument(0);
@@ -232,8 +237,8 @@ class SubscriptionServiceTest {
 
         given(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
             .willReturn(quizCategory);
-        given(userRepository.findBySerialId("user-serial-id"))
-            .willReturn(Optional.of(userWithSubscription));
+        given(userRepository.findBySerialIdOrElseThrow("user-serial-id"))
+            .willReturn(userWithSubscription);
 
         // when & then
         SubscriptionException ex = assertThrows(SubscriptionException.class,
@@ -245,8 +250,8 @@ class SubscriptionServiceTest {
     @DisplayName("구독 정보 업데이트 성공")
     void updateSubscription_success() {
         // given
-        given(subscriptionRepository.findBySerialId("id"))
-            .willReturn(Optional.of(subscription));
+        given(subscriptionRepository.findBySerialIdOrElseThrow("id"))
+            .willReturn(subscription);
         given(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
             .willReturn(quizCategory);
 
@@ -276,8 +281,8 @@ class SubscriptionServiceTest {
             .active(true)
             .build();
 
-        given(subscriptionRepository.findBySerialId("id"))
-            .willReturn(Optional.of(overSubscription));
+        given(subscriptionRepository.findBySerialIdOrElseThrow("id"))
+            .willReturn(overSubscription);
         given(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
             .willReturn(quizCategory);
 
@@ -334,8 +339,8 @@ class SubscriptionServiceTest {
         // given
         given(quizCategoryRepository.findByCategoryTypeOrElseThrow("BACKEND"))
             .willReturn(quizCategory);
-        given(userRepository.findBySerialId("user-serial-id"))
-            .willReturn(Optional.empty());
+        given(userRepository.findBySerialIdOrElseThrow("user-serial-id"))
+            .willThrow(new UserException(UserExceptionCode.NOT_FOUND_USER));
 
         // when & then
         UserException ex = assertThrows(UserException.class,

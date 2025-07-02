@@ -20,7 +20,6 @@ import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.service.SubscriptionService;
 import java.time.LocalDate;
 import java.util.EnumSet;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,8 +69,8 @@ class UserServiceTest {
             ReflectionTestUtils.setField(user, "id", 1L);
             ReflectionTestUtils.setField(user, "serialId", "sub-uuid-1");
 
-            when(userRepository.findBySerialId(subscription.getSerialId())).thenReturn(
-                Optional.of(user));
+            when(userRepository.findBySerialIdOrElseThrow(subscription.getSerialId()))
+                .thenReturn(user);
 
             //when
             userService.disableUser(mockAuthUser);
@@ -95,7 +94,8 @@ class UserServiceTest {
             ReflectionTestUtils.setField(user, "id", 2L);
             ReflectionTestUtils.setField(user, "serialId", "sub-uuid-1");
 
-            when(userRepository.findBySerialId("sub-uuid-1")).thenReturn(Optional.of(user));
+            when(userRepository.findBySerialIdOrElseThrow("sub-uuid-1"))
+                .thenReturn(user);
 
             // when
             userService.disableUser(mockAuthUser);
@@ -109,7 +109,8 @@ class UserServiceTest {
         @DisplayName("유저가 존재하지 않으면 예외를 던진다.")
         void noUser_throwException() {
             // given
-            when(userRepository.findBySerialId("sub-uuid-1")).thenReturn(Optional.empty());
+            when(userRepository.findBySerialIdOrElseThrow("sub-uuid-1"))
+                .thenThrow(new UserException(UserExceptionCode.NOT_FOUND_USER));
 
             // when & then
             assertThatThrownBy(() -> userService.disableUser(mockAuthUser))

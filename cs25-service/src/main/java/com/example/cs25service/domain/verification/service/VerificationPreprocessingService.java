@@ -35,8 +35,7 @@ public class VerificationPreprocessingService {
         }
 
         if (authUser != null) {
-            User user = userRepository.findBySerialId(authUser.getSerialId())
-                .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
+            User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
 
             if (user.getSubscription() != null) {
                 throw new UserException(

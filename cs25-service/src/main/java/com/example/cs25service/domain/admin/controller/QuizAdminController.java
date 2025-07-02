@@ -30,12 +30,18 @@ public class QuizAdminController {
 
     private final QuizAdminService quizAdminService;
 
+    /**
+     * 문제 JSON 형식 업로드 컨트롤러
+     * @param file 파일 객체
+     * @param categoryType 카테고리 타입
+     * @param formatType 포맷 타입
+     * @return 상태 텍스트를 반환
+     */
     @PostMapping("/upload")
     public ApiResponse<String> uploadQuizByJsonFile(
         @RequestParam("file") MultipartFile file,
         @RequestParam("categoryType") String categoryType,
-        @RequestParam("formatType") QuizFormatType formatType,
-        @AuthenticationPrincipal AuthUser authUser
+        @RequestParam("formatType") QuizFormatType formatType
     ) {
         if (file.isEmpty()) {
             return new ApiResponse<>(400, "파일이 비어있습니다.");
@@ -50,7 +56,12 @@ public class QuizAdminController {
         return new ApiResponse<>(200, "문제 등록 성공");
     }
 
-    //GET	관리자 문제 목록 조회 (기본값: 비추천 오름차순)	/admin/quizzes
+    /**
+     * 관리자 문제 목록 조회 컨트롤러 (기본값: 비추천/오름차순)
+     * @param page 페이징 객체
+     * @param size 몇개씩 불러올지
+     * @return 문제 목록 DTO를 반환
+     */
     @GetMapping
     public ApiResponse<Page<QuizDetailDto>> getQuizDetails(
         @RequestParam(defaultValue = "1") int page,
@@ -59,7 +70,11 @@ public class QuizAdminController {
         return new ApiResponse<>(200, quizAdminService.getAdminQuizDetails(page, size));
     }
 
-    //GET	관리자 문제 상세 조회	/admin/quizzes/{quizId}
+    /**
+     * 관리자 문제 상세 조회 컨트롤러
+     * @param quizId 문제 id
+     * @return 문제 목록 DTO를 반환
+     */
     @GetMapping("/{quizId}")
     public ApiResponse<QuizDetailDto> getQuizDetail(
         @Positive @PathVariable(name = "quizId") Long quizId
@@ -67,8 +82,11 @@ public class QuizAdminController {
         return new ApiResponse<>(200, quizAdminService.getAdminQuizDetail(quizId));
     }
 
-
-    //POST	관리자 문제 등록	/admin/quizzes
+    /**
+     * 관리자 문제 등록 컨트롤러
+     * @param requestDto 요청 DTO
+     * @return 등록한 문제 id를 반환
+     */
     @PostMapping
     public ApiResponse<Long> createQuiz(
         @RequestBody QuizCreateRequestDto requestDto
@@ -76,7 +94,12 @@ public class QuizAdminController {
         return new ApiResponse<>(201, quizAdminService.createQuiz(requestDto));
     }
 
-    //PATCH	관리자 문제 수정	/admin/quizzes/{quizId}
+    /**
+     * 관리자 문제 수정 컨트롤러
+     * @param quizId 문제 id
+     * @param requestDto 요청 DTO
+     * @return 수정한 문제 DTO를 반환
+     */
     @PatchMapping("/{quizId}")
     public ApiResponse<QuizDetailDto> updateQuiz(
         @Positive @PathVariable(name = "quizId") Long quizId,
@@ -85,7 +108,11 @@ public class QuizAdminController {
         return new ApiResponse<>(200, quizAdminService.updateQuiz(quizId, requestDto));
     }
 
-    //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
+    /**
+     * 관리자 문제 삭제 컨트롤러
+     * @param quizId 문제 id
+     * @return 반환값 없음
+     */
     @DeleteMapping("/{quizId}")
     public ApiResponse<Void> deleteQuiz(
         @Positive @PathVariable(name = "quizId") Long quizId
