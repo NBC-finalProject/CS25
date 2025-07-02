@@ -49,8 +49,7 @@ public class QuizAdminService {
     @Transactional
     public void uploadQuizJson(
         MultipartFile file,
-        String categoryType,
-        QuizFormatType formatType
+        String categoryType
     ) {
 
         try {
@@ -92,7 +91,7 @@ public class QuizAdminService {
                     }
 
                     return Quiz.builder()
-                        .type(formatType)
+                        .type(QuizFormatType.valueOf(dto.getType()))
                         .question(dto.getQuestion())
                         .choice(dto.getChoice())
                         .answer(dto.getAnswer())

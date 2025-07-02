@@ -34,7 +34,6 @@ public class QuizAdminController {
     public ApiResponse<String> uploadQuizByJsonFile(
         @RequestParam("file") MultipartFile file,
         @RequestParam("categoryType") String categoryType,
-        @RequestParam("formatType") QuizFormatType formatType,
         @AuthenticationPrincipal AuthUser authUser
     ) {
         if (file.isEmpty()) {
@@ -46,7 +45,7 @@ public class QuizAdminController {
             return new ApiResponse<>(400, "JSON 파일만 업로드 가능합니다.");
         }
 
-        quizAdminService.uploadQuizJson(file, categoryType, formatType);
+        quizAdminService.uploadQuizJson(file, categoryType);
         return new ApiResponse<>(200, "문제 등록 성공");
     }
 
