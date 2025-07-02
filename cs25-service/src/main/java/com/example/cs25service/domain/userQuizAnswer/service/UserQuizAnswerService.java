@@ -38,7 +38,8 @@ public class UserQuizAnswerService {
     private final SubscriptionRepository subscriptionRepository;
 
     /**
-     * 사용자의 퀴즈 답변을 저장하는 메서드 중복 답변을 방지하고 사용자 정보와 함께 답변을 저장
+     * 사용자의 퀴즈 답변을 저장하는 메서드
+     * 중복 답변을 방지하고 사용자 정보와 함께 답변을 저장
      *
      * @param quizSerialId 퀴즈 시리얼 ID (UUID)
      * @param requestDto   사용자 답변 요청 DTO
@@ -48,8 +49,7 @@ public class UserQuizAnswerService {
      * @throws UserQuizAnswerException 중복 답변인 경우
      */
     @Transactional
-    public UserQuizAnswerResponseDto submitAnswer(String quizSerialId,
-        UserQuizAnswerRequestDto requestDto) {
+    public UserQuizAnswerResponseDto submitAnswer(String quizSerialId, UserQuizAnswerRequestDto requestDto) {
 
         Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(
             requestDto.getSubscriptionId());
@@ -65,11 +65,13 @@ public class UserQuizAnswerService {
             .existsByQuizIdAndSubscriptionId(quiz.getId(), subscription.getId());
 
         // 이미 답변했으면
-        if (isDuplicate) {
+        if(isDuplicate) {
             UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId())
-                .orElseThrow(() -> new UserQuizAnswerException(
-                    UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
+                .orElseThrow(()-> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
+
+            // 유효한 답변객체인지 검증
+            validateUserQuizAnswer(userQuizAnswer);
 
             // 유효한 답변객체인지 검증
             validateUserQuizAnswer(userQuizAnswer);
@@ -113,19 +115,18 @@ public class UserQuizAnswerService {
     }
 
     /**
-     * 사용자의 퀴즈 답변을 채점하고 결과를 반환하는 메서드 객관식과 주관식 문제를 모두 지원하며, 회원인 경우 점수를 업데이트
-     *
+     * 사용자의 퀴즈 답변을 채점하고 결과를 반환하는 메서드
+     * 객관식과 주관식 문제를 모두 지원하며, 회원인 경우 점수를 업데이트
+     * 
      * @param userQuizAnswerId 사용자 퀴즈 답변 ID
      * @return 채점 결과를 포함한 응답 DTO
      * @throws UserQuizAnswerException 답변을 찾을 수 없는 경우
      */
     @Transactional
     public UserQuizAnswerResponseDto evaluateAnswer(Long userQuizAnswerId) {
-        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findWithQuizAndUserById(
-                userQuizAnswerId)
-            .orElseThrow(
-                () -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
-            );
+        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findWithQuizAndUserById(userQuizAnswerId)
+            .orElseThrow(() -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
+        );
         Quiz quiz = userQuizAnswer.getQuiz();
 
         // 정답인지 채점하고 업데이트
@@ -142,8 +143,9 @@ public class UserQuizAnswerService {
     }
 
     /**
-     * 특정 퀴즈의 각 선택지별 선택률을 계산하는 메서드 모든 사용자의 답변을 집계하여 통계 정보를 반환
-     *
+     * 특정 퀴즈의 각 선택지별 선택률을 계산하는 메서드
+     * 모든 사용자의 답변을 집계하여 통계 정보를 반환
+     * 
      * @param quizSerialId 퀴즈 시리얼 ID
      * @return 선택지별 선택률과 총 응답 수를 포함한 응답 DTO
      * @throws QuizException 퀴즈를 찾을 수 없는 경우
@@ -173,9 +175,10 @@ public class UserQuizAnswerService {
     }
 
     /**
-     * 사용자의 답변이 정답인지 확인하고 점수를 업데이트하는 메서드 채점 로직을 실행한 후 회원인 경우 점수를 업데이트
-     *
-     * @param quiz           퀴즈 정보
+     * 사용자의 답변이 정답인지 확인하고 점수를 업데이트하는 메서드
+     * 채점 로직을 실행한 후 회원인 경우 점수를 업데이트
+     * 
+     * @param quiz 퀴즈 정보
      * @param userQuizAnswer 사용자 답변 정보
      * @return 답변 정답 여부
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
@@ -187,36 +190,39 @@ public class UserQuizAnswerService {
     }
 
     /**
-     * 퀴즈 타입에 따라 사용자 답변의 정답 여부를 채점하는 메서드 - 객관식/주관식 (score=1,3): 사용자 답변과 정답을 공백 제거하여 비교
-     *
-     * @param quiz           퀴즈 정보
+     * 퀴즈 타입에 따라 사용자 답변의 정답 여부를 채점하는 메서드
+     * - 객관식/주관식 (score=1,3): 사용자 답변과 정답을 공백 제거하여 비교
+     * 
+     * @param quiz 퀴즈 정보
      * @param userQuizAnswer 사용자 답변 정보
      * @return 답변 정답 여부 (true: 정답, false: 오답)
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
     private boolean checkAnswer(Quiz quiz, UserQuizAnswer userQuizAnswer) {
-        if (quiz.getType().getScore() == 1 || quiz.getType().getScore() == 3) {
+        if(quiz.getType().getScore() == 1 || quiz.getType().getScore() == 3){
             return userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
-        } else {
+        }else{
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
     }
 
     /**
-     * 회원 사용자의 점수를 업데이트하는 메서드 정답/오답 여부와 퀴즈 난이도에 따라 점수를 부여 - 정답: 퀴즈 타입 점수 × 난이도 경험치 - 오답: 기본 점수 1점
-     *
-     * @param user            사용자 정보 (null인 경우 비회원으로 점수 업데이트 안함)
-     * @param quiz            퀴즈 정보
+     * 회원 사용자의 점수를 업데이트하는 메서드
+     * 정답/오답 여부와 퀴즈 난이도에 따라 점수를 부여
+     * - 정답: 퀴즈 타입 점수 × 난이도 경험치
+     * - 오답: 기본 점수 1점
+     * 
+     * @param user 사용자 정보 (null인 경우 비회원으로 점수 업데이트 안함)
+     * @param quiz 퀴즈 정보
      * @param isAnswerCorrect 답변 정답 여부
      */
     private void updateUserScore(User user, Quiz quiz, boolean isAnswerCorrect) {
-        if (user != null) {
+        if(user != null){
             double updatedScore;
-            if (isAnswerCorrect) {
+            if(isAnswerCorrect){
                 // 정답: 퀴즈 타입 점수 × 난이도 경험치 획득
-                updatedScore =
-                    user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
-            } else {
+                updatedScore = user.getScore() + (quiz.getType().getScore() * quiz.getLevel().getExp());
+            }else{
                 // 오답: 참여 점수 1점 획득
                 updatedScore = user.getScore() + 1;
             }
@@ -249,14 +255,13 @@ public class UserQuizAnswerService {
      * 퀴즈객체의 타입이 서술형이고, 답변객체의 AI 피드백이 널이 아니어야 한다.
      *
      * @param userQuizAnswer 답변 객체
-     * @param quiz           퀴즈 객체
+     * @param quiz 퀴즈 객체
      * @return true/false 반환
      */
     private boolean getSubjectiveAnswerStatus(UserQuizAnswer userQuizAnswer, Quiz quiz) {
-        if (quiz.getType() == null) {
+        if(quiz.getType() == null){
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
-        return userQuizAnswer.getAiFeedback() != null && quiz.getType()
-            .equals(QuizFormatType.SUBJECTIVE);
+        return userQuizAnswer.getAiFeedback() != null && quiz.getType().equals(QuizFormatType.SUBJECTIVE);
     }
 }
