@@ -124,9 +124,8 @@ public class UserQuizAnswerService {
      */
     @Transactional
     public UserQuizAnswerResponseDto evaluateAnswer(Long userQuizAnswerId) {
-        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findWithQuizAndUserById(userQuizAnswerId)
-            .orElseThrow(() -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
-        );
+        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
+            .findWithQuizAndUserByIdOrElseThrow(userQuizAnswerId);
         Quiz quiz = userQuizAnswer.getQuiz();
 
         // 정답인지 채점하고 업데이트
