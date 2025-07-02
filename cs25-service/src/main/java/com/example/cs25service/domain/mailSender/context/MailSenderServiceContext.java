@@ -1,7 +1,6 @@
 package com.example.cs25service.domain.mailSender.context;
 
 import com.example.cs25service.domain.mailSender.MailSenderServiceStrategy;
-import com.example.cs25service.domain.mailSender.exception.MailSenderException;
 import com.example.cs25service.domain.mailSender.exception.MailSenderExceptionCode;
 
 import java.util.Map;
