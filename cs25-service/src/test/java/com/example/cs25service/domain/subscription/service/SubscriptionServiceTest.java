@@ -33,7 +33,6 @@ import com.example.cs25service.domain.subscription.dto.SubscriptionResponseDto;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.EnumSet;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -296,8 +295,8 @@ class SubscriptionServiceTest {
     @DisplayName("구독 취소 성공")
     void cancelSubscription_success() {
         // given
-        given(subscriptionRepository.findBySerialId("id"))
-            .willReturn(Optional.of(subscription));
+        given(subscriptionRepository.findBySerialIdOrElseThrow("id"))
+            .willReturn(subscription);
 
         // when
         assertDoesNotThrow(() -> subscriptionService.cancelSubscription("id"));

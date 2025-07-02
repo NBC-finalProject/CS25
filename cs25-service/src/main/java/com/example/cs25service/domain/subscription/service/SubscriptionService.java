@@ -148,7 +148,7 @@ public class SubscriptionService {
     private SubscriptionResponseDto createSubscriptionWithLogout(
         SubscriptionRequestDto requestDto, QuizCategory quizCategory
     ) {
-        // 이메일 체크
+        // 이메일 중복체크
         this.checkEmail(requestDto.getEmail());
         try {
             Subscription subscription = createAndSaveSubscription(requestDto, quizCategory);
@@ -156,7 +156,7 @@ public class SubscriptionService {
 
             return toSubscriptionResponseDto(subscription);
         } catch (DataIntegrityViolationException e) {
-            // UNIQUE 제약조건 위반 시 발생하는 예외처리
+            // 이중방어로 이메일 중복(UNIQUE 제약조건) 예외 발생시
             throw new SubscriptionException(
                 SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
         }
