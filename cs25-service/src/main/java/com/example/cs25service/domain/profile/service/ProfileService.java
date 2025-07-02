@@ -148,7 +148,6 @@ public class ProfileService {
 
             double answerRate = (double) correctAnswers / totalAnswers * 100;
             rates.put(child.getCategoryType(), answerRate);
-
         }
 
         return CategoryUserAnswerRateResponse.builder()
