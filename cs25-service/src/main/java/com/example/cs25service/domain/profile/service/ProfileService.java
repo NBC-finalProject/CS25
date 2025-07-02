@@ -77,10 +77,9 @@ public class ProfileService {
                 () -> new UserException(UserExceptionCode.NOT_FOUND_USER));
 
         // 유저 아이디로 내가 푼 문제 조회
-        Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserId(user.getId(), pageable);
+        Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserIdAndIsCorrectFalse(user.getId(), pageable);
 
         List<WrongQuizDto> wrongQuizList = page.stream()
-            .filter(answer -> !answer.getIsCorrect()) // 틀린 문제
             .map(answer -> new WrongQuizDto(
                 answer.getQuiz().getQuestion(),
                 answer.getUserAnswer(),
