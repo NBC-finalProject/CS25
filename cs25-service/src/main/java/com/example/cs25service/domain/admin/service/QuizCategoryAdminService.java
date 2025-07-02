@@ -51,7 +51,7 @@ public class QuizCategoryAdminService {
                 });
         }
 
-        quizCategory.setCategoryType(request.getCategory());
+        quizCategory.updateCategoryType(request.getCategory());
 
         if(request.getParentId() != null){
             QuizCategory parentQuizCategory = quizCategoryRepository.findByIdOrElseThrow(request.getParentId());
