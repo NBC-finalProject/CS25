@@ -13,8 +13,6 @@ import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptio
 import com.example.cs25entity.domain.subscription.repository.SubscriptionHistoryRepository;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
-import com.example.cs25entity.domain.user.exception.UserException;
-import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
@@ -67,17 +65,17 @@ public class SubscriptionService {
     /**
      * 구독정보를 생성하는 메서드
      *
-     * @param request  사용자를 통해 받은 생성할 구독 정보
+     * @param requestDto  사용자를 통해 받은 생성할 구독 정보
      * @param authUser 로그인 정보
      * @return 구독 응답 DTO를 반환
      */
     @Transactional
     public SubscriptionResponseDto createSubscription(
-        SubscriptionRequestDto request, AuthUser authUser) {
+        SubscriptionRequestDto requestDto, AuthUser authUser) {
 
         // 퀴즈 카테고리 불러오기
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
-            request.getCategory());
+            requestDto.getCategory());
 
         // 퀴즈 카테고리가 대분류인지 검증
         if (quizCategory.isChildCategory()) {
@@ -86,68 +84,10 @@ public class SubscriptionService {
 
         // 로그인을 한 경우
         if (authUser != null) {
-            User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
-
-            // 구독 정보가 없는 경우
-            if (user.getSubscription() == null) {
-                LocalDate nowDate = LocalDate.now();
-
-                Subscription subscription = subscriptionRepository.save(
-                    Subscription.builder()
-                        .email(request.getEmail())
-                        .category(quizCategory)
-                        .startDate(nowDate)
-                        .endDate(nowDate.plusMonths(request.getPeriod().getMonths()))
-                        .subscriptionType(request.getDays())
-                        .build()
-                );
-
-                createSubscriptionHistory(subscription);
-                user.updateSubscription(subscription);
-
-                return SubscriptionResponseDto.builder()
-                    .id(subscription.getId())
-                    .category(subscription.getCategory().getCategoryType())
-                    .startDate(subscription.getStartDate())
-                    .endDate(subscription.getEndDate())
-                    .subscriptionType(subscription.getSubscriptionType())
-                    .build();
-            } else {
-                // 이미 구독정보가 있으면 예외 처리
-                throw new SubscriptionException(
-                    SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
-            }
+            return createSubscriptionWithLogin(authUser, requestDto, quizCategory);
         // 비로그인일 경우
         } else {
-            // 이메일 체크
-            this.checkEmail(request.getEmail());
-            try {
-                LocalDate nowDate = LocalDate.now();
-
-                Subscription subscription = subscriptionRepository.save(
-                    Subscription.builder()
-                        .email(request.getEmail())
-                        .category(quizCategory)
-                        .startDate(nowDate)
-                        .endDate(nowDate.plusMonths(request.getPeriod().getMonths()))
-                        .subscriptionType(request.getDays())
-                        .build()
-                );
-
-                createSubscriptionHistory(subscription);
-
-                return SubscriptionResponseDto.builder()
-                    .id(subscription.getId())
-                    .category(subscription.getCategory().getCategoryType())
-                    .startDate(subscription.getStartDate())
-                    .endDate(subscription.getEndDate())
-                    .subscriptionType(subscription.getSubscriptionType())
-                    .build();
-            } catch (DataIntegrityViolationException e) {
-                // UNIQUE 제약조건 위반 시 발생하는 예외처리
-                throw new SubscriptionException(
-                    SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
-            }
+            return createSubscriptionWithLogout(requestDto, quizCategory);
         }
     }
 
@@ -158,9 +98,8 @@ public class SubscriptionService {
      * @param requestDto     사용자로부터 받은 업데이트할 구독정보
      */
     @Transactional
-    public void updateSubscription(String subscriptionId,
-        SubscriptionRequestDto requestDto) {
-
+    public void updateSubscription(String subscriptionId, SubscriptionRequestDto requestDto
+    ) {
         Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId);
         QuizCategory quizCategory = quizCategoryRepository.findByCategoryTypeOrElseThrow(
             requestDto.getCategory());
@@ -192,11 +131,102 @@ public class SubscriptionService {
      */
     @Transactional
     public void cancelSubscription(String subscriptionId) {
-        Subscription subscription = subscriptionRepository.findBySerialId(subscriptionId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(subscriptionId);
 
         subscription.updateDisable();
         createSubscriptionHistory(subscription);
+    }
+
+    /**
+     * 비로그인 유저 구독을 생성하는 메서드
+     *
+     * @param requestDto 유저로부터 받은 요청 DTO
+     * @param quizCategory 문제 분야
+     * @return 구독 응답 DTO를 반환
+     * @throws SubscriptionException 이미 구독중인 이메일이면 예외처리
+     */
+    private SubscriptionResponseDto createSubscriptionWithLogout(
+        SubscriptionRequestDto requestDto, QuizCategory quizCategory
+    ) {
+        // 이메일 체크
+        this.checkEmail(requestDto.getEmail());
+        try {
+            Subscription subscription = createAndSaveSubscription(requestDto, quizCategory);
+            createSubscriptionHistory(subscription);
+
+            return toSubscriptionResponseDto(subscription);
+        } catch (DataIntegrityViolationException e) {
+            // UNIQUE 제약조건 위반 시 발생하는 예외처리
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+        }
+    }
+
+    /**
+     * 로그인 유저 구독을 생성하는 메서드
+     *
+     * @param authUser 로그인 유저 정보
+     * @param request 유저로부터 받은 요청 DTO
+     * @param quizCategory 문제 분야
+     * @return 구독 응답 DTO를 반환
+     * @throws SubscriptionException 구독정보가 있으면 예외처리
+     */
+    private SubscriptionResponseDto createSubscriptionWithLogin(
+        AuthUser authUser, SubscriptionRequestDto request, QuizCategory quizCategory
+    ) {
+        User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
+
+        // 구독 정보가 없어야 함
+        if (user.getSubscription() == null) {
+            // 구독 및 히스토리 생성
+            Subscription subscription = createAndSaveSubscription(request, quizCategory);
+            createSubscriptionHistory(subscription);
+
+            // 로그인 유저 구독정보 업데이트
+            user.updateSubscription(subscription);
+
+            return toSubscriptionResponseDto(subscription);
+        } else {
+            throw new SubscriptionException(
+                SubscriptionExceptionCode.DUPLICATE_SUBSCRIPTION_EMAIL_ERROR);
+        }
+    }
+
+    /**
+     * 요청 DTO로 구독을 생성하고 반환하는 메서드
+     *
+     * @param requestDto 요청 DTO
+     * @param quizCategory 구독한 문제 분야
+     * @return 구독 객체를 반환
+     */
+    private Subscription createAndSaveSubscription(SubscriptionRequestDto requestDto, QuizCategory quizCategory) {
+        LocalDate nowDate = LocalDate.now();
+
+        return subscriptionRepository.save(
+            Subscription.builder()
+                .email(requestDto.getEmail())
+                .category(quizCategory)
+                .startDate(nowDate)
+                .endDate(nowDate.plusMonths(requestDto.getPeriod().getMonths()))
+                .subscriptionType(requestDto.getDays())
+                .build()
+        );
+    }
+
+    /**
+     * 구독객체로 응답 DTO를 생성하고 반환하는 메서드
+     *
+     * @param subscription 구독 객체
+     * @return 구독 응답 DTO를 반환
+     */
+    private SubscriptionResponseDto toSubscriptionResponseDto(Subscription subscription) {
+        return SubscriptionResponseDto.builder()
+            .id(subscription.getId())
+            .category(subscription.getCategory().getCategoryType())
+            .startDate(subscription.getStartDate())
+            .endDate(subscription.getEndDate())
+            .subscriptionType(subscription.getSubscriptionType())
+            .build();
     }
 
     /**

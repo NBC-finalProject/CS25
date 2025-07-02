@@ -7,11 +7,9 @@ import java.time.LocalDate;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @Builder
-@RequiredArgsConstructor
 @JsonPropertyOrder({"category", "email", "days", "active", "startDate", "endDate", "period"})
 public class SubscriptionInfoDto {
     private final String category; // 구독 카테고리
