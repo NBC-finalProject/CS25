@@ -1,8 +1,8 @@
 package com.example.cs25service.domain.userQuizAnswer.controller;
 
-import com.example.cs25service.domain.userQuizAnswer.dto.CheckSimpleAnswerResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.service.UserQuizAnswerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,10 +46,8 @@ class UserQuizAnswerControllerTest {
         //given
         String quizSerialId = "uuid_quiz";
 
-        Long userQuizAnswerId = 1L;
-
         given(userQuizAnswerService.submitAnswer(eq(quizSerialId), any(UserQuizAnswerRequestDto.class)))
-                .willReturn(userQuizAnswerId);
+                .willReturn(any(UserQuizAnswerResponseDto.class));
 
         //when & then
         mockMvc.perform(MockMvcRequestBuilders
@@ -74,7 +72,7 @@ class UserQuizAnswerControllerTest {
         //given
         Long userQuizAnswerId = 1L;
 
-        given(userQuizAnswerService.evaluateAnswer(eq(userQuizAnswerId))).willReturn(any(CheckSimpleAnswerResponseDto.class));
+        given(userQuizAnswerService.evaluateAnswer(eq(userQuizAnswerId))).willReturn(any(UserQuizAnswerResponseDto.class));
 
         //when & then
         mockMvc.perform(MockMvcRequestBuilders
