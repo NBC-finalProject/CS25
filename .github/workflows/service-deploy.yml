@@ -43,6 +43,8 @@ jobs:
           echo "CHROMA_HOST=${{ secrets.CHROMA_HOST }}" >> .env
           echo "FRONT_END_URI=${{ secrets.FRONT_END_URI }}" >> .env
           echo "CLAUDE_API_KEY=${{ secrets.CLAUDE_API_KEY }}" >> .env
+          echo "AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}" >> .env
+          echo "AWS_SES_SECRET_KEY=${{ secrets.AWS_SES_SECRET_KEY }}" >> .env
 
 
       - name: Upload .env to EC2
