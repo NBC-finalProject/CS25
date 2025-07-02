@@ -19,8 +19,8 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'com.h2database:h2'
 
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
     // ai
     implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma:1.0.0'
@@ -29,7 +29,14 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
 
+    //JavaMailSender
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
 
+    //AWS SES
+    implementation platform("software.amazon.awssdk:bom:2.25.39")
+    implementation 'software.amazon.awssdk:sesv2'
+    implementation 'software.amazon.awssdk:netty-nio-client'
+    implementation 'software.amazon.awssdk:auth'
     // Jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6' //service
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.6' //service

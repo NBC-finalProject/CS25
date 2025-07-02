@@ -42,7 +42,7 @@ class QuizCategoryAdminServiceTest {
             .category("BACKEND")
             .build();
 
-        when(quizCategoryRepository.findByCategoryType("BACKEND")).thenReturn(Optional.empty());
+        when(quizCategoryRepository.existsByCategoryType("BACKEND")).thenReturn(false);
 
         //when
         quizCategoryService.createQuizCategory(quizCategoryRequestDto);
@@ -54,7 +54,7 @@ class QuizCategoryAdminServiceTest {
     @Test
     @DisplayName("대분류 카테고리가 있을 때, 소분류 퀴즈 카테고리 생성 성공")
     void createQuizCategory_withParent_success() {
-        //given
+        // given
         QuizCategory parentCategory = QuizCategory.builder()
             .categoryType("BACKEND")
             .build();
@@ -64,13 +64,13 @@ class QuizCategoryAdminServiceTest {
             .parentId(1L)
             .build();
 
-        when(quizCategoryRepository.findByCategoryType("DATABASE")).thenReturn(Optional.empty());
-        when(quizCategoryRepository.findById(1L)).thenReturn(Optional.of(parentCategory));
+        when(quizCategoryRepository.existsByCategoryType("DATABASE")).thenReturn(false);
+        when(quizCategoryRepository.findByIdOrElseThrow(1L)).thenReturn(parentCategory);
 
-        //when
+        // when
         quizCategoryService.createQuizCategory(quizCategoryRequestDto);
 
-        //then
+        // then
         verify(quizCategoryRepository).save(any(QuizCategory.class));
     }
 
@@ -79,11 +79,10 @@ class QuizCategoryAdminServiceTest {
     void createQuizCategory_alreadyExist_throwQuizException() {
         //given
         QuizCategoryRequestDto request = QuizCategoryRequestDto.builder()
-            .category("BACKEND")
+            .category("DATABASE")
             .build();
 
-        when(quizCategoryRepository.findByCategoryType("BACKEND"))
-            .thenReturn(Optional.of(mock(QuizCategory.class)));
+        when(quizCategoryRepository.existsByCategoryType("DATABASE")).thenReturn(true);
 
         //when
         QuizException ex = assertThrows(QuizException.class,
@@ -102,11 +101,9 @@ class QuizCategoryAdminServiceTest {
             .parentId(1L)
             .build();
 
-        when(quizCategoryRepository.findByCategoryType("DATABASE"))
-            .thenReturn(Optional.empty());
-
-        when(quizCategoryRepository.findById(request.getParentId()))
-            .thenReturn(Optional.empty());
+        when(quizCategoryRepository.existsByCategoryType("DATABASE")).thenReturn(false);
+        when(quizCategoryRepository.findByIdOrElseThrow(1L))
+            .thenThrow(new QuizException(QuizExceptionCode.PARENT_QUIZ_CATEGORY_NOT_FOUND_ERROR));
 
         //when
         QuizException ex = assertThrows(QuizException.class,

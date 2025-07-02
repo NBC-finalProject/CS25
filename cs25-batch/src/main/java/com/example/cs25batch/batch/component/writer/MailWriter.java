@@ -1,8 +1,7 @@
 package com.example.cs25batch.batch.component.writer;
 
 import com.example.cs25batch.batch.dto.MailDto;
-import com.example.cs25batch.batch.service.SesMailService;
-import com.example.cs25batch.context.MailSenderContext;
+import com.example.cs25batch.sender.context.MailSenderContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;

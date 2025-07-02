@@ -10,7 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.cs25entity.domain.mail.exception.CustomMailException;
-import com.example.cs25service.domain.mail.service.MailService;
+import com.example.cs25service.domain.mail.service.JavaMailService;
+import com.example.cs25service.domain.mailSender.context.MailSenderServiceContext;
 import com.example.cs25service.domain.verification.exception.VerificationException;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.MailException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class VerificationServiceTest {
@@ -36,7 +38,7 @@ class VerificationServiceTest {
     private ValueOperations<String, String> valueOperations;
 
     @Mock
-    private MailService mailService;
+    private MailSenderServiceContext mailSenderServiceContext;
 
     @InjectMocks
     private VerificationService verificationService;
@@ -52,13 +54,14 @@ class VerificationServiceTest {
             // save() 내부의 opsForValue().set(...) 방어용
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             //when(valueOperations.get("VERIFY:" + email)).thenReturn("123456");
+            ReflectionTestUtils.setField(verificationService, "strategy", "javaServiceMailSender");
         }
 
         @Test
         @DisplayName("정상적으로 인증 코드를 생성하고 이메일을 발송한다")
         void issueSuccess() throws MessagingException {
             // given
-            doNothing().when(mailService).sendVerificationCodeEmail(anyString(), anyString());
+            doNothing().when(mailSenderServiceContext).send(anyString(), anyString(), anyString());
 
             // when & then
             assertDoesNotThrow(() -> verificationService.issue(email));
@@ -67,10 +70,9 @@ class VerificationServiceTest {
         @Test
         @DisplayName("이메일 발송에 실패하면 인증 코드도 삭제되고 예외가 발생한다")
         void issueFailsAndCodeDeleted() throws MessagingException {
-            // giveㅜㅡ
+            // given
             doThrow(new MailException("실패") {
-            }).when(mailService)
-                .sendVerificationCodeEmail(eq(email), anyString());
+            }).when(mailSenderServiceContext).send(eq(email), anyString(), eq("javaServiceMailSender"));
             when(redisTemplate.delete("VERIFY:" + email)).thenReturn(true);
 
             // when & then

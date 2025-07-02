@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.verification.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -8,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.verification.dto.VerificationIssueRequest;
 import com.example.cs25service.domain.verification.dto.VerificationVerifyRequest;
 import com.example.cs25service.domain.verification.service.VerificationPreprocessingService;
@@ -51,9 +53,10 @@ class VerificationControllerTest {
         void issueVerificationCode_success() throws Exception {
             // given
             VerificationIssueRequest request = new VerificationIssueRequest("test@example.com");
+            AuthUser authUser = null;
 
             // when
-            doNothing().when(preprocessingService).isValidEmailCheck(anyString());
+            doNothing().when(preprocessingService).isValidEmailCheck(anyString(), eq(authUser));
             doNothing().when(verificationService).issue(anyString());
 
             // then

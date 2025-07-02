@@ -12,7 +12,7 @@ import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRep
 import com.example.cs25service.domain.admin.dto.request.QuizCreateRequestDto;
 import com.example.cs25service.domain.admin.dto.request.QuizUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.QuizDetailDto;
-import com.example.cs25service.domain.quiz.dto.CreateQuizDto;
+import com.example.cs25service.domain.admin.dto.request.CreateQuizDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -52,12 +52,9 @@ public class QuizAdminService {
         String categoryType,
         QuizFormatType formatType
     ) {
-
         try {
             //대분류 확인
-            QuizCategory category = quizCategoryRepository.findByCategoryType(categoryType)
-                .orElseThrow(
-                    () -> new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR));
+            QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
 
             //소분류 조회하기
             List<QuizCategory> childCategory = category.getChildren();
@@ -135,11 +132,8 @@ public class QuizAdminService {
     }
 
     @Transactional(readOnly = true)
-    //GET	관리자 문제  상세 조회	/admin/quizzes/{quizId}
     public QuizDetailDto getAdminQuizDetail(Long quizId) {
-        Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() ->
-                new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Quiz quiz = quizRepository.findByIdOrElseThrow(quizId);
 
         return QuizDetailDto.builder()
             .quizId(quiz.getId())
@@ -154,7 +148,6 @@ public class QuizAdminService {
             .build();
     }
 
-    //POST	관리자 문제 등록	/admin/quizzes
     @Transactional
     public Long createQuiz(QuizCreateRequestDto requestDto) {
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(
@@ -171,11 +164,9 @@ public class QuizAdminService {
         return quizRepository.save(newQuiz).getId();
     }
 
-    //PATCH	관리자 문제 수정	/admin/quizzes/{quizId}
     @Transactional
     public QuizDetailDto updateQuiz(@Positive Long quizId, QuizUpdateRequestDto requestDto) {
-        Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Quiz quiz = quizRepository.findByIdOrElseThrow(quizId);
 
         // 카테고리
         if (StringUtils.hasText(requestDto.getCategory())) {
@@ -231,11 +222,9 @@ public class QuizAdminService {
             .build();
     }
 
-    //DELETE	관리자 문제 삭제	/admin/quizzes/{quizId}
     @Transactional
     public void deleteQuiz(@Positive Long quizId) {
-        Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Quiz quiz = quizRepository.findByIdOrElseThrow(quizId);
 
         quiz.disableQuiz();
     }

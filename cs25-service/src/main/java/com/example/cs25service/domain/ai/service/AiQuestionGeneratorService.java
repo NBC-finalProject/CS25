@@ -7,6 +7,7 @@ import com.example.cs25entity.domain.quiz.repository.QuizCategoryRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -28,11 +29,11 @@ public class AiQuestionGeneratorService {
     @Transactional
     public Quiz generateQuestionFromContext() {
         // 1. LLM으로부터 CS 키워드 동적 생성
-        String keyword = chatClient.prompt()
-            .system(promptProvider.getKeywordSystem())
-            .user(promptProvider.getKeywordUser())
-            .call()
-            .content()
+        String keyword = Objects.requireNonNull(chatClient.prompt()
+				.system(promptProvider.getKeywordSystem())
+				.user(promptProvider.getKeywordUser())
+				.call()
+				.content())
             .trim();
 
         if (!StringUtils.hasText(keyword)) {
@@ -54,19 +55,19 @@ public class AiQuestionGeneratorService {
         }
 
         // 3. 중심 토픽 추출
-        String topic = chatClient.prompt()
-            .system(promptProvider.getTopicSystem())
-            .user(promptProvider.getTopicUser(context))
-            .call()
-            .content()
+        String topic = Objects.requireNonNull(chatClient.prompt()
+				.system(promptProvider.getTopicSystem())
+				.user(promptProvider.getTopicUser(context))
+				.call()
+				.content())
             .trim();
 
         // 4. 카테고리 분류 (BACKEND / FRONTEND)
-        String categoryType = chatClient.prompt()
-            .system(promptProvider.getCategorySystem())
-            .user(promptProvider.getCategoryUser(topic))
-            .call()
-            .content()
+        String categoryType = Objects.requireNonNull(chatClient.prompt()
+				.system(promptProvider.getCategorySystem())
+				.user(promptProvider.getCategoryUser(topic))
+				.call()
+				.content())
             .trim()
             .toUpperCase();
 
@@ -79,11 +80,11 @@ public class AiQuestionGeneratorService {
         QuizCategory category = quizCategoryRepository.findByCategoryTypeOrElseThrow(categoryType);
 
         // 5. 문제 생성 (문제, 정답, 해설)
-        String output = chatClient.prompt()
-            .system(promptProvider.getGenerateSystem())
-            .user(promptProvider.getGenerateUser(context))
-            .call()
-            .content()
+        String output = Objects.requireNonNull(chatClient.prompt()
+				.system(promptProvider.getGenerateSystem())
+				.user(promptProvider.getGenerateUser(context))
+				.call()
+				.content())
             .trim();
 
         String[] lines = output.split("\n");

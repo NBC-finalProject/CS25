@@ -32,7 +32,7 @@ public class MailConsumerAsyncStepConfig {
     public Step mailConsumerAsyncStep(
         JobRepository jobRepository,
         @Qualifier("redisConsumeReader") ItemReader<Map<String, String>> reader,
-        @Qualifier("mailMessageProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
+        @Qualifier("mailConsumerAsyncProcessor") ItemProcessor<Map<String, String>, MailDto> processor,
         @Qualifier("mailWriter") ItemWriter<MailDto> writer,
         PlatformTransactionManager transactionManager,
         MailStepLogger mailStepLogger,

@@ -35,7 +35,7 @@ public class ChunckAnalyzer {
                             }
                         }
                         // 남은 데이터 처리
-                        if (chunkBuilder.length() > 0) {
+                        if (!chunkBuilder.isEmpty()) {
                             chunkCount++;
                         }
                     }

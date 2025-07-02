@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.userQuizAnswer.service;
 
 import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
@@ -15,8 +16,9 @@ import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import com.example.cs25service.domain.userQuizAnswer.dto.*;
-
+import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
+import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerResponseDto;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,47 +40,62 @@ public class UserQuizAnswerService {
     /**
      * 사용자의 퀴즈 답변을 저장하는 메서드
      * 중복 답변을 방지하고 사용자 정보와 함께 답변을 저장
-     * 
+     *
      * @param quizSerialId 퀴즈 시리얼 ID (UUID)
-     * @param requestDto 사용자 답변 요청 DTO
+     * @param requestDto   사용자 답변 요청 DTO
      * @return 저장된 사용자 퀴즈 답변의 ID
-     * @throws SubscriptionException 구독 정보를 찾을 수 없는 경우
-     * @throws QuizException 퀴즈를 찾을 수 없는 경우
+     * @throws SubscriptionException   구독 정보를 찾을 수 없는 경우
+     * @throws QuizException           퀴즈를 찾을 수 없는 경우
      * @throws UserQuizAnswerException 중복 답변인 경우
      */
     @Transactional
-    public Long submitAnswer(String quizSerialId, UserQuizAnswerRequestDto requestDto) {
+    public UserQuizAnswerResponseDto submitAnswer(String quizSerialId, UserQuizAnswerRequestDto requestDto) {
 
-        // 구독 정보 조회
-        Subscription subscription = subscriptionRepository.findBySerialId(
-                requestDto.getSubscriptionId())
-            .orElseThrow(() -> new SubscriptionException(
-                SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
+        Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(
+            requestDto.getSubscriptionId());
 
-        // 퀴즈 조회
-        Quiz quiz = quizRepository.findBySerialId(quizSerialId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
-
-        // 중복 답변 제출 막음
-        boolean isDuplicate = userQuizAnswerRepository
-            .existsByQuizIdAndSubscriptionId(quiz.getId(), subscription.getId());
-        if (isDuplicate) {
-            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
+        // 구독 활성화 상태인지 조회
+        if (!subscription.isActive()) {
+            throw new SubscriptionException(SubscriptionExceptionCode.DISABLED_SUBSCRIPTION_ERROR);
         }
 
-        // 유저 정보 조회
-        User user = userRepository.findBySubscription(subscription).orElse(null);
+        Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizSerialId);
 
-        UserQuizAnswer answer = userQuizAnswerRepository.save(
-            UserQuizAnswer.builder()
-                .userAnswer(requestDto.getAnswer())
-                .isCorrect(null)
-                .user(user)
-                .quiz(quiz)
-                .subscription(subscription)
-                .build()
-        );
-        return answer.getId();
+        // 이미 답변했는지 여부 조회
+        boolean isDuplicate = userQuizAnswerRepository
+            .existsByQuizIdAndSubscriptionId(quiz.getId(), subscription.getId());
+
+        // 이미 답변했으면
+        if(isDuplicate) {
+            UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
+                .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId());
+
+            // 유효한 답변객체인지 검증
+            validateUserQuizAnswer(userQuizAnswer);
+
+            // 유효한 답변객체인지 검증
+            validateUserQuizAnswer(userQuizAnswer);
+
+            // 서술형 답변인지 확인
+            boolean isSubjectiveAnswer = getSubjectiveAnswerStatus(userQuizAnswer, quiz);
+
+            return toAnswerDto(userQuizAnswer, quiz, isSubjectiveAnswer);
+        }
+        // 처음 답변한 경우 답변 생성하여 저장
+        else {
+            User user = userRepository.findBySubscription(subscription).orElse(null);
+
+            UserQuizAnswer savedUserQuizAnswer = userQuizAnswerRepository.save(
+                UserQuizAnswer.builder()
+                    .userAnswer(requestDto.getAnswer())
+                    .isCorrect(null)
+                    .user(user)
+                    .quiz(quiz)
+                    .subscription(subscription)
+                    .build()
+            );
+            return toAnswerDto(savedUserQuizAnswer, quiz, isDuplicate);
+        }
     }
 
     /**
@@ -90,22 +107,22 @@ public class UserQuizAnswerService {
      * @throws UserQuizAnswerException 답변을 찾을 수 없는 경우
      */
     @Transactional
-    public CheckSimpleAnswerResponseDto evaluateAnswer(Long userQuizAnswerId) {
-        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository.findWithQuizAndUserById(userQuizAnswerId).orElseThrow(
-                () -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER)
-        );
-
+    public UserQuizAnswerResponseDto evaluateAnswer(Long userQuizAnswerId) {
+        UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
+            .findWithQuizAndUserByIdOrElseThrow(userQuizAnswerId);
         Quiz quiz = userQuizAnswer.getQuiz();
-        boolean isAnswerCorrect = getIsAnswerCorrect(quiz, userQuizAnswer);
 
+        // 정답인지 채점하고 업데이트
+        boolean isAnswerCorrect = getAnswerCorrectStatus(quiz, userQuizAnswer);
         userQuizAnswer.updateIsCorrect(isAnswerCorrect);
-        return new CheckSimpleAnswerResponseDto(
-                quiz.getQuestion(),
-                userQuizAnswer.getUserAnswer(),
-                quiz.getAnswer(),
-                quiz.getCommentary(),
-                userQuizAnswer.getIsCorrect()
-        );
+
+        return UserQuizAnswerResponseDto.builder()
+            .userQuizAnswerId(userQuizAnswerId)
+            .question(quiz.getQuestion())
+            .answer(quiz.getAnswer())
+            .commentary(quiz.getCommentary())
+            .isCorrect(userQuizAnswer.getIsCorrect())
+            .build();
     }
 
     /**
@@ -117,8 +134,7 @@ public class UserQuizAnswerService {
      * @throws QuizException 퀴즈를 찾을 수 없는 경우
      */
     public SelectionRateResponseDto calculateSelectionRateByOption(String quizSerialId) {
-        Quiz quiz = quizRepository.findBySerialId(quizSerialId)
-            .orElseThrow(() -> new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
+        Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizSerialId);
         List<UserAnswerDto> answers = userQuizAnswerRepository.findUserAnswerByQuizId(quiz.getId());
 
         //보기별 선택 수 집계
@@ -142,6 +158,26 @@ public class UserQuizAnswerService {
     }
 
     /**
+     * 답변 DTO를 생성하여 반환하는 메서드
+     * @param userQuizAnswer 답변 객체
+     * @param quiz 문제 객체
+     * @param isDuplicate 중복 여부
+     * @return 답변 DTO를 반환
+     */
+    private UserQuizAnswerResponseDto toAnswerDto (
+        UserQuizAnswer userQuizAnswer, Quiz quiz, boolean isDuplicate
+    ) {
+        return UserQuizAnswerResponseDto.builder()
+            .userQuizAnswerId(userQuizAnswer.getId())
+            .question(quiz.getQuestion())
+            .commentary(quiz.getCommentary())
+            .userAnswer(userQuizAnswer.getUserAnswer())
+            .answer(quiz.getAnswer())
+            .duplicated(isDuplicate)
+            .build();
+    }
+
+    /**
      * 사용자의 답변이 정답인지 확인하고 점수를 업데이트하는 메서드
      * 채점 로직을 실행한 후 회원인 경우 점수를 업데이트
      * 
@@ -150,7 +186,7 @@ public class UserQuizAnswerService {
      * @return 답변 정답 여부
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
-    private boolean getIsAnswerCorrect(Quiz quiz, UserQuizAnswer userQuizAnswer) {
+    private boolean getAnswerCorrectStatus(Quiz quiz, UserQuizAnswer userQuizAnswer) {
         boolean isAnswerCorrect = checkAnswer(quiz, userQuizAnswer);
         updateUserScore(userQuizAnswer.getUser(), quiz, isAnswerCorrect);
         return isAnswerCorrect;
@@ -158,8 +194,7 @@ public class UserQuizAnswerService {
 
     /**
      * 퀴즈 타입에 따라 사용자 답변의 정답 여부를 채점하는 메서드
-     * - 객관식 (score=1): 사용자 답변과 정답의 첫 글자를 비교
-     * - 주관식 (score=3): 사용자 답변과 정답을 공백 제거하여 비교
+     * - 객관식/주관식 (score=1,3): 사용자 답변과 정답을 공백 제거하여 비교
      * 
      * @param quiz 퀴즈 정보
      * @param userQuizAnswer 사용자 답변 정보
@@ -167,11 +202,7 @@ public class UserQuizAnswerService {
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
     private boolean checkAnswer(Quiz quiz, UserQuizAnswer userQuizAnswer) {
-        if(quiz.getType().getScore() == 1){
-            // 객관식: 첫 글자만 비교 (예: "1" vs "1번")
-            return userQuizAnswer.getUserAnswer().equals(quiz.getAnswer().substring(0, 1));
-        }else if(quiz.getType().getScore() == 3){
-            // 주관식: 전체 답변을 공백 제거하여 비교
+        if(quiz.getType().getScore() == 1 || quiz.getType().getScore() == 3){
             return userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
         }else{
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
@@ -200,5 +231,40 @@ public class UserQuizAnswerService {
             }
             user.updateScore(updatedScore);
         }
+    }
+
+    /**
+     * 답변 객체를 검증하는 메서드
+     * @param userQuizAnswer 답변 객체
+     */
+    private void validateUserQuizAnswer(UserQuizAnswer userQuizAnswer) {
+        if(userQuizAnswer.getUser() == null){
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+        if(userQuizAnswer.getQuiz() == null){
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+        if(userQuizAnswer.getSubscription() == null){
+            throw new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR);
+        }
+        // AI 피드백 작성 도중에 종료하는 경우 & 비정상적인 종료 (aiFeedback or isCorrect null)
+        if(userQuizAnswer.getAiFeedback() == null || userQuizAnswer.getIsCorrect() == null){
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.INVALID_ANSWER);
+        }
+    }
+
+    /**
+     * 서술형에 대한 답변인지 확인하는 메서드
+     * 퀴즈객체의 타입이 서술형이고, 답변객체의 AI 피드백이 널이 아니어야 한다.
+     *
+     * @param userQuizAnswer 답변 객체
+     * @param quiz 퀴즈 객체
+     * @return true/false 반환
+     */
+    private boolean getSubjectiveAnswerStatus(UserQuizAnswer userQuizAnswer, Quiz quiz) {
+        if(quiz.getType() == null){
+            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+        }
+        return userQuizAnswer.getAiFeedback() != null && quiz.getType().equals(QuizFormatType.SUBJECTIVE);
     }
 }

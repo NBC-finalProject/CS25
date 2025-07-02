@@ -36,14 +36,12 @@ public class SubscriptionAdminService {
     }
 
     /**
-     * 구독자 개별 조회
-     * @param subscriptionId
-     * @return
+     * 구독자 개별 조회 메서드
+     * @param subscriptionId 구독자 id
+     * @return 구독응답 DTO를 반환
      */
     public SubscriptionPageResponseDto getSubscription(Long subscriptionId) {
-        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(
-                () -> new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR)
-        );
+        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
 
         return SubscriptionPageResponseDto.builder()
                 .id(subscription.getId())
@@ -56,13 +54,11 @@ public class SubscriptionAdminService {
     }
 
     /**
-     * 구독 취소
-     * @param subscriptionId
+     * 구독 취소하는 메서드
+     * @param subscriptionId 구독자 id
      */
     public void deleteSubscription(Long subscriptionId) {
-        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(
-                () -> new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR)
-        );
+        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
         subscription.updateDisable();
     }
 }

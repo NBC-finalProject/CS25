@@ -39,18 +39,20 @@ public class ProfileService {
     private final SubscriptionHistoryRepository subscriptionHistoryRepository;
     private final QuizCategoryRepository quizCategoryRepository;
 
-    // 구독 정보 가져오기
+    /**
+     * 로그인 유저 구독 정보 조회하는 메서드
+     * @param authUser 로그인 유저
+     * @return 구독정보 DTO를 반환
+     */
     public UserSubscriptionResponseDto getUserSubscription(AuthUser authUser) {
 
         // 유저 정보 조회
-        User user = userRepository.findBySerialId(authUser.getSerialId())
-            .orElseThrow(() ->
-                new UserException(UserExceptionCode.NOT_FOUND_USER));
+        User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
 
         // 구독 아이디 조회
         Long subscriptionId = user.getSubscription().getId();
 
-        //
+        // 구독 정보
         SubscriptionInfoDto subscriptionInfo = subscriptionService.getSubscription(
             user.getSubscription().getSerialId());
 
@@ -70,18 +72,20 @@ public class ProfileService {
             .build();
     }
 
-    // 유저 틀린 문제 다시보기
+    /**
+     * 로그인 유저의 틀린문제 조회 메서드
+     * @param authUser 로그인 유저 정보
+     * @param pageable 페이징 객체
+     * @return 틀린문제 DTO를 반환
+     */
     public ProfileWrongQuizResponseDto getWrongQuiz(AuthUser authUser, Pageable pageable) {
 
-        User user = userRepository.findBySerialId(authUser.getSerialId())
-            .orElseThrow(() ->
-                new UserException(UserExceptionCode.NOT_FOUND_USER));
+        User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
 
         // 유저 아이디로 내가 푼 문제 조회
-        Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserId(user.getId(), pageable);
+        Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserIdAndIsCorrectFalse(user.getId(), pageable);
 
         List<WrongQuizDto> wrongQuizList = page.stream()
-            .filter(answer -> !answer.getIsCorrect()) // 틀린 문제
             .map(answer -> new WrongQuizDto(
                 answer.getQuiz().getQuestion(),
                 answer.getUserAnswer(),
@@ -90,23 +94,26 @@ public class ProfileService {
             ))
             .collect(Collectors.toList());
 
-        return new ProfileWrongQuizResponseDto(authUser.getSerialId(), wrongQuizList);
+        return new ProfileWrongQuizResponseDto(authUser.getSerialId(), wrongQuizList, page);
     }
 
+    /**
+     * 프로필 정보를 조회
+     * @param authUser 로그인 정보
+     * @return 프로필 정보를 반환 (이름, 랭킹, 점수, 구독 id)
+     */
     public ProfileResponseDto getProfile(AuthUser authUser) {
 
-        User user = userRepository.findBySerialId(authUser.getSerialId()).orElseThrow(
-            () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-        );
-
-        // 랭킹
+        User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
         int myRank = userRepository.findRankByScore(user.getScore());
+
+        boolean userSubscriptionStatus = getUserSubscriptionStatus(user);
 
         return ProfileResponseDto.builder()
             .name(user.getName())
             .rank(myRank)
             .score(user.getScore())
-            .subscriptionId(user.getSubscription() == null ? null : user.getSubscription().getSerialId())
+            .subscriptionId(userSubscriptionStatus ? user.getSubscription().getSerialId() : null)
             .build();
     }
 
@@ -114,9 +121,12 @@ public class ProfileService {
     public CategoryUserAnswerRateResponse getUserQuizAnswerCorrectRate(AuthUser authUser) {
 
         //유저 검증
-        User user = userRepository.findBySerialId(authUser.getSerialId()).orElseThrow(
-            () -> new UserException(UserExceptionCode.NOT_FOUND_USER)
-        );
+        User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
+
+        // 사용자에게 구독정보가 없으면 예외처리
+        if(!getUserSubscriptionStatus(user)) {
+            throw new UserException(UserExceptionCode.NOT_FOUND_SUBSCRIPTION);
+        }
 
         // 사용자에게 구독정보가 없으면 예외처리
         if(user.getSubscription() == null) {
@@ -149,11 +159,19 @@ public class ProfileService {
 
             double answerRate = (double) correctAnswers / totalAnswers * 100;
             rates.put(child.getCategoryType(), answerRate);
-
         }
 
         return CategoryUserAnswerRateResponse.builder()
             .correctRates(rates)
             .build();
+    }
+
+    /**
+     * 유저의 구독정보가 있는지 확인하는 메서드
+     * @param user 유저 정보
+     * @return 있으면 true, 없으면 false를 반환
+     */
+    private boolean getUserSubscriptionStatus(User user) {
+        return user.getSubscription() != null;
     }
 }

@@ -22,7 +22,6 @@ public class SubscriptionAdminController {
         return new ApiResponse<>(200, subscriptionAdminService.getAdminSubscriptions(page, size));
     }
 
-    // 구독자 개별 조회
     @GetMapping("/{subscriptionId}")
     public ApiResponse<SubscriptionPageResponseDto> getSubscription(
             @PathVariable Long subscriptionId
@@ -30,7 +29,6 @@ public class SubscriptionAdminController {
         return new ApiResponse<>(200, subscriptionAdminService.getSubscription(subscriptionId));
     }
 
-    // 구독자 삭제
     @PatchMapping("/{subscriptionId}")
     public ApiResponse<Void> deleteSubscription(
             @PathVariable Long subscriptionId
@@ -38,8 +36,4 @@ public class SubscriptionAdminController {
         subscriptionAdminService.deleteSubscription(subscriptionId);
         return new ApiResponse<>(200);
     }
-
-
-
-
 }

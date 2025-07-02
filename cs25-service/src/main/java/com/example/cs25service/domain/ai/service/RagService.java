@@ -21,16 +21,11 @@ public class RagService {
 
     private final VectorStore vectorStore;
 
-//    public void saveDocumentsToVectorStore(List<Document> docs) {
-//        vectorStore.add(docs);
-//        System.out.println(docs.size() + "개 문서 저장 완료");
-//    }
-
     public void saveMarkdownChunksToVectorStore() throws IOException {
         // 현재 작업 디렉터리와 폴더 절대 경로 출력
-        System.out.println("현재 작업 디렉터리: " + System.getProperty("user.dir"));
+		log.info("현재 작업 디렉터리: {}", System.getProperty("user.dir"));
         File folder = new File("data/markdowns");
-        System.out.println("폴더 절대 경로: " + folder.getAbsolutePath());
+		log.info("폴더 절대 경로: {}", folder.getAbsolutePath());
 
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".txt"));
         if (files == null) {
@@ -67,7 +62,7 @@ public class RagService {
                     }
                 }
                 // 남은 데이터 저장
-                if (chunkBuilder.length() > 0) {
+                if (!chunkBuilder.isEmpty()) {
                     Map<String, Object> metadata = new HashMap<>();
                     metadata.put("fileName", file.getName());
                     metadata.put("chunkIndex", chunkIndex);
@@ -85,10 +80,10 @@ public class RagService {
     public List<Document> searchRelevant(String query, int topK, double similarityThreshold) {
         return vectorStore.similaritySearch(
                 SearchRequest.builder()
-                        .query(query)
-                        .topK(topK)
-                        .similarityThreshold(similarityThreshold)
-                        .build()
+                    .query(query)
+                    .topK(topK)
+                    .similarityThreshold(similarityThreshold)
+                    .build()
         );
     }
 }

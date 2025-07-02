@@ -21,7 +21,6 @@ public class QuizAccuracyCalculateService {
     private final QuizAccuracyRedisRepository quizAccuracyRedisRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
 
-
     public void calculateAndCacheAllQuizAccuracies() {
         List<Quiz> quizzes = quizRepository.findAll();
 
@@ -45,5 +44,4 @@ public class QuizAccuracyCalculateService {
         log.info("총 {}개의 정답률 캐싱 완료", accuracyList.size());
         quizAccuracyRedisRepository.saveAll(accuracyList);
     }
-
 }
