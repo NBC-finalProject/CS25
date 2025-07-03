@@ -5,6 +5,8 @@ import com.example.cs25entity.domain.subscription.repository.SubscriptionReposit
 import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.entity.SocialType;
 import com.example.cs25entity.domain.user.entity.User;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25service.domain.oauth2.dto.OAuth2GithubResponse;
 import com.example.cs25service.domain.oauth2.dto.OAuth2KakaoResponse;
@@ -19,6 +21,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -32,21 +35,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
+        try {
+            OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // 서비스를 구분하는 아이디 ex) Kakao, Github ...
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        SocialType socialType = SocialType.from(registrationId);
-        String accessToken = userRequest.getAccessToken().getTokenValue();
+            // 서비스를 구분하는 아이디 ex) Kakao, Github ...
+            String registrationId = userRequest.getClientRegistration().getRegistrationId();
+            SocialType socialType = SocialType.from(registrationId);
+            String accessToken = userRequest.getAccessToken().getTokenValue();
 
-        // 서비스에서 제공받은 데이터
-        Map<String, Object> attributes = oAuth2User.getAttributes();
+            // 서비스에서 제공받은 데이터
+            Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        OAuth2Response oAuth2Response = getOAuth2Response(socialType, attributes, accessToken);
-        userRepository.validateSocialJoinEmail(oAuth2Response.getEmail(), socialType);
+            OAuth2Response oAuth2Response = getOAuth2Response(socialType, attributes, accessToken);
+            //userRepository.validateSocialJoinEmail(oAuth2Response.getEmail(), socialType);
 
-        User loginUser = getUser(oAuth2Response);
-        return new AuthUser(loginUser);
+            User loginUser = getUser(oAuth2Response);
+            return new AuthUser(loginUser);
+        } catch (UserException e) {
+            throw new OAuth2AuthenticationException(
+                new OAuth2Error("user_exception", e.getMessage(), null), e);
+        }
     }
 
     /**
@@ -59,7 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      */
     private OAuth2Response getOAuth2Response(SocialType socialType, Map<String, Object> attributes,
         String accessToken) {
-        if(socialType == null){
+        if (socialType == null) {
             throw new OAuth2Exception(OAuth2ExceptionCode.SOCIAL_PROVIDER_NOT_FOUND);
         }
         return switch (socialType) {
@@ -86,7 +94,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // 기존 User 조회
-        User existingUser = userRepository.findByEmail(email).orElse(null);
+        User existingUser = userRepository.validateSocialJoinEmail(email, provider).orElse(null);
 
         // 기존 유저가 있다면, isActive 값 확인 후 true로 업데이트
         if (existingUser != null) {
@@ -98,6 +106,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         Subscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
+        if (subscription != null) {
+            userRepository.findBySubscription(subscription).ifPresent(user -> {
+                throw new UserException(UserExceptionCode.EMAIL_DUPLICATION);
+            });
+        }
+
         return userRepository.save(User.builder()
             .email(email)
             .name(name)

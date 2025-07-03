@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum UserExceptionCode {
-    EMAIL_DUPLICATION(false, HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
+    EMAIL_DUPLICATION(false, HttpStatus.CONFLICT, "해당 이메일로 구독을 사용중입니다. 다른 소셜 로그인을 사용해주세요."),
     EVENT_CRUD_FAILED(false, HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 값을 레디스에 읽기/저장 실패했으요"),
     LOCK_FAILED(false, HttpStatus.CONFLICT, "요청 시간 초과, 락 획득 실패"),
     INVALID_ROLE(false, HttpStatus.BAD_REQUEST, "역할 값이 잘못되었습니다."),
