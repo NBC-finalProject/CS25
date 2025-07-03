@@ -3,6 +3,7 @@ package com.example.cs25entity.domain.userQuizAnswer.repository;
 import com.example.cs25entity.domain.quiz.entity.QQuiz;
 import com.example.cs25entity.domain.quiz.entity.QQuizCategory;
 import com.example.cs25entity.domain.subscription.entity.QSubscription;
+import com.example.cs25entity.domain.user.entity.QUser;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.QUserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
@@ -92,18 +93,21 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
         QUserQuizAnswer userQuizAnswer = QUserQuizAnswer.userQuizAnswer;
         QQuiz quiz = QQuiz.quiz;
         QSubscription subscription = QSubscription.subscription;
+        QUser user = QUser.user;
 
-        UserQuizAnswer result = queryFactory.selectFrom(userQuizAnswer)
-            .join(userQuizAnswer.quiz, quiz)
-            .join(userQuizAnswer.subscription, subscription)
+        UserQuizAnswer result = queryFactory
+            .selectFrom(userQuizAnswer)
+            .leftJoin(userQuizAnswer.quiz, quiz).fetchJoin()
+            .leftJoin(userQuizAnswer.subscription, subscription).fetchJoin()
+            .leftJoin(userQuizAnswer.user, user).fetchJoin()
             .where(
                 quiz.serialId.eq(quizSerialId),
                 subscription.serialId.eq(subSerialId)
             )
             .fetchOne();
 
-        if (result == null) {
-            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
+        if(result == null) {
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER);
         }
         return result;
     }
