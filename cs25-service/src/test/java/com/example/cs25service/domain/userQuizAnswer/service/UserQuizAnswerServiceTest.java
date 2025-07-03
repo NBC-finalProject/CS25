@@ -110,6 +110,7 @@ class UserQuizAnswerServiceTest {
 
         userQuizAnswer = UserQuizAnswer.builder()
                 .userAnswer("1")
+                .isCorrect(true)
                 .build();
         ReflectionTestUtils.setField(userQuizAnswer, "id", 1L);
 
@@ -126,7 +127,6 @@ class UserQuizAnswerServiceTest {
     @Test
     void submitAnswer_정상_저장된다() {
         // given
-
         String subscriptionSerialId = "uuid_subscription";
         String quizSerialId = "uuid_quiz";
 
