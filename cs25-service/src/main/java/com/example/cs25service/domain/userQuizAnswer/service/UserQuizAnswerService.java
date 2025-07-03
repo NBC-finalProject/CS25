@@ -10,6 +10,8 @@ import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptio
 import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.User;
+import com.example.cs25entity.domain.user.exception.UserException;
+import com.example.cs25entity.domain.user.exception.UserExceptionCode;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
@@ -242,7 +244,7 @@ public class UserQuizAnswerService {
      */
     private void validateDuplicatedUserAnswer(UserQuizAnswer userQuizAnswer) {
         if(userQuizAnswer.getUser() == null){
-            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
+            throw new UserException(UserExceptionCode.NOT_FOUND_USER);
         }
         if(userQuizAnswer.getQuiz() == null){
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
