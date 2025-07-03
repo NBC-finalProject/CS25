@@ -44,7 +44,7 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
             //response.sendRedirect("http://localhost:5173");
         } else {
             // 알 수 없는 오류
-            response.sendRedirect("http://localhost:5173");
+            response.sendRedirect("https://cs25.co.kr");
         }
     }
 }
