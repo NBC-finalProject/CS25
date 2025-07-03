@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.security.config;
 
 import com.example.cs25common.global.exception.ErrorResponseUtil;
+import com.example.cs25service.domain.oauth2.handler.OAuth2LoginFailureHandler;
 import com.example.cs25service.domain.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25service.domain.oauth2.service.CustomOAuth2UserService;
 import com.example.cs25service.domain.security.jwt.filter.JwtAuthenticationFilter;
@@ -32,6 +33,7 @@ public class SecurityConfig {
     private static final String[] PERMITTED_ROLES = {"USER", "ADMIN"};
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Value("${FRONT_END_URI:http://localhost:5173}")
     private String frontEndUri;
@@ -98,6 +100,7 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                     .loginPage("/login")
                     .successHandler(oAuth2LoginSuccessHandler)
+                    .failureHandler(oAuth2LoginFailureHandler)
                     .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                         .userService(customOAuth2UserService)
                     )

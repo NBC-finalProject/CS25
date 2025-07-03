@@ -21,12 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    @Query("SELECT u FROM User u LEFT JOIN FETCH u.subscription WHERE u.email = :email")
 //    Optional<User> findUserWithSubscriptionByEmail(String email);
 
-    default void validateSocialJoinEmail(String email, SocialType socialType) {
-        findByEmail(email).ifPresent(existingUser -> {
-            if (!existingUser.getSocialType().equals(socialType)) {
-                throw new UserException(UserExceptionCode.EMAIL_DUPLICATION);
-            }
-        });
+    default Optional<User> validateSocialJoinEmail(String email, SocialType socialType) {
+        return findByEmail(email)
+            .filter(existingUser -> existingUser.getSocialType().equals(socialType));
     }
 
     Optional<User> findBySubscription(Subscription subscription);

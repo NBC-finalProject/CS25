@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -44,6 +46,7 @@ public class UserAdminController {
     }
 
     //DELETE	관리자 사용자(회원) 탈퇴	/admin/users/{userId}
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{userId}")
     public ApiResponse<Void> disableUser(
         @Positive @PathVariable(name = "userId") Long userId
@@ -54,6 +57,7 @@ public class UserAdminController {
     }
 
     //PATCH	관리자 사용자(회원) 구독 상태 변경	/admin/users/{userId}/subscriptions
+
     @PatchMapping("/{userId}/subscriptions")
     public ApiResponse<String> updateAdminSubscription(
         @Positive @PathVariable(name = "userId") Long userId,
@@ -64,6 +68,7 @@ public class UserAdminController {
     }
 
     //DELETE	관리자 사용자(회원) 구독 취소 	/admin/users/{userId}/subscriptions
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{userId}/subscriptions")
     public ApiResponse<Void> cancelSubscription(
         @Positive @PathVariable(name = "userId") Long userId
@@ -74,6 +79,7 @@ public class UserAdminController {
     }
 
     //PATCH  관리자의 권한 수정 /admin/users/{userId}/role
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/{userId}/role")
     public ApiResponse<Void> patchUserRole(
         @Positive @PathVariable(name = "userId") Long userId,
@@ -82,6 +88,4 @@ public class UserAdminController {
         userAdminService.patchUserRole(userId, request);
         return new ApiResponse<>(204);
     }
-
-
 }

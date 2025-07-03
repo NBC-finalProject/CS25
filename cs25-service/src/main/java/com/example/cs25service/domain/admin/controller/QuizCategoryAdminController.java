@@ -26,8 +26,7 @@ public class QuizCategoryAdminController {
 
     @PostMapping
     public ApiResponse<String> createQuizCategory(
-        @Valid @RequestBody QuizCategoryRequestDto request,
-        @AuthenticationPrincipal AuthUser authUser
+        @Valid @RequestBody QuizCategoryRequestDto request
     ) {
         quizCategoryService.createQuizCategory(request);
         return new ApiResponse<>(200, "카테고리 등록 성공");
@@ -36,16 +35,14 @@ public class QuizCategoryAdminController {
     @PutMapping("/{quizCategoryId}")
     public ApiResponse<QuizCategoryResponseDto> updateQuizCategory(
         @Valid @RequestBody QuizCategoryRequestDto request,
-        @NotNull @PathVariable Long quizCategoryId,
-        @AuthenticationPrincipal AuthUser authUser
+        @NotNull @PathVariable Long quizCategoryId
     ){
         return new ApiResponse<>(200, quizCategoryService.updateQuizCategory(quizCategoryId, request));
     }
 
     @DeleteMapping("/{quizCategoryId}")
     public ApiResponse<String> deleteQuizCategory(
-        @NotNull @PathVariable Long quizCategoryId,
-        @AuthenticationPrincipal AuthUser authUser
+        @NotNull @PathVariable Long quizCategoryId
     ){
         quizCategoryService.deleteQuizCategory(quizCategoryId);
         return new ApiResponse<>(200, "카테고리가 삭제되었습니다.");
