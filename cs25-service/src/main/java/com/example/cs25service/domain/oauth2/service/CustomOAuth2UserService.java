@@ -16,7 +16,6 @@ import com.example.cs25service.domain.oauth2.exception.OAuth2Exception;
 import com.example.cs25service.domain.oauth2.exception.OAuth2ExceptionCode;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -97,17 +96,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 기존 User 조회
         User existingUser = userRepository.validateSocialJoinEmail(email, provider).orElse(null);
 
-        // 기존 유저가 있다면, isActive 값 확인 후 true로 업데이트
+        // 기존 유저가 있다면
         if (existingUser != null) {
-            if (!existingUser.isActive()) {
-                existingUser.updateEnableUser();  // isActive를 true로 설정
-                userRepository.save(existingUser);  // 변경 사항 저장
-            }
             return existingUser;
         }
 
+        // 유저가 없는데 이메일이 있다.
         Subscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
-        if (subscription != null && !Objects.equals(subscription.getEmail(), email)) {
+        if (subscription != null) {
             userRepository.findBySubscription(subscription).ifPresent(user -> {
                 throw new UserException(UserExceptionCode.EMAIL_DUPLICATION);
             });
