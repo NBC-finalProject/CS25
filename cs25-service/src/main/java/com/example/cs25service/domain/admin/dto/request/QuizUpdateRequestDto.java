@@ -19,4 +19,14 @@ public class QuizUpdateRequestDto {
     private String commentary;
 
     private QuizFormatType quizType;
+
+    public QuizUpdateRequestDto(String question, String category, String choice, String answer,
+        String commentary, QuizFormatType quizType) {
+        this.question = question;
+        this.category = category;
+        this.choice = choice;
+        this.answer = answer;
+        this.commentary = commentary;
+        this.quizType = quizType;
+    }
 }
