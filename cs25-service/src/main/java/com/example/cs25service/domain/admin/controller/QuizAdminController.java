@@ -6,12 +6,11 @@ import com.example.cs25service.domain.admin.dto.request.QuizCreateRequestDto;
 import com.example.cs25service.domain.admin.dto.request.QuizUpdateRequestDto;
 import com.example.cs25service.domain.admin.dto.response.QuizDetailDto;
 import com.example.cs25service.domain.admin.service.QuizAdminService;
-import com.example.cs25service.domain.security.dto.AuthUser;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,9 +32,10 @@ public class QuizAdminController {
 
     /**
      * 문제 JSON 형식 업로드 컨트롤러
-     * @param file 파일 객체
+     *
+     * @param file         파일 객체
      * @param categoryType 카테고리 타입
-     * @param formatType 포맷 타입
+     * @param formatType   포맷 타입
      * @return 상태 텍스트를 반환
      */
     @PostMapping("/upload")
@@ -58,6 +59,7 @@ public class QuizAdminController {
 
     /**
      * 관리자 문제 목록 조회 컨트롤러 (기본값: 비추천/오름차순)
+     *
      * @param page 페이징 객체
      * @param size 몇개씩 불러올지
      * @return 문제 목록 DTO를 반환
@@ -72,6 +74,7 @@ public class QuizAdminController {
 
     /**
      * 관리자 문제 상세 조회 컨트롤러
+     *
      * @param quizId 문제 id
      * @return 문제 목록 DTO를 반환
      */
@@ -84,9 +87,11 @@ public class QuizAdminController {
 
     /**
      * 관리자 문제 등록 컨트롤러
+     *
      * @param requestDto 요청 DTO
      * @return 등록한 문제 id를 반환
      */
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ApiResponse<Long> createQuiz(
         @RequestBody QuizCreateRequestDto requestDto
@@ -96,7 +101,8 @@ public class QuizAdminController {
 
     /**
      * 관리자 문제 수정 컨트롤러
-     * @param quizId 문제 id
+     *
+     * @param quizId     문제 id
      * @param requestDto 요청 DTO
      * @return 수정한 문제 DTO를 반환
      */
@@ -110,9 +116,11 @@ public class QuizAdminController {
 
     /**
      * 관리자 문제 삭제 컨트롤러
+     *
      * @param quizId 문제 id
      * @return 반환값 없음
      */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{quizId}")
     public ApiResponse<Void> deleteQuiz(
         @Positive @PathVariable(name = "quizId") Long quizId

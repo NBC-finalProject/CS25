@@ -25,29 +25,18 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
         QQuiz quiz = QQuiz.quiz;
         QQuizCategory category = QQuizCategory.quizCategory;
 
-        // 1. 소분류 ID들 가져오기
-        List<Long> subCategoryIds = queryFactory
-            .select(category.id)
-            .from(category)
-            .where(category.parent.id.eq(parentCategoryId))
-            .fetch();
-
-        if (subCategoryIds.isEmpty()) {
-            return List.of();
-        }
-
         // 2. 퀴즈 조회
         BooleanBuilder builder = new BooleanBuilder()
-            .and(quiz.category.id.in(subCategoryIds)) //내가 정한 카테고리에
+            .and(quiz.category.parent.id.eq(parentCategoryId)) //내가 정한 카테고리에
             .and(quiz.level.in(difficulties)) //정해진 난이도 그룹안에있으면서
             .and(quiz.type.in(targetTypes)); //퀴즈 타입은 이거야
 
         if (!solvedQuizIds.isEmpty()) {
             builder.and(quiz.id.notIn(solvedQuizIds)); //혹시라도 구독자가 문제를 푼 이력잉 ㅣㅆ으면 그것도 제외해야햄
         }
-
         return queryFactory
             .selectFrom(quiz)
+            .join(quiz.category, category)
             .where(builder)
             .limit(20)
             .fetch();

@@ -51,6 +51,24 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
     }
 
     @Override
+    public List<UserQuizAnswer> findBySubscriptionIdAndQuizCategoryId(Long subscriptionId,
+        Long quizCategoryId) {
+        QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
+        QQuiz quiz = QQuiz.quiz;
+        QQuizCategory category = QQuizCategory.quizCategory;
+
+        return queryFactory
+            .selectFrom(answer)
+            .join(answer.quiz, quiz)
+            .join(quiz.category, category)
+            .where(
+                answer.subscription.id.eq(subscriptionId),
+                category.id.eq(quizCategoryId)
+            )
+            .fetch();
+    }
+
+    @Override
     public Set<Long> findRecentSolvedCategoryIds(Long userId, Long parentCategoryId,
         LocalDate afterDate) {
         QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
