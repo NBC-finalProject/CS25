@@ -13,7 +13,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +44,24 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             .join(quiz.category, category)
             .where(
                 answer.user.id.eq(userId),
+                category.id.eq(quizCategoryId)
+            )
+            .fetch();
+    }
+
+    @Override
+    public List<UserQuizAnswer> findBySubscriptionIdAndQuizCategoryId(Long subscriptionId,
+        Long quizCategoryId) {
+        QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
+        QQuiz quiz = QQuiz.quiz;
+        QQuizCategory category = QQuizCategory.quizCategory;
+
+        return queryFactory
+            .selectFrom(answer)
+            .join(answer.quiz, quiz)
+            .join(quiz.category, category)
+            .where(
+                answer.subscription.id.eq(subscriptionId),
                 category.id.eq(quizCategoryId)
             )
             .fetch();
@@ -85,7 +102,7 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             )
             .fetchOne();
 
-        if(result == null) {
+        if (result == null) {
             throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.DUPLICATED_ANSWER);
         }
         return result;

@@ -10,9 +10,9 @@ import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,23 +37,24 @@ public class TodayQuizService {
         Long parentCategoryId = subscription.getCategory().getId(); // 대분류 ID
         Long subscriptionId = subscription.getId();
 
-        // 2. 유저 정답률 계산
-        List<UserQuizAnswer> answerHistory = userQuizAnswerRepository.findByUserIdAndQuizCategoryId(
+        // 2. 유저 정답률 계산, 내가 푼 문제 아이디값
+        List<UserQuizAnswer> answerHistory = userQuizAnswerRepository.findBySubscriptionIdAndQuizCategoryId(
             subscriptionId, parentCategoryId);
-        double accuracy = calculateAccuracy(answerHistory);
-
-        // 5. 내가 푼 문제 ID
-        Set<Long> solvedQuizIds = answerHistory.stream()
-            .map(a -> a.getQuiz().getId())
-            .collect(Collectors.toSet());
-
-        // 6. 서술형 주기 판단 (풀이 횟수 기반)
         int quizCount = answerHistory.size(); // 사용자가 지금까지 푼 문제 수
-        boolean isEssayDay = quizCount % 3 == 2; //일단 3배수일때 한번씩은 서술 뽑아줘야함( 조정 필요하면 나중에 하는거롤)
+        int totalCorrect = 0;
+        Set<Long> solvedQuizIds = new HashSet<>();
 
-//        List<QuizFormatType> targetTypes = isEssayDay
-//            ? List.of(QuizFormatType.SUBJECTIVE)
-//            : List.of(QuizFormatType.MULTIPLE_CHOICE, QuizFormatType.SHORT_ANSWER);
+        for (UserQuizAnswer answer : answerHistory) {
+            if (answer.getIsCorrect()) {
+                totalCorrect++;
+            }
+            solvedQuizIds.add(answer.getQuiz().getId());
+        }
+
+        double accuracy =
+            quizCount == 0 ? 100.0 : ((double) totalCorrect / quizCount) * 100.0;
+        // 6. 서술형 주기 판단 (풀이 횟수 기반)
+        boolean isEssayDay = quizCount % 3 == 2; //일단 3배수일때 한번씩은 서술( 조정 필요하면 나중에 하는거롤)
 
         List<QuizFormatType> targetTypes = isEssayDay
             ? List.of(QuizFormatType.SUBJECTIVE)
@@ -93,19 +94,19 @@ public class TodayQuizService {
         }
     }
 
-    private double calculateAccuracy(List<UserQuizAnswer> answers) {
-        if (answers.isEmpty()) {
-            return 100.0;
-        }
-
-        int totalCorrect = 0;
-        for (UserQuizAnswer answer : answers) {
-            if (answer.getIsCorrect()) {
-                totalCorrect++;
-            }
-        }
-        return ((double) totalCorrect / answers.size()) * 100.0;
-    }
+//    private double calculateAccuracy(List<UserQuizAnswer> answers) {
+//        if (answers.isEmpty()) {
+//            return 100.0;
+//        }
+//
+//        int totalCorrect = 0;
+//        for (UserQuizAnswer answer : answers) {
+//            if (answer.getIsCorrect()) {
+//                totalCorrect++;
+//            }
+//        }
+//        return ((double) totalCorrect / answers.size()) * 100.0;
+//    }
 
 
     @Transactional
