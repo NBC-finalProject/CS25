@@ -34,8 +34,7 @@ public class QuizAdminController {
     public ApiResponse<String> uploadQuizByJsonFile(
         @RequestParam("file") MultipartFile file,
         @RequestParam("categoryType") String categoryType,
-        @RequestParam("formatType") QuizFormatType formatType,
-        @AuthenticationPrincipal AuthUser authUser
+        @RequestParam("formatType") QuizFormatType formatType
     ) {
         if (file.isEmpty()) {
             return new ApiResponse<>(400, "파일이 비어있습니다.");
