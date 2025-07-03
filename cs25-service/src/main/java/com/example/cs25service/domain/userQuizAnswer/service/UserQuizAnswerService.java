@@ -73,7 +73,7 @@ public class UserQuizAnswerService {
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId());
 
             // 유효한 답변객체인지 검증
-            validateDuplicatedUserAnswer(userQuizAnswer);
+            validateExistedUserQuizAnswer(userQuizAnswer);
 
             // 서술형 답변인지 확인
             boolean isSubjectiveAnswer = getSubjectiveAnswerStatus(userQuizAnswer, quiz);
@@ -242,7 +242,7 @@ public class UserQuizAnswerService {
      * 이미 답변한 객체를 검증하는 메서드
      * @param userQuizAnswer 답변 객체
      */
-    private void validateDuplicatedUserAnswer(UserQuizAnswer userQuizAnswer) {
+    private void validateExistedUserQuizAnswer(UserQuizAnswer userQuizAnswer) {
         if(userQuizAnswer.getUser() == null){
             throw new UserException(UserExceptionCode.NOT_FOUND_USER);
         }
