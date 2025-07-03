@@ -17,12 +17,4 @@ public class QuizTestController {
         accuracyService.calculateAndCacheAllQuizAccuracies();
         return new ApiResponse<>(200);
     }
-
-//    @GetMapping("/accuracyTest/getTodayQuiz/{subscriptionId}")
-//    public ApiResponse<QuizDto> getTodayQuiz(
-//        @PathVariable(name = "subscriptionId") Long subscriptionId
-//    ) {
-//        return new ApiResponse<>(200, accuracyService.getTodayQuiz(subscriptionId));
-//    }
-
 }

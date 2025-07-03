@@ -34,8 +34,7 @@ public class AiService {
     private final UserRepository userRepository;
 
     public AiFeedbackResponse getFeedback(Long answerId) {
-        var answer = userQuizAnswerRepository.findWithQuizAndUserById(answerId)
-            .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
+        var answer = userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(answerId);
 
         var quiz = answer.getQuiz();
         var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.3);

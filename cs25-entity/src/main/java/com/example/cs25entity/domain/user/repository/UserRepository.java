@@ -42,5 +42,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findBySerialId(String serialId);
 
+    default User findBySerialIdOrElseThrow(String serialId) {
+        return findBySerialId(serialId)
+            .orElseThrow(() -> new UserException(UserExceptionCode.NOT_FOUND_USER));
+    }
+
     boolean existsByEmail(String email);
 }

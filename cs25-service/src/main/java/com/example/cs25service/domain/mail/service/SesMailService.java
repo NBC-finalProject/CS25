@@ -2,11 +2,7 @@ package com.example.cs25service.domain.mail.service;
 
 import com.example.cs25entity.domain.mail.exception.CustomMailException;
 import com.example.cs25entity.domain.mail.exception.MailExceptionCode;
-import com.example.cs25entity.domain.quiz.entity.Quiz;
-import com.example.cs25entity.domain.subscription.entity.Subscription;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;

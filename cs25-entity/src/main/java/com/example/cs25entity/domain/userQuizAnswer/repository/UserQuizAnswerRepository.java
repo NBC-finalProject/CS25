@@ -1,6 +1,9 @@
 package com.example.cs25entity.domain.userQuizAnswer.repository;
 
+import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +18,11 @@ import org.springframework.stereotype.Repository;
 public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, Long>,
     UserQuizAnswerCustomRepository {
 
+    default UserQuizAnswer findByIdOrElseThrow(Long id) {
+        return findById(id)
+            .orElseThrow(() -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
+    }
+
     List<UserQuizAnswer> findAllByQuizId(Long quizId);
 
     boolean existsByQuizIdAndSubscriptionId(Long quizId, Long subscriptionId);
@@ -24,6 +32,11 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
     @Query("SELECT a FROM UserQuizAnswer a JOIN FETCH a.quiz LEFT JOIN FETCH a.user WHERE a.id = :id")
     Optional<UserQuizAnswer> findWithQuizAndUserById(@Param("id") Long id);
 
-    @Query("SELECT a FROM UserQuizAnswer a WHERE a.isCorrect = false")
-    Page<UserQuizAnswer> findAllByUserIdAndIsCorrectFalse(Long id, Pageable pageable);
+    default UserQuizAnswer findWithQuizAndUserByIdOrElseThrow(Long id) {
+        return findWithQuizAndUserById(id)
+            .orElseThrow(() -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
+    }
+
+    @Query("SELECT a FROM UserQuizAnswer a WHERE a.user.id = :userId AND a.isCorrect = false")
+    Page<UserQuizAnswer> findAllByUserIdAndIsCorrectFalse(Long userId, Pageable pageable);
 }

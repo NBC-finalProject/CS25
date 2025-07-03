@@ -5,34 +5,32 @@ import com.example.cs25entity.domain.quiz.entity.QuizCategory;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.DayOfWeek;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.exception.SubscriptionException;
+import com.example.cs25entity.domain.subscription.exception.SubscriptionExceptionCode;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.user.entity.Role;
-import com.example.cs25entity.domain.user.entity.SocialType;
 import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.dto.UserAnswerDto;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
+import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
-import com.example.cs25service.domain.userQuizAnswer.dto.CheckSimpleAnswerResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
-import org.junit.jupiter.api.Assertions;
+import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -82,20 +80,20 @@ class UserQuizAnswerServiceTest {
                 .subscriptionType(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY))
                 .build();
         ReflectionTestUtils.setField(subscription, "id", 1L);
-        ReflectionTestUtils.setField(subscription, "serialId", "sub-uuid-1");
+        ReflectionTestUtils.setField(subscription, "serialId", "uuid_subscription");
 
         // 객관식 퀴즈
         choiceQuiz = Quiz.builder()
                 .type(QuizFormatType.MULTIPLE_CHOICE)
                 .question("Java is?")
-                .answer("1. Programming Language")
+                .answer("1. Programming")
                 .commentary("Java is a language.")
-                .choice("1. Programming // 2. Coffee")
+                .choice("1. Programming/2. Coffee/3. iceCream/4. latte")
                 .category(category)
                 .level(QuizLevel.EASY)
                 .build();
         ReflectionTestUtils.setField(choiceQuiz, "id", 1L);
-        ReflectionTestUtils.setField(choiceQuiz, "serialId", "sub-uuid-2");
+        ReflectionTestUtils.setField(choiceQuiz, "serialId", "uuid_quiz");
 
 
         // 주관식 퀴즈
@@ -108,7 +106,7 @@ class UserQuizAnswerServiceTest {
                 .level(QuizLevel.EASY)
                 .build();
         ReflectionTestUtils.setField(shortAnswerQuiz, "id", 1L);
-        ReflectionTestUtils.setField(shortAnswerQuiz, "serialId", "sub-uuid-3");
+        ReflectionTestUtils.setField(shortAnswerQuiz, "serialId", "uuid_quiz_1");
 
         userQuizAnswer = UserQuizAnswer.builder()
                 .userAnswer("1")
@@ -128,23 +126,31 @@ class UserQuizAnswerServiceTest {
     @Test
     void submitAnswer_정상_저장된다() {
         // given
-        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
-        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
+
+        String subscriptionSerialId = "uuid_subscription";
+        String quizSerialId = "uuid_quiz";
+
+        when(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionSerialId)).thenReturn(subscription);
+        when(quizRepository.findBySerialIdOrElseThrow(quizSerialId)).thenReturn(choiceQuiz);
         when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(choiceQuiz.getId(), subscription.getId())).thenReturn(false);
         when(userQuizAnswerRepository.save(any())).thenReturn(userQuizAnswer);
 
         // when
-        Long answer = userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto);
+        UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto);
 
         // then
-
-        assertThat(userQuizAnswer.getId()).isEqualTo(answer);
+        assertThat(userQuizAnswer.getId()).isEqualTo(userQuizAnswerResponseDto.getUserQuizAnswerId());
+        assertThat(userQuizAnswer.getUserAnswer()).isEqualTo(userQuizAnswerResponseDto.getUserAnswer());
+        assertThat(userQuizAnswer.getAiFeedback()).isEqualTo(userQuizAnswerResponseDto.getAiFeedback());
     }
 
     @Test
     void submitAnswer_구독없음_예외() {
         // given
-        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.empty());
+        String subscriptionSerialId = "uuid_subscription";
+
+        when(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionSerialId))
+                .thenThrow(new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR));
 
         // when & then
         assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
@@ -153,23 +159,47 @@ class UserQuizAnswerServiceTest {
     }
 
     @Test
+    void submitAnswer_구독_비활성_예외(){
+        //given
+        String subscriptionSerialId = "uuid_subscription";
+
+        Subscription subscription = mock(Subscription.class);
+        when(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionSerialId)).thenReturn(subscription);
+        when(subscription.isActive()).thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
+                .isInstanceOf(SubscriptionException.class)
+                .hasMessageContaining("비활성화된 구독자 입니다.");
+    }
+
+    @Test
     void submitAnswer_중복답변_예외(){
         //give
-        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
+        String subscriptionSerialId = "uuid_subscription";
+        String quizSerialId = "uuid_quiz";
+
+        when(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionSerialId)).thenReturn(subscription);
+        when(quizRepository.findBySerialIdOrElseThrow(quizSerialId)).thenReturn(choiceQuiz);
         when(userQuizAnswerRepository.existsByQuizIdAndSubscriptionId(choiceQuiz.getId(), subscription.getId())).thenReturn(true);
-        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
+        when(userQuizAnswerRepository.findUserQuizAnswerBySerialIds(quizSerialId, subscriptionSerialId))
+                .thenThrow(new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
 
         //when & then
         assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
                 .isInstanceOf(UserQuizAnswerException.class)
-                .hasMessageContaining("이미 제출한 문제입니다.");
+                .hasMessageContaining("해당 답변을 찾을 수 없습니다");
     }
 
     @Test
     void submitAnswer_퀴즈없음_예외() {
         // given
-        when(subscriptionRepository.findBySerialId(subscription.getSerialId())).thenReturn(Optional.of(subscription));
-        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.empty());
+        String subscriptionSerialId = "uuid_subscription";
+        String quizSerialId = "uuid_quiz";
+
+        when(subscriptionRepository.findBySerialIdOrElseThrow(subscriptionSerialId)).thenReturn(subscription);
+        when(quizRepository.findBySerialIdOrElseThrow(quizSerialId))
+                .thenThrow(new QuizException(QuizExceptionCode.NOT_FOUND_ERROR));
 
         // when & then
         assertThatThrownBy(() -> userQuizAnswerService.submitAnswer(choiceQuiz.getSerialId(), requestDto))
@@ -181,18 +211,18 @@ class UserQuizAnswerServiceTest {
     void evaluateAnswer_비회원_객관식_정답(){
         //given
         UserQuizAnswer choiceAnswer = UserQuizAnswer.builder()
-                .userAnswer("1")
+                .userAnswer("1. Programming")
                 .quiz(choiceQuiz)
                 .subscription(subscription)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(choiceAnswer.getId())).thenReturn(choiceAnswer);
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
+        UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
 
         //then
-        assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
+        assertThat(userQuizAnswerResponseDto.isCorrect()).isTrue();
     }
 
     @Test
@@ -204,32 +234,32 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(shortAnswer.getId())).thenReturn(shortAnswer);
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
+        UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
 
         //then
-        assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
+        assertThat(userQuizAnswerResponseDto.isCorrect()).isTrue();
     }
 
     @Test
     void evaluateAnswer_회원_객관식_정답_점수부여(){
         //given
         UserQuizAnswer choiceAnswer = UserQuizAnswer.builder()
-                .userAnswer("1")
+                .userAnswer("1. Programming")
                 .quiz(choiceQuiz)
                 .user(user)
                 .subscription(subscription)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(choiceAnswer.getId())).thenReturn(Optional.of(choiceAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(choiceAnswer.getId())).thenReturn(choiceAnswer);
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
+        UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(choiceAnswer.getId());
 
         //then
-        assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
+        assertThat(userQuizAnswerResponseDto.isCorrect()).isTrue();
         assertThat(user.getScore()).isEqualTo(3);
     }
 
@@ -243,10 +273,10 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(shortAnswer.getId())).thenReturn(shortAnswer);
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
+        UserQuizAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
 
         //then
         assertThat(checkSimpleAnswerResponseDto.isCorrect()).isTrue();
@@ -262,51 +292,48 @@ class UserQuizAnswerServiceTest {
                 .quiz(shortAnswerQuiz)
                 .build();
 
-        when(userQuizAnswerRepository.findWithQuizAndUserById(shortAnswer.getId())).thenReturn(Optional.of(shortAnswer));
+        when(userQuizAnswerRepository.findWithQuizAndUserByIdOrElseThrow(shortAnswer.getId())).thenReturn(shortAnswer);
 
         //when
-        CheckSimpleAnswerResponseDto checkSimpleAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
+        UserQuizAnswerResponseDto userQuizAnswerResponseDto = userQuizAnswerService.evaluateAnswer(shortAnswer.getId());
 
         //then
-        assertThat(checkSimpleAnswerResponseDto.isCorrect()).isFalse();
+        assertThat(userQuizAnswerResponseDto.isCorrect()).isFalse();
     }
 
 
     @Test
     void calculateSelectionRateByOption_조회_성공(){
-
         //given
+        String quizSerialId = "uuid_quiz";
+
         List<UserAnswerDto> answers = List.of(
-                new UserAnswerDto("1"),
-                new UserAnswerDto("1"),
-                new UserAnswerDto("2"),
-                new UserAnswerDto("2"),
-                new UserAnswerDto("2"),
-                new UserAnswerDto("3"),
-                new UserAnswerDto("3"),
-                new UserAnswerDto("3"),
-                new UserAnswerDto("4"),
-                new UserAnswerDto("4")
+                new UserAnswerDto("1. Programming"),
+                new UserAnswerDto("1. Programming"),
+                new UserAnswerDto("2. Coffee"),
+                new UserAnswerDto("2. Coffee"),
+                new UserAnswerDto("2. Coffee"),
+                new UserAnswerDto("3. iceCream"),
+                new UserAnswerDto("3. iceCream"),
+                new UserAnswerDto("3. iceCream"),
+                new UserAnswerDto("4. latte"),
+                new UserAnswerDto("4. latte")
         );
 
+        when(quizRepository.findBySerialIdOrElseThrow(quizSerialId)).thenReturn(choiceQuiz);
         when(userQuizAnswerRepository.findUserAnswerByQuizId(choiceQuiz.getId())).thenReturn(answers);
-        when(quizRepository.findBySerialId(choiceQuiz.getSerialId())).thenReturn(Optional.of(choiceQuiz));
 
         //when
         SelectionRateResponseDto selectionRateByOption = userQuizAnswerService.calculateSelectionRateByOption(choiceQuiz.getSerialId());
 
         //then
         assertThat(selectionRateByOption.getTotalCount()).isEqualTo(10);
-
-        Map<String, Double> expectedRates = new HashMap<>();
-        expectedRates.put("1", 2/10.0);
-        expectedRates.put("2", 3/10.0);
-        expectedRates.put("3", 3/10.0);
-        expectedRates.put("4", 2/10.0);
-
-        expectedRates.forEach((key, expectedRate) ->
-                assertEquals(expectedRate, selectionRateByOption.getSelectionRates().get(key), 0.0001)
+        Map<String, Double> selectionRates = Map.of(
+                "1. Programming", 0.2,
+                "2. Coffee", 0.3,
+                "3. iceCream", 0.3,
+                "4. latte", 0.2
         );
-
+        assertThat(selectionRateByOption.getSelectionRates()).isEqualTo(selectionRates);
     }
 }

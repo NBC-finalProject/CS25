@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.users.service;
 
-
 import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25entity.domain.user.exception.UserException;
 import com.example.cs25entity.domain.user.exception.UserExceptionCode;
@@ -30,16 +29,16 @@ public class AuthService {
         String nickname = jwtTokenProvider.getNickname(refreshToken);
         Role role = jwtTokenProvider.getRole(refreshToken);
 
-        // 2. Redis 에 저장된 토큰 조회
+        // Redis 에 저장된 토큰 조회
         String savedToken = refreshTokenService.get(userId);
         if (savedToken == null || !savedToken.equals(refreshToken)) {
             throw new UserException(UserExceptionCode.TOKEN_NOT_MATCHED);
         }
 
-        // 4. 새 토큰 발급
+        // 새 토큰 발급
         TokenResponseDto newToken = jwtTokenProvider.generateTokenPair(userId, nickname, role);
 
-        // 5. Redis 갱신
+        // Redis 갱신
         refreshTokenService.save(userId, newToken.getRefreshToken(),
             jwtTokenProvider.getRefreshTokenDuration());
 

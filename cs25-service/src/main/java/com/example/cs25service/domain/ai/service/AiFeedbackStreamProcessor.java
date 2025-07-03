@@ -30,8 +30,7 @@ public class AiFeedbackStreamProcessor {
     @Transactional
     public void stream(Long answerId, SseEmitter emitter) {
         try {
-            var answer = userQuizAnswerRepository.findById(answerId)
-                .orElseThrow(() -> new AiException(AiExceptionCode.NOT_FOUND_ANSWER));
+            var answer = userQuizAnswerRepository.findByIdOrElseThrow(answerId);
 
             if (answer.getAiFeedback() != null) {
                 emitter.send(SseEmitter.event().data("이미 처리된 요청입니다."));
