@@ -176,7 +176,7 @@ public class UserQuizAnswerService {
             .commentary(quiz.getCommentary())
             .userAnswer(userQuizAnswer.getUserAnswer())
             .answer(quiz.getAnswer())
-            .isCorrect(userQuizAnswer.getIsCorrect())
+            .isCorrect(isDuplicate ? userQuizAnswer.getIsCorrect() : null)
             .duplicated(isDuplicate)
             .aiFeedback(isSubjectiveAnswer ? userQuizAnswer.getAiFeedback() : null)
             .build();
