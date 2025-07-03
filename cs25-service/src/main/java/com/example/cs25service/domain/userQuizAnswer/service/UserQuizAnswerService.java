@@ -71,20 +71,18 @@ public class UserQuizAnswerService {
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId());
 
             // 유효한 답변객체인지 검증
-            validateUserQuizAnswer(userQuizAnswer);
-
-            // 유효한 답변객체인지 검증
-            validateUserQuizAnswer(userQuizAnswer);
+            validateDuplicatedUserAnswer(userQuizAnswer);
 
             // 서술형 답변인지 확인
             boolean isSubjectiveAnswer = getSubjectiveAnswerStatus(userQuizAnswer, quiz);
 
-            return toAnswerDto(userQuizAnswer, quiz, isSubjectiveAnswer);
+            return toAnswerDto(userQuizAnswer, quiz, true, isSubjectiveAnswer);
         }
         // 처음 답변한 경우 답변 생성하여 저장
         else {
             User user = userRepository.findBySubscription(subscription).orElse(null);
 
+            // 서술형의 경우는 AiFeedbackStreamProcesser 로직에서 isCorrect, aiFeedback 컬럼을 저장
             UserQuizAnswer savedUserQuizAnswer = userQuizAnswerRepository.save(
                 UserQuizAnswer.builder()
                     .userAnswer(requestDto.getAnswer())
@@ -94,7 +92,7 @@ public class UserQuizAnswerService {
                     .subscription(subscription)
                     .build()
             );
-            return toAnswerDto(savedUserQuizAnswer, quiz, isDuplicate);
+            return toAnswerDto(savedUserQuizAnswer, quiz, false, false);
         }
     }
 
@@ -165,7 +163,10 @@ public class UserQuizAnswerService {
      * @return 답변 DTO를 반환
      */
     private UserQuizAnswerResponseDto toAnswerDto (
-        UserQuizAnswer userQuizAnswer, Quiz quiz, boolean isDuplicate
+        UserQuizAnswer userQuizAnswer,
+        Quiz quiz,
+        boolean isDuplicate,
+        boolean isSubjectiveAnswer
     ) {
         return UserQuizAnswerResponseDto.builder()
             .userQuizAnswerId(userQuizAnswer.getId())
@@ -173,7 +174,9 @@ public class UserQuizAnswerService {
             .commentary(quiz.getCommentary())
             .userAnswer(userQuizAnswer.getUserAnswer())
             .answer(quiz.getAnswer())
+            .isCorrect(userQuizAnswer.getIsCorrect())
             .duplicated(isDuplicate)
+            .aiFeedback(isSubjectiveAnswer ? userQuizAnswer.getAiFeedback() : null)
             .build();
     }
 
@@ -234,37 +237,41 @@ public class UserQuizAnswerService {
     }
 
     /**
-     * 답변 객체를 검증하는 메서드
+     * 이미 답변한 객체를 검증하는 메서드
      * @param userQuizAnswer 답변 객체
      */
-    private void validateUserQuizAnswer(UserQuizAnswer userQuizAnswer) {
+    private void validateDuplicatedUserAnswer(UserQuizAnswer userQuizAnswer) {
         if(userQuizAnswer.getUser() == null){
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
         if(userQuizAnswer.getQuiz() == null){
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
         }
+        if(userQuizAnswer.getQuiz().getType() == null){
+            throw new QuizException(QuizExceptionCode.QUIZ_CATEGORY_NOT_FOUND_ERROR);
+        }
         if(userQuizAnswer.getSubscription() == null){
             throw new SubscriptionException(SubscriptionExceptionCode.NOT_FOUND_SUBSCRIPTION_ERROR);
         }
-        // AI 피드백 작성 도중에 종료하는 경우 & 비정상적인 종료 (aiFeedback or isCorrect null)
-        if(userQuizAnswer.getAiFeedback() == null || userQuizAnswer.getIsCorrect() == null){
-            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.INVALID_ANSWER);
+        // AI 피드백 생성중에 비정상적인 종료했을 경우
+        if(userQuizAnswer.getAiFeedback() == null && userQuizAnswer.getIsCorrect() == null){
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.AI_ANSWER_INVALID_ANSWER);
+        }
+        if(userQuizAnswer.getIsCorrect() == null){
+            throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.CORRECT_STATUS_INVALID_ANSWER);
         }
     }
 
     /**
      * 서술형에 대한 답변인지 확인하는 메서드
-     * 퀴즈객체의 타입이 서술형이고, 답변객체의 AI 피드백이 널이 아니어야 한다.
+     * 퀴즈객체의 타입이 서술형이고, 답변객체의 AI 피드백이 null이 아니어야 한다.
      *
      * @param userQuizAnswer 답변 객체
      * @param quiz 퀴즈 객체
      * @return true/false 반환
      */
     private boolean getSubjectiveAnswerStatus(UserQuizAnswer userQuizAnswer, Quiz quiz) {
-        if(quiz.getType() == null){
-            throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
-        }
-        return userQuizAnswer.getAiFeedback() != null && quiz.getType().equals(QuizFormatType.SUBJECTIVE);
+        return userQuizAnswer.getAiFeedback() != null &&
+            quiz.getType().equals(QuizFormatType.SUBJECTIVE);
     }
 }
