@@ -141,7 +141,7 @@ class QuizAdminServiceTest {
         }
 
         @Test
-        @DisplayName("정상작동_시_퀴즈가저장된다")
+        @DisplayName("JSON_파싱_실패_시_예외발생")
         void uploadQuizJson_JSON_PARSING_FAILED_ERROR() throws Exception {
             // given
             MockMultipartFile file = new MockMultipartFile("file", "quiz.json", "application/json",
