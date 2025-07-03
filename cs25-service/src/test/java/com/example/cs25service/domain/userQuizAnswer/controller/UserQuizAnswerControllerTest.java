@@ -4,6 +4,7 @@ import com.example.cs25service.domain.userQuizAnswer.dto.SelectionRateResponseDt
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerRequestDto;
 import com.example.cs25service.domain.userQuizAnswer.dto.UserQuizAnswerResponseDto;
 import com.example.cs25service.domain.userQuizAnswer.service.UserQuizAnswerService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,21 @@ class UserQuizAnswerControllerTest {
     @MockitoBean
     private UserQuizAnswerService userQuizAnswerService;
 
+    private UserQuizAnswerResponseDto userQuizAnswerResponseDto;
+
+    @BeforeEach
+    void setup(){
+        userQuizAnswerResponseDto = UserQuizAnswerResponseDto.builder()
+                .userQuizAnswerId(1L)
+                .question("문제")
+                .answer("답안")
+                .commentary("해설")
+                .isCorrect(true)
+                .userAnswer("사용자 답안")
+                .aiFeedback(null)
+                .duplicated(false)
+                .build();
+    }
 
     @Test
     @DisplayName("정답 제출하기")
@@ -47,7 +63,7 @@ class UserQuizAnswerControllerTest {
         String quizSerialId = "uuid_quiz";
 
         given(userQuizAnswerService.submitAnswer(eq(quizSerialId), any(UserQuizAnswerRequestDto.class)))
-                .willReturn(any(UserQuizAnswerResponseDto.class));
+                .willReturn(userQuizAnswerResponseDto);
 
         //when & then
         mockMvc.perform(MockMvcRequestBuilders
@@ -72,23 +88,13 @@ class UserQuizAnswerControllerTest {
         //given
         Long userQuizAnswerId = 1L;
 
-        given(userQuizAnswerService.evaluateAnswer(eq(userQuizAnswerId))).willReturn(any(UserQuizAnswerResponseDto.class));
+        given(userQuizAnswerService.evaluateAnswer(eq(userQuizAnswerId))).willReturn(userQuizAnswerResponseDto);
 
         //when & then
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/quizzes/simpleAnswer/{userQuizAnswerId}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                          "question":"퀴즈",
-                          "userAnswer": "내가 제출한 정답",
-                          "answer": "정답",
-                          "commentary": "해설",
-                          "isCorrect": true
-                    }
-                """)
-                .with(csrf()))
-                .andDo(print())
+                .post("/quizzes/evaluate/{userQuizAnswerId}", 1L)
+                    .with(csrf()))
+                    .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.httpCode").value(200));
     }
