@@ -37,6 +37,6 @@ public interface UserQuizAnswerRepository extends JpaRepository<UserQuizAnswer, 
             .orElseThrow(() -> new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER));
     }
 
-    @Query("SELECT a FROM UserQuizAnswer a WHERE a.isCorrect = false")
-    Page<UserQuizAnswer> findAllByUserIdAndIsCorrectFalse(Long id, Pageable pageable);
+    @Query("SELECT a FROM UserQuizAnswer a WHERE a.user.id = :userId AND a.isCorrect = false")
+    Page<UserQuizAnswer> findAllByUserIdAndIsCorrectFalse(Long userId, Pageable pageable);
 }
