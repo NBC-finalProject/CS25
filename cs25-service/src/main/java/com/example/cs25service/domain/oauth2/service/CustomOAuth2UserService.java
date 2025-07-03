@@ -16,6 +16,7 @@ import com.example.cs25service.domain.oauth2.exception.OAuth2Exception;
 import com.example.cs25service.domain.oauth2.exception.OAuth2ExceptionCode;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -106,7 +107,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         Subscription subscription = subscriptionRepository.findByEmail(email).orElse(null);
-        if (subscription != null) {
+        if (subscription != null && !Objects.equals(subscription.getEmail(), email)) {
             userRepository.findBySubscription(subscription).ifPresent(user -> {
                 throw new UserException(UserExceptionCode.EMAIL_DUPLICATION);
             });
