@@ -17,4 +17,23 @@ public class QuizTestController {
         accuracyService.calculateAndCacheAllQuizAccuracies();
         return new ApiResponse<>(200);
     }
+
+//
+//    @GetMapping("/accuracyTest/{subscriptionId}")
+//    public ApiResponse<Void> accuracyTest(
+//        @PathVariable Long subscriptionId
+//    ) {
+//        accuracyService.getTodayQuizBySubscription(subscriptionId);
+//        return new ApiResponse<>(200);
+//    }
+
+//    @GetMapping("/test/sse")
+//    public void testSse(HttpServletResponse response) throws IOException {
+//        response.setContentType("text/event-stream");
+//        response.setCharacterEncoding("UTF-8");
+//
+//        PrintWriter writer = response.getWriter();
+//        writer.write("data: hello world\n\n");
+//        writer.flush();
+//    }
 }
