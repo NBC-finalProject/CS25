@@ -41,6 +41,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6' //service
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.6' //service
     runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.12.6' //service
+    implementation 'org.apache.commons:commons-text:1.10.0'
 
     //Monitoring
     implementation 'io.micrometer:micrometer-registry-prometheus'

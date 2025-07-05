@@ -10,6 +10,7 @@ import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,8 +78,9 @@ public class TodayQuizService {
         }
 
         // 8. 오프셋 계산 (풀이 수 기준)
-        long offset = quizCount % candidateQuizzes.size();
-        return candidateQuizzes.get((int) offset);
+        long seed = LocalDate.now().toEpochDay() + subscriptionId;
+        int offset = (int) (seed % candidateQuizzes.size());
+        return candidateQuizzes.get(offset);
     }
 
 

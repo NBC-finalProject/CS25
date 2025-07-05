@@ -61,7 +61,7 @@
 v1(version 1): 초기 구성
 ![image](https://github.com/user-attachments/assets/411dfe0e-5e6f-48a4-8507-dc6e0b823d88)
 v2(version 2): 이후 구성
-![image](https://github.com/user-attachments/assets/251ff3f0-f736-44a3-a3e7-e12a734defef)
+![image](https://github.com/user-attachments/assets/8a6ded19-d876-4f98-b98f-cdf9e54e7817)
 멀티 모듈 적용
 ![image](https://github.com/user-attachments/assets/c0e4ac1f-02a2-4605-8e20-186a0ffcf79c)
 
