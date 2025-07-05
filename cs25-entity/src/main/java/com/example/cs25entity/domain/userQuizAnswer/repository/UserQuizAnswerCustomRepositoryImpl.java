@@ -63,7 +63,7 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             .join(quiz.category, category)
             .where(
                 answer.subscription.id.eq(subscriptionId),
-                category.id.eq(quizCategoryId)
+                category.parent.id.eq(quizCategoryId)
             )
             .fetch();
     }
@@ -106,7 +106,7 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
             )
             .fetchOne();
 
-        if(result == null) {
+        if (result == null) {
             throw new UserQuizAnswerException(UserQuizAnswerExceptionCode.NOT_FOUND_ANSWER);
         }
         return result;
