@@ -1,7 +1,6 @@
 package com.example.cs25batch.sender.context;
 
 import com.example.cs25batch.batch.dto.MailDto;
-import com.example.cs25batch.config.RateLimiterConfig;
 import com.example.cs25batch.sender.MailSenderStrategy;
 import io.github.bucket4j.Bucket;
 import java.time.Duration;
@@ -18,19 +17,13 @@ public class MailSenderContext {
 
     public void send(MailDto dto, String strategyKey) {
         MailSenderStrategy strategy = getStrategy(strategyKey);
+        Bucket bucket = strategy.getRateLimiter();
 
-        RateLimiterConfig limiterConfig = strategy.getPolicy().rateLimiterConfig();
+        if (!bucket.tryConsume(1)) {
+            throw new RuntimeException("전략에 해당하는 RateLimiter가 존재하지 않습니다.: " + strategyKey);
+        }
 
         strategy.sendQuizMail(dto);
-    }
-
-    private Bucket createBucket(RateLimiterConfig config) {
-        return Bucket.builder()
-            .addLimit(limit -> limit
-                .capacity(config.capacity())
-                .refillIntervally(config.refill(), Duration.ofMillis(config.millis()))
-            )
-            .build();
     }
 
     private MailSenderStrategy getStrategy(String key) {
