@@ -1,6 +1,5 @@
 package com.example.cs25service.domain.quiz.scheduler;
 
-import com.example.cs25service.domain.quiz.service.QuizAccuracyCalculateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class QuizAccuracyScheduler {
 
-    private final QuizAccuracyCalculateService quizService;
+//    private final QuizAccuracyCalculateService quizService;
 
 //    @Scheduled(cron = "0 55 5 * * *")
 //    public void calculateAndCacheAllQuizAccuracies() {
@@ -22,6 +21,4 @@ public class QuizAccuracyScheduler {
 //            log.error("[Scheduler] 정답률 계산 중 오류 발생", e);
 //        }
 //    }
-
-
 }

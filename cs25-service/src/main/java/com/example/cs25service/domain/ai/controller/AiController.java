@@ -7,6 +7,7 @@ import com.example.cs25service.domain.ai.service.AiQuestionGeneratorService;
 import com.example.cs25service.domain.ai.service.AiService;
 import com.example.cs25service.domain.ai.service.FileLoaderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ public class AiController {
     private final FileLoaderService fileLoaderService;
     private final AiFeedbackQueueService aiFeedbackQueueService;
 
-    @GetMapping("/{answerId}/feedback")
+    @GetMapping(value = "/{answerId}/feedback", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamFeedback(@PathVariable Long answerId) {
         SseEmitter emitter = new SseEmitter(60_000L);
         emitter.onTimeout(emitter::complete);
