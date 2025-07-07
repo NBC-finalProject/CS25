@@ -5,19 +5,11 @@ import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25service.domain.mail.service.SesMailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.context.Context;
 import software.amazon.awssdk.services.sesv2.SesV2Client;
-import software.amazon.awssdk.services.sesv2.model.Body;
-import software.amazon.awssdk.services.sesv2.model.Content;
-import software.amazon.awssdk.services.sesv2.model.Destination;
-import software.amazon.awssdk.services.sesv2.model.EmailContent;
-import software.amazon.awssdk.services.sesv2.model.Message;
-import software.amazon.awssdk.services.sesv2.model.SendEmailRequest;
-import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 
 @RequiredArgsConstructor
 @Component("sesServiceMailSender")
-public class SesMailSenderStrategy implements MailSenderServiceStrategy{
+public class SesMailSenderStrategy implements MailSenderServiceStrategy {
 
     private final SesMailService sesMailService;
     private final SesV2Client sesV2Client;
@@ -25,5 +17,10 @@ public class SesMailSenderStrategy implements MailSenderServiceStrategy{
     @Override
     public void sendVerificationCodeMail(String toEmail, String code) {
         sesMailService.sendVerificationCodeEmail(toEmail, code);
+    }
+
+    @Override
+    public void sendQuizMail(Subscription subscription, Quiz quiz) {
+        sesMailService.sendQuizMail(subscription, quiz);
     }
 }

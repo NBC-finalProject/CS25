@@ -26,6 +26,6 @@ public class MailSenderServiceContext {
 
     public void sendQuizMail(Subscription subscription, Quiz quiz){
         MailSenderServiceStrategy strategy = strategyMap.get("sesServiceMailSender");
-
+        strategy.sendQuizMail(subscription, quiz);
     }
 }

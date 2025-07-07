@@ -21,12 +21,13 @@ import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 @RequiredArgsConstructor
 public class SesMailService {
 
+    private static final String DOMAIN = "https://cs25.co.kr";
     private final SpringTemplateEngine templateEngine;
     private final SesV2Client sesV2Client;
-    private static final String DOMAIN = "https://cs25.co.kr";
 
     public static String generateQuizLink(String subscriptionId, String quizId) {
-        return String.format("%s/todayQuiz?subscriptionId=%s&quizId=%s", DOMAIN, subscriptionId, quizId);
+        return String.format("%s/todayQuiz?subscriptionId=%s&quizId=%s", DOMAIN, subscriptionId,
+            quizId);
     }
 
     public static String generateSubscriptionSettings(String subscriptionId) {
@@ -81,50 +82,56 @@ public class SesMailService {
         }
     }
 
-    public void sendQuizEmail(Subscription subscription, Quiz quiz) throws SesV2Exception {
-        Context context = new Context();
-        context.setVariable("toEmail", subscription.getEmail());
-        context.setVariable("question", quiz.getQuestion());
-        context.setVariable("quizLink", generateQuizLink(subscription.getSerialId(), quiz.getSerialId()));
-        context.setVariable("subscriptionSettings", generateSubscriptionSettings(subscription.getSerialId()));
-        String htmlContent = templateEngine.process("mail-template", context);
+    public void sendQuizMail(Subscription subscription, Quiz quiz) {
+        try {
+            Context context = new Context();
+            context.setVariable("toEmail", subscription.getEmail());
+            context.setVariable("question", quiz.getQuestion());
+            context.setVariable("quizLink",
+                generateQuizLink(subscription.getSerialId(), quiz.getSerialId()));
+            context.setVariable("subscriptionSettings",
+                generateSubscriptionSettings(subscription.getSerialId()));
+            String htmlContent = templateEngine.process("mail-template", context);
 
-        //수신인
-        Destination destination = Destination.builder()
-            .toAddresses(subscription.getEmail())
-            .build();
+            //수신인
+            Destination destination = Destination.builder()
+                .toAddresses(subscription.getEmail())
+                .build();
 
-        //이메일 제목
-        Content subject = Content.builder()
-            .data("[CS25] " + quiz.getQuestion())
-            .charset("UTF-8")
-            .build();
+            //이메일 제목
+            Content subject = Content.builder()
+                .data("[CS25] " + quiz.getQuestion())
+                .charset("UTF-8")
+                .build();
 
-        //html 구성
-        Content htmlBody = Content.builder()
-            .data(htmlContent)
-            .charset("UTF-8")
-            .build();
+            //html 구성
+            Content htmlBody = Content.builder()
+                .data(htmlContent)
+                .charset("UTF-8")
+                .build();
 
-        Body body = Body.builder()
-            .html(htmlBody)
-            .build();
+            Body body = Body.builder()
+                .html(htmlBody)
+                .build();
 
-        Message message = Message.builder()
-            .subject(subject)
-            .body(body)
-            .build();
+            Message message = Message.builder()
+                .subject(subject)
+                .body(body)
+                .build();
 
-        EmailContent emailContent = EmailContent.builder()
-            .simple(message)
-            .build();
+            EmailContent emailContent = EmailContent.builder()
+                .simple(message)
+                .build();
 
-        SendEmailRequest emailRequest = SendEmailRequest.builder()
-            .destination(destination)
-            .content(emailContent)
-            .fromEmailAddress("CS25 <noreply@cs25.co.kr>")
-            .build();
+            SendEmailRequest emailRequest = SendEmailRequest.builder()
+                .destination(destination)
+                .content(emailContent)
+                .fromEmailAddress("CS25 <noreply@cs25.co.kr>")
+                .build();
 
-        sesV2Client.sendEmail(emailRequest);
+            sesV2Client.sendEmail(emailRequest);
+        } catch (SesV2Exception e) {
+            throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
+        }
     }
 }
