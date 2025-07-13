@@ -1,6 +1,7 @@
 package com.example.cs25service.domain.subscription.controller;
 
 import com.example.cs25common.global.dto.ApiResponse;
+import com.example.cs25service.domain.mail.service.TodayQuizService;
 import com.example.cs25service.domain.security.dto.AuthUser;
 import com.example.cs25service.domain.subscription.dto.SubscriptionInfoDto;
 import com.example.cs25service.domain.subscription.dto.SubscriptionRequestDto;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
+    private final TodayQuizService todayQuizService;
 
     @GetMapping("/{subscriptionId}")
     public ApiResponse<SubscriptionInfoDto> getSubscription(
@@ -43,8 +45,10 @@ public class SubscriptionController {
         @RequestBody @Valid SubscriptionRequestDto request,
         @AuthenticationPrincipal AuthUser authUser
     ) {
+        SubscriptionResponseDto result = subscriptionService.createSubscription(request, authUser);
+        todayQuizService.sendQuizMail(result.getId());
         return new ApiResponse<>(201,
-            subscriptionService.createSubscription(request, authUser));
+            result);
     }
 
     @PatchMapping("/{subscriptionId}")
