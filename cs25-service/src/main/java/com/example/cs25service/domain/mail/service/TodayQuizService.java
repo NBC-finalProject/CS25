@@ -17,7 +17,7 @@ public class TodayQuizService {
 
     public void sendQuizMail(Long subscriptionId){
         Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
-        Quiz quiz = quizRepository.findByIdOrElseThrow(1L); //일단 1L로 고정
+        Quiz quiz = quizRepository.findByIdOrElseThrow(1048600L); //일단 1L로 고정
         mailSenderServiceContext.sendQuizMail(subscription, quiz);
     }
 }
