@@ -15,13 +15,13 @@ import org.apache.commons.text.StringEscapeUtils;
 
 public class XssRequestWrapper extends HttpServletRequestWrapper {
 
-    private final String sanitizedJsonBody;
+    private final String sanitizedJsonBody; //결과 저장예정
 
     public XssRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
 
         if (request.getContentType() != null && request.getContentType()
-            .contains("application/json")) {
+            .contains("application/json")) { //Request Body 가 다 제이슨이니깐
             String rawBody = request.getReader().lines()
                 .collect(Collectors.joining(System.lineSeparator()));
             this.sanitizedJsonBody = StringEscapeUtils.escapeHtml4(rawBody); // 또는 필드 단위 escape
@@ -31,12 +31,12 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String getParameter(String name) {
+    public String getParameter(String name) { //폼 요청(application/x-www-form-urlencoded)일 경우
         return escape(super.getParameter(name));
     }
 
     @Override
-    public String[] getParameterValues(String name) {
+    public String[] getParameterValues(String name) { //getParameter << 이거 있을때
         String[] values = super.getParameterValues(name);
         if (values == null) {
             return null;
@@ -50,6 +50,7 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
+        //request Body가 있으면 스트림으로 다 일겅바야
         if (sanitizedJsonBody == null) {
             return super.getInputStream();
         }
