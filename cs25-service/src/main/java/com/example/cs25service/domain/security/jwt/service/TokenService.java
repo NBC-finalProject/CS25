@@ -34,7 +34,7 @@ public class TokenService {
     public ResponseCookie createAccessTokenCookie(String accessToken) {
         return ResponseCookie.from("accessToken", accessToken)
             .httpOnly(true) //프론트 생기면 true
-            .secure(false) //https 적용되면 true
+            .secure(true) //https 적용되면 true
             .path("/")
             .maxAge(Duration.ofMinutes(60))
             .sameSite("Lax")
@@ -47,8 +47,8 @@ public class TokenService {
 
         // 2. accessToken 쿠키 만료 설정
         ResponseCookie expiredCookie = ResponseCookie.from("accessToken", "")
-            .httpOnly(false)
-            .secure(false)
+            .httpOnly(true)
+            .secure(true)
             .path("/")
             .maxAge(0)
             .sameSite("Lax")
