@@ -5,7 +5,7 @@ name: CD - Docker Build & Deploy to EC2
 # main 브랜치에 push 발생 시 자동 실행
 on:
   push:
-    branches: [ feat/285 ]
+    branches: [ main ]
 
 # GitHub Actions 에서 제공하는 최신 Ubuntu 이미지 실행
 jobs:
@@ -61,9 +61,9 @@ jobs:
       - name: Upload .env to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.SSH_HOST_TEST }}
+          host: ${{ secrets.SSH_HOST }}
           username: ec2-user
-          key: ${{ secrets.SSH_KEY_TEST }}
+          key: ${{ secrets.SSH_KEY }}
           source: ".env"
           target: "/home/ec2-user/app"
 
@@ -71,9 +71,9 @@ jobs:
       - name: Deploy on EC2 (Blue-Green 무중단 배포)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST_TEST }}
+          host: ${{ secrets.SSH_HOST }}
           username: ec2-user
-          key: ${{ secrets.SSH_KEY_TEST }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ec2-user/app
             
