@@ -61,9 +61,9 @@ jobs:
       - name: Upload .env to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: ${{ secrets.SSH_HOST_TEST }}
           username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_KEY_TEST }}
           source: ".env"
           target: "/home/ec2-user/app"
 
@@ -71,9 +71,9 @@ jobs:
       - name: Deploy on EC2 (Blue-Green 무중단 배포)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: ${{ secrets.SSH_HOST_TEST }}
           username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_KEY_TEST }}
           script: |
             cd /home/ec2-user/app
             
