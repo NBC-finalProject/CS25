@@ -1,29 +1,40 @@
+
+# 워크 플로우 이름
 name: CD - Docker Build & Deploy to EC2
 
+# main 브랜치에 push 발생 시 자동 실행
 on:
   push:
-    branches: [ main ]
+    branches: [ feat/285 ]
 
+# GitHub Actions 에서 제공하는 최신 Ubuntu 이미지 실행
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 현재 브랜치의 코드를 GitHub Actions 실행 환경에 clone
       - name: Checkout source
         uses: actions/checkout@v4
 
+      # cs25-service/Dockerfile 기준으로 Docker 이미지 빌드
+      # baekjonghyun/cs25-service:latest 라는 이름으로 태깅
       - name: Build Docker image (cs25-service)
         run: docker build -t baekjonghyun/cs25-service:latest -f cs25-service/Dockerfile .
 
+      # DockerHub 로그인
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
+          # 로그인 인증 정보
           username: baekjonghyun
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 빌드한 이미지를 DockerHub로 업로드하여 EC2에서 Pull 가능하게 함
       - name: Push Docker image to DockerHub
         run: docker push baekjonghyun/cs25-service:latest
 
+      # GitHub Secrets 로부터 환경 변수를 읽어 .env 파일 생성
       - name: Create .env from secrets
         run: |
           echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
@@ -46,7 +57,7 @@ jobs:
           echo "AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}" >> .env
           echo "AWS_SES_SECRET_KEY=${{ secrets.AWS_SES_SECRET_KEY }}" >> .env
 
-
+      # EC2 접속 후 .env 파일 업로드
       - name: Upload .env to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -56,7 +67,8 @@ jobs:
           source: ".env"
           target: "/home/ec2-user/app"
 
-      - name: Deploy on EC2 (docker run)
+      # EC2 서버에 SSH 접속 후 Docker 배포 자동화 스크립트 실행
+      - name: Deploy on EC2 (Blue-Green 무중단 배포)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -64,20 +76,58 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ec2-user/app
-
-            echo "[1] Pull latest Docker image"
-            docker image prune
+            
+            echo "[1] 현재 nginx가 사용하는 포트 확인"
+            CURRENT_PORT=$(grep -o 'proxy_pass http://localhost:[0-9]*;' /etc/nginx/conf.d/api.cs25.co.kr.conf | grep -o '[0-9]*')
+      
+            if [ "$CURRENT_PORT" = "8080" ]; then
+            NEW_PORT=8081
+            OLD_CONTAINER=cs25-8080
+            else
+            NEW_PORT=8080
+            OLD_CONTAINER=cs25-8081
+            fi
+      
+            echo "[2] 새로운 포트($NEW_PORT)로 컨테이너 실행"
             docker pull baekjonghyun/cs25-service:latest
-            
-            echo "[2] Stop and remove old container"
-            docker stop cs25 || echo "No running container to stop"
-            docker rm cs25 || echo "No container to remove"
-            
-            echo "[3] Run new container"
             docker run -d \
-            --name cs25 \
+            --name cs25-$NEW_PORT \
             --env-file .env \
-            -p 8080:8080 \
+            -p $NEW_PORT:8080 \
             baekjonghyun/cs25-service:latest
-            
-            echo "[✔] Deployment completed successfully"
+      
+            echo "[3] nginx 설정 포트 교체 및 reload"
+            sudo sed -i "s/$CURRENT_PORT/$NEW_PORT/" /etc/nginx/conf.d/api.cs25.co.kr.conf
+            sudo nginx -t && sudo nginx -s reload
+      
+            echo "[4] 이전 컨테이너 종료 및 삭제"
+            docker stop $OLD_CONTAINER || echo "No previous container"
+            docker rm $OLD_CONTAINER || echo "No previous container"
+      
+            echo "[✔] 무중단 배포 완료! 현재 포트: $NEW_PORT"
+
+
+#            echo "[1] Pull latest Docker image"
+#            # 사용하지 않는 이미지 정리
+#            docker image prune
+#            # DockerHub 에서 최신 이미지 pull
+#            docker pull baekjonghyun/cs25-service:latest
+#
+#            echo "[2] Stop and remove old container"
+#            # 기존 컨테이너 중지
+#            docker stop cs25 || echo "No running container to stop"
+#            # 기존 컨테이너 삭제
+#            docker rm cs25 || echo "No container to remove"
+#
+#            echo "[3] Run new container"
+#            # 새 이미지를 기반으로 cs25 컨테이너 실행
+#            # 백그라운드 모드
+#            docker run -d \
+#            --name cs25 \
+#            # 환경 변수 .env 파일 사용
+#            --env-file .env \
+#            # 포트 매핑
+#            -p 8080:8080 \
+#            baekjonghyun/cs25-service:latest
+#
+#            echo "[✔] Deployment completed successfully"
