@@ -97,7 +97,7 @@ jobs:
             baekjonghyun/cs25-service:latest
       
             echo "[3] nginx 설정 포트 교체 및 reload"
-            sudo sed -i "s/$CURRENT_PORT/$NEW_PORT/" /etc/nginx/conf.d/api.cs25.co.kr.conf
+            sudo sed -i "s/$CURRENT_PORT/$NEW_PORT/" /etc/nginx/conf.d/api.conf
             sudo nginx -t && sudo nginx -s reload
       
             echo "[4] 이전 컨테이너 종료 및 삭제"
