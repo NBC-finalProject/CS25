@@ -5,7 +5,7 @@ name: CD - Docker Build & Deploy to EC2
 # main 브랜치에 push 발생 시 자동 실행
 on:
   push:
-    branches: [ feat/285 ]
+    branches: [ main ]
 
 # GitHub Actions 에서 제공하는 최신 Ubuntu 이미지 실행
 jobs:
