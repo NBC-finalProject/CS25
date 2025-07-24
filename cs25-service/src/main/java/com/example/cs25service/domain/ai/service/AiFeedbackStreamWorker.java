@@ -27,8 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class AiFeedbackStreamWorker {
 
     private static final String GROUP_NAME = RedisStreamConfig.GROUP_NAME;
-    private static final int CORE_WORKER = 2;             // 기본 워커
-    private static final int MAX_WORKER = 16;             // 최대 워커
+    private static final int CORE_WORKER = 2;             // 최소 워커 수
+    private static final int MAX_WORKER = 16;             // 최대 워커 수
     private static final int SCALING_CHECK_INTERVAL = 5;  // 워커 상태 체크 주기 (초)
 
     private final AiFeedbackStreamProcessor processor;
@@ -38,7 +38,7 @@ public class AiFeedbackStreamWorker {
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
         CORE_WORKER,
         MAX_WORKER,
-        60, TimeUnit.SECONDS,
+        30, TimeUnit.SECONDS,        // 30초간 작업 없으면 스레드 종료 가능
         new LinkedBlockingQueue<>()
     );
 
@@ -46,11 +46,15 @@ public class AiFeedbackStreamWorker {
 
     @PostConstruct
     public void start() {
+        // core 스레드도 idle 상태에서 timeout 허용
+        executor.allowCoreThreadTimeOut(true);
+
         // 초기 워커 실행
         for (int i = 0; i < CORE_WORKER; i++) {
             final String consumerName = "consumer-" + i;
             executor.submit(() -> poll(consumerName));
         }
+
         // 자동 스케일링 워커 실행
         executor.submit(this::autoScaleWorkers);
     }
@@ -59,23 +63,21 @@ public class AiFeedbackStreamWorker {
         while (running.get()) {
             try {
                 long queueSize = redisTemplate.opsForStream().size(RedisStreamConfig.STREAM_KEY);
-                int currentThreads = executor.getActiveCount();
-                int newThreads = calculateTargetWorkerCount(queueSize);
+                int currentThreads = executor.getCorePoolSize();
+                int targetThreads = calculateTargetWorkerCount(queueSize);
 
-                if (newThreads > currentThreads) {
+                if (targetThreads > currentThreads) {
                     // 워커 확장
-                    log.info("워커 수 확장: {}개 -> {}개 (큐 크기: {})", currentThreads, newThreads, queueSize);
-                    for (int i = currentThreads; i < newThreads; i++) {
+                    log.info("워커 수 확장: {}개 -> {}개 (큐 크기: {})", currentThreads, targetThreads, queueSize);
+                    executor.setCorePoolSize(targetThreads);
+                    for (int i = currentThreads; i < targetThreads; i++) {
                         final String consumerName = "consumer-" + i;
                         executor.submit(() -> poll(consumerName));
                     }
-                } else if (newThreads < currentThreads) {
-                    // 워커 축소
-                    int threadsToReduce = currentThreads - newThreads;
-                    log.info("워커 수 축소: {}개 -> {}개 (큐 크기: {})", currentThreads, newThreads, queueSize);
-                    for (int i = 0; i < threadsToReduce; i++) {
-                        executor.remove(() -> {}); // 큐에 대기중인 task 제거 (간단한 축소 처리)
-                    }
+                } else if (targetThreads < currentThreads) {
+                    // 워커 축소 (setCorePoolSize 감소)
+                    log.info("워커 수 축소: {}개 -> {}개 (큐 크기: {})", currentThreads, targetThreads, queueSize);
+                    executor.setCorePoolSize(targetThreads);
                 }
 
                 TimeUnit.SECONDS.sleep(SCALING_CHECK_INTERVAL);
