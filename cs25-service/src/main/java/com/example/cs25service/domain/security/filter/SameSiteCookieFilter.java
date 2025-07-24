@@ -10,7 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
+@Component("jwtSameSiteCookieFilter")
 @Order(2)
 public class SameSiteCookieFilter extends OncePerRequestFilter {
 
