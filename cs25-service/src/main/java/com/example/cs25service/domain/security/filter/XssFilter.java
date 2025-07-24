@@ -6,12 +6,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @Order(1)
+@Slf4j
 public class XssFilter extends OncePerRequestFilter {
 
     @Override
@@ -22,5 +24,7 @@ public class XssFilter extends OncePerRequestFilter {
 
         XssRequestWrapper wrappedRequest = new XssRequestWrapper(request);
         filterChain.doFilter(wrappedRequest, response);
+
+        log.debug("XSS Filter applied for content type: {}", request.getContentType());
     }
 }
