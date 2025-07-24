@@ -53,6 +53,7 @@ public class UserQuizAnswerService {
     @Transactional
     public UserQuizAnswerResponseDto submitAnswer(String quizSerialId, UserQuizAnswerRequestDto requestDto) {
 
+        // 구독 정보 조회
         Subscription subscription = subscriptionRepository.findBySerialIdOrElseThrow(
             requestDto.getSubscriptionId());
 
@@ -61,6 +62,7 @@ public class UserQuizAnswerService {
             throw new SubscriptionException(SubscriptionExceptionCode.DISABLED_SUBSCRIPTION_ERROR);
         }
 
+        // 퀴즈 조회
         Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizSerialId);
 
         // 이미 답변했는지 여부 조회
@@ -69,6 +71,7 @@ public class UserQuizAnswerService {
 
         // 이미 답변했으면
         if(isDuplicate) {
+            // 기존 답변 조회
             UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
                 .findUserQuizAnswerBySerialIds(quizSerialId, requestDto.getSubscriptionId());
 
@@ -82,6 +85,7 @@ public class UserQuizAnswerService {
         }
         // 처음 답변한 경우 답변 생성하여 저장
         else {
+            // 유저 조회, 유저 정보 없으면 null 로 처리 (비회원인 경우)
             User user = userRepository.findBySubscription(subscription).orElse(null);
 
             // 서술형의 경우는 AiFeedbackStreamProcesser 로직에서 isCorrect, aiFeedback 컬럼을 저장
@@ -108,8 +112,10 @@ public class UserQuizAnswerService {
      */
     @Transactional
     public UserQuizAnswerResponseDto evaluateAnswer(Long userQuizAnswerId) {
+        // 유저 답변 조회
         UserQuizAnswer userQuizAnswer = userQuizAnswerRepository
             .findWithQuizAndUserByIdOrElseThrow(userQuizAnswerId);
+        // 유저 답변에 대한 퀴즈 조회
         Quiz quiz = userQuizAnswer.getQuiz();
 
         // 정답인지 채점하고 업데이트
@@ -134,18 +140,25 @@ public class UserQuizAnswerService {
      * @throws QuizException 퀴즈를 찾을 수 없는 경우
      */
     public SelectionRateResponseDto calculateSelectionRateByOption(String quizSerialId) {
+        // 퀴즈 조회
         Quiz quiz = quizRepository.findBySerialIdOrElseThrow(quizSerialId);
+        // 해당 퀴즈에 대한 모든 사용자 응답(UserAnswerDto) 조회
         List<UserAnswerDto> answers = userQuizAnswerRepository.findUserAnswerByQuizId(quiz.getId());
 
-        //보기별 선택 수 집계
+        // 보기별 선택 수 집계
         Map<String, Long> selectionCounts = answers.stream()
-            .map(UserAnswerDto::getUserAnswer)
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            .map(UserAnswerDto::getUserAnswer)  // 사용자 입력값만 추출 (answer-> UserAnswerDto.getUserAnswer(answer))
+            .filter(Objects::nonNull)           // null 응답 제거
+            .map(String::trim)                  // 공백 제거
+                .collect(Collectors.groupingBy(
+                        Function.identity(),    // 보기별로 그룹핑
+                        Collectors.counting()   // 각 보기 선택 횟수 카운트
+                ));
 
         // 총 응답 수 계산
-        long totalResponses = selectionCounts.values().stream().mapToLong(Long::longValue).sum();
+        long totalResponses = selectionCounts.values().stream()
+                .mapToLong(Long::longValue)
+                .sum();
 
         // 선택률 계산
         Map<String, Double> selectionRates = selectionCounts.entrySet().stream()
@@ -192,8 +205,11 @@ public class UserQuizAnswerService {
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
     private boolean getAnswerCorrectStatus(Quiz quiz, UserQuizAnswer userQuizAnswer) {
+        // 정답인지 체크
         boolean isAnswerCorrect = checkAnswer(quiz, userQuizAnswer);
+        // 점수 업데이트
         updateUserScore(userQuizAnswer.getUser(), quiz, isAnswerCorrect);
+        // 정답 여부 반환
         return isAnswerCorrect;
     }
 
@@ -207,7 +223,9 @@ public class UserQuizAnswerService {
      * @throws QuizException 지원하지 않는 퀴즈 타입인 경우
      */
     private boolean checkAnswer(Quiz quiz, UserQuizAnswer userQuizAnswer) {
+        // 퀴즈 타입이 객관식이거나 주관식이면
         if(quiz.getType().getScore() == 1 || quiz.getType().getScore() == 3){
+            // 공백 제거하고 정답이랑 똑같은지 확인
             return userQuizAnswer.getUserAnswer().trim().equals(quiz.getAnswer().trim());
         }else{
             throw new QuizException(QuizExceptionCode.NOT_FOUND_ERROR);
@@ -225,6 +243,7 @@ public class UserQuizAnswerService {
      * @param isAnswerCorrect 답변 정답 여부
      */
     private void updateUserScore(User user, Quiz quiz, boolean isAnswerCorrect) {
+        // 로그인 유저이면
         if(user != null){
             double updatedScore;
             if(isAnswerCorrect){
