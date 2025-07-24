@@ -4,7 +4,7 @@ import com.example.cs25common.global.exception.ErrorResponseUtil;
 import com.example.cs25service.domain.oauth2.handler.OAuth2LoginFailureHandler;
 import com.example.cs25service.domain.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.example.cs25service.domain.oauth2.service.CustomOAuth2UserService;
-import com.example.cs25service.domain.security.jwt.filter.JwtAuthenticationFilter;
+import com.example.cs25service.domain.security.filter.JwtAuthenticationFilter;
 import com.example.cs25service.domain.security.jwt.provider.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

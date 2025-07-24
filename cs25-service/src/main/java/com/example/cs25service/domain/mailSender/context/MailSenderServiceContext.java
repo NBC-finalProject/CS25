@@ -1,5 +1,7 @@
 package com.example.cs25service.domain.mailSender.context;
 
+import com.example.cs25entity.domain.quiz.entity.Quiz;
+import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25service.domain.mailSender.MailSenderServiceStrategy;
 import com.example.cs25service.domain.mailSender.exception.MailSenderExceptionCode;
 
@@ -20,5 +22,10 @@ public class MailSenderServiceContext {
             );
         }
         strategy.sendVerificationCodeMail(toEmail, code);
+    }
+
+    public void sendQuizMail(Subscription subscription, Quiz quiz){
+        MailSenderServiceStrategy strategy = strategyMap.get("sesServiceMailSender");
+        strategy.sendQuizMail(subscription, quiz);
     }
 }
