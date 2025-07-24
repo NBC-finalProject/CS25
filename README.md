@@ -2,11 +2,12 @@
 ---
 # 🕰️ 개발 기간
 05/27(화) ~ 07/07(월)
----
+--- 
 
 # 🛠️ 기술 스택
 
-![image](https://github.com/user-attachments/assets/28529309-2fa5-4368-8b6c-b0f01ef412b5)
+<img width="1201" height="1334" alt="image" src="https://github.com/user-attachments/assets/3999c77d-5470-4eb6-86c9-bd321c808422" />
+
 ---
 
 # 🔑 주요 기능과 서비스 작동 흐름

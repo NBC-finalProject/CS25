@@ -46,23 +46,25 @@ public class ProfileService {
      */
     public UserSubscriptionResponseDto getUserSubscription(AuthUser authUser) {
 
-        // 유저 정보 조회
+        // 사용자 정보 조회
         User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
 
-        // 구독 아이디 조회
+        // 해당 유저가 현재 사용 중인 구독 id 조회
         Long subscriptionId = user.getSubscription().getId();
 
-        // 구독 정보
+        // 현재 구독의 상세 정보 조회
         SubscriptionInfoDto subscriptionInfo = subscriptionService.getSubscription(
             user.getSubscription().getSerialId());
 
-        //로그 다 모아와서 리스트로 만들기
+        // 해당 구독의 이력(SubscriptionHistory) 전체 조회
         List<SubscriptionHistory> subLogs = subscriptionHistoryRepository
             .findAllBySubscriptionId(subscriptionId);
+        // 조회한 구독 이력 엔티티 리스트를 DTO로 변환 (정적 팩토리 메소드 사용)
         List<SubscriptionHistoryDto> dtoList = subLogs.stream()
-            .map(SubscriptionHistoryDto::fromEntity)
+            .map(SubscriptionHistoryDto::fromEntity) // fromEntity(log -> SubscriptionHistoryDto.fromEntity(log))
             .toList();
 
+        // 사용자 정보, 구독 상세, 구독 이력 로그를 포함한 응답 DTO 생성 및 반환
         return UserSubscriptionResponseDto.builder()
             .userId(user.getSerialId())
             .email(user.getEmail())
@@ -80,20 +82,23 @@ public class ProfileService {
      */
     public ProfileWrongQuizResponseDto getWrongQuiz(AuthUser authUser, Pageable pageable) {
 
+        // 현재 로그인한 사용자 정보 조회
         User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
 
-        // 유저 아이디로 내가 푼 문제 조회
+        // 사용자가 틀린 퀴즈만 조회 (isCorrect = false), 페이징 적용
         Page<UserQuizAnswer> page = userQuizAnswerRepository.findAllByUserIdAndIsCorrectFalse(user.getId(), pageable);
 
+        // 틀린 문제 리스트를 WrongQuizDto로 변환 (문제, 사용자의 답, 정답, 해설 포함)
         List<WrongQuizDto> wrongQuizList = page.stream()
             .map(answer -> new WrongQuizDto(
-                answer.getQuiz().getQuestion(),
-                answer.getUserAnswer(),
-                answer.getQuiz().getAnswer(),
-                answer.getQuiz().getCommentary()
+                answer.getQuiz().getQuestion(),     // 문제
+                answer.getUserAnswer(),             // 사용자가 입력한 답안
+                answer.getQuiz().getAnswer(),       // 정답
+                answer.getQuiz().getCommentary()    // 해설
             ))
             .collect(Collectors.toList());
 
+        // 사용자 id, 틀린 문제 리스트, 페이지 정보를 포함한 응답 DTO 생성 및 변환
         return new ProfileWrongQuizResponseDto(authUser.getSerialId(), wrongQuizList, page);
     }
 
@@ -104,9 +109,12 @@ public class ProfileService {
      */
     public ProfileResponseDto getProfile(AuthUser authUser) {
 
+        // 사용자 정보 조회
         User user = userRepository.findBySerialIdOrElseThrow(authUser.getSerialId());
+        // 내 랭킹 조회 (조회 쿼리: 내 점수보다 큰 사용자 조회 해서 카운팅 하고 + 1)
         int myRank = userRepository.findRankByScore(user.getScore());
 
+        // 유저가 구독을 했는지 안했는지 검증
         boolean userSubscriptionStatus = getUserSubscriptionStatus(user);
 
         return ProfileResponseDto.builder()
