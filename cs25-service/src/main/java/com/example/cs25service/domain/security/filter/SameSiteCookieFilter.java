@@ -1,4 +1,4 @@
-package com.example.cs25service.domain.security.jwt.filter;
+package com.example.cs25service.domain.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

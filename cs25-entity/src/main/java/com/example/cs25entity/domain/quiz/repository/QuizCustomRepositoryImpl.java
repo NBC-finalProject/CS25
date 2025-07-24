@@ -29,7 +29,8 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
         BooleanBuilder builder = new BooleanBuilder()
             .and(quiz.category.parent.id.eq(parentCategoryId)) //내가 정한 카테고리에
             .and(quiz.level.in(difficulties)) //정해진 난이도 그룹안에있으면서
-            .and(quiz.type.in(targetTypes)); //퀴즈 타입은 이거야
+            .and(quiz.type.in(targetTypes)) //퀴즈 타입은 이거야
+            .and(quiz.category.id.isNotNull());
 
         if (!solvedQuizIds.isEmpty()) {
             builder.and(quiz.id.notIn(solvedQuizIds)); //혹시라도 구독자가 문제를 푼 이력잉 ㅣㅆ으면 그것도 제외해야햄

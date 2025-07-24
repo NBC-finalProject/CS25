@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.cs25entity.domain.user.entity.Role;
 import com.example.cs25service.domain.security.dto.AuthUser;
+import com.example.cs25service.domain.security.filter.JwtAuthenticationFilter;
 import com.example.cs25service.domain.security.jwt.exception.JwtAuthenticationException;
 import com.example.cs25service.domain.security.jwt.exception.JwtExceptionCode;
 import com.example.cs25service.domain.security.jwt.provider.JwtTokenProvider;
@@ -42,7 +43,7 @@ class JwtAuthenticationFilterTest {
     @Nested
     @DisplayName("doFilterInternal 함수는 ")
     class inDoFilterInternal {
-        
+
         @AfterEach
         void clearContext() {
             SecurityContextHolder.clearContext();
