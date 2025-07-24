@@ -1,5 +1,8 @@
 package com.example.cs25service.domain.security.common;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,28 +18,28 @@ import org.apache.commons.text.StringEscapeUtils;
 
 public class XssRequestWrapper extends HttpServletRequestWrapper {
 
-    private final String sanitizedJsonBody; //결과 저장예정
+    private final String sanitizedJsonBody;
 
     public XssRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
 
         if (request.getContentType() != null && request.getContentType()
-            .contains("application/json")) { //Request Body 가 다 제이슨이니깐
+            .contains("application/json")) {
             String rawBody = request.getReader().lines()
                 .collect(Collectors.joining(System.lineSeparator()));
-            this.sanitizedJsonBody = StringEscapeUtils.escapeHtml4(rawBody); // 또는 필드 단위 escape
+            this.sanitizedJsonBody = sanitizeJsonBody(rawBody); //JSON 필드 값만 escape
         } else {
             this.sanitizedJsonBody = null;
         }
     }
 
     @Override
-    public String getParameter(String name) { //폼 요청(application/x-www-form-urlencoded)일 경우
+    public String getParameter(String name) {
         return escape(super.getParameter(name));
     }
 
     @Override
-    public String[] getParameterValues(String name) { //getParameter << 이거 있을때
+    public String[] getParameterValues(String name) {
         String[] values = super.getParameterValues(name);
         if (values == null) {
             return null;
@@ -50,7 +53,6 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        //request Body가 있으면 스트림으로 다 일겅바야
         if (sanitizedJsonBody == null) {
             return super.getInputStream();
         }
@@ -86,5 +88,37 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
             return super.getReader();
         }
         return new BufferedReader(new InputStreamReader(getInputStream()));
+    }
+
+    // 🔽 JSON 필드 값만 escape하는 메서드
+    private String sanitizeJsonBody(String rawBody) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(rawBody);
+            sanitizeJsonNode(root);
+            return mapper.writeValueAsString(root);
+        } catch (Exception e) {
+            // 문제가 생기면 원본 반환 (fallback)
+            return rawBody;
+        }
+    }
+
+    private void sanitizeJsonNode(JsonNode node) {
+        if (node.isObject()) {
+            ObjectNode objNode = (ObjectNode) node;
+            objNode.fieldNames().forEachRemaining(field -> {
+                JsonNode child = objNode.get(field);
+                if (child.isTextual()) {
+                    String sanitized = StringEscapeUtils.escapeHtml4(child.asText());
+                    objNode.put(field, sanitized);
+                } else {
+                    sanitizeJsonNode(child);
+                }
+            });
+        } else if (node.isArray()) {
+            for (JsonNode item : node) {
+                sanitizeJsonNode(item);
+            }
+        }
     }
 }
