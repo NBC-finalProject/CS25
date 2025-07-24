@@ -6,8 +6,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -28,10 +26,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class AiFeedbackStreamWorker {
 
-    private final String GROUP_NAME = RedisStreamConfig.GROUP_NAME;
-    private final int CORE_WORKER = 2; // 기본 워커
-    private final int MAX_WOKRER = 16; // 최대 워커
-    private final int SCALING_CHECK_INTERVAL = 5; // 5초마다 큐 상태 확인
+    private static final String GROUP_NAME = RedisStreamConfig.GROUP_NAME;
+    private static final int CORE_WORKER = 2;             // 기본 워커
+    private static final int MAX_WORKER = 16;             // 최대 워커
+    private static final int SCALING_CHECK_INTERVAL = 5;  // 워커 상태 체크 주기 (초)
 
     private final AiFeedbackStreamProcessor processor;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -39,49 +37,62 @@ public class AiFeedbackStreamWorker {
 
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
         CORE_WORKER,
-        MAX_WOKRER,
+        MAX_WORKER,
         60, TimeUnit.SECONDS,
         new LinkedBlockingQueue<>()
     );
+
     private final AtomicBoolean running = new AtomicBoolean(true);
 
     @PostConstruct
     public void start() {
+        // 초기 워커 실행
         for (int i = 0; i < CORE_WORKER; i++) {
             final String consumerName = "consumer-" + i;
-            executor.submit(()-> poll(consumerName));
+            executor.submit(() -> poll(consumerName));
         }
+        // 자동 스케일링 워커 실행
         executor.submit(this::autoScaleWorkers);
     }
 
     private void autoScaleWorkers() {
         while (running.get()) {
             try {
-                Long queueSize = redisTemplate.opsForStream()
-                    .size(RedisStreamConfig.STREAM_KEY);
+                long queueSize = redisTemplate.opsForStream().size(RedisStreamConfig.STREAM_KEY);
                 int currentThreads = executor.getActiveCount();
-                int newThreads = CORE_WORKER;
+                int newThreads = calculateTargetWorkerCount(queueSize);
 
-                // 큐 크기에 따라 확장 기준 설정
-                if (queueSize > 100) newThreads = 4;
-                if (queueSize > 500) newThreads = 8;
-                if (queueSize > 1000) newThreads = 16;
-
-                // 현재 스레드 수보다 늘려야 하면 워커 추가
                 if (newThreads > currentThreads) {
+                    // 워커 확장
                     log.info("워커 수 확장: {}개 -> {}개 (큐 크기: {})", currentThreads, newThreads, queueSize);
                     for (int i = currentThreads; i < newThreads; i++) {
                         final String consumerName = "consumer-" + i;
                         executor.submit(() -> poll(consumerName));
                     }
+                } else if (newThreads < currentThreads) {
+                    // 워커 축소
+                    int threadsToReduce = currentThreads - newThreads;
+                    log.info("워커 수 축소: {}개 -> {}개 (큐 크기: {})", currentThreads, newThreads, queueSize);
+                    for (int i = 0; i < threadsToReduce; i++) {
+                        executor.remove(() -> {}); // 큐에 대기중인 task 제거 (간단한 축소 처리)
+                    }
                 }
 
-                // 정해진 시간마다 큐 상태 체크
                 TimeUnit.SECONDS.sleep(SCALING_CHECK_INTERVAL);
             } catch (Exception e) {
-                log.error("워커 자동 확장 중 오류 발생", e);
+                log.error("워커 자동 스케일링 중 오류 발생", e);
             }
         }
+    }
+
+    /**
+     * 큐 크기에 따른 목표 워커 수 계산
+     */
+    private int calculateTargetWorkerCount(long queueSize) {
+        if (queueSize > 1000) return 16;
+        else if (queueSize > 500) return 8;
+        else if (queueSize > 100) return 4;
+        else return CORE_WORKER;
     }
 
     private void poll(String consumerName) {
@@ -98,20 +109,16 @@ public class AiFeedbackStreamWorker {
                         SseEmitter emitter = emitterRegistry.get(answerId);
 
                         if (emitter == null) {
-                            log.warn("해당 answerId={}에 대한 emitter 없습니다.", answerId);
+                            log.warn("해당 answerId={}에 대한 emitter가 없습니다.", answerId);
                             redisTemplate.opsForStream()
                                 .acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
                             continue;
                         }
 
                         processor.stream(answerId, emitter);
-
                         emitterRegistry.remove(answerId);
-                        redisTemplate.opsForSet()
-                            .remove(AiFeedbackQueueService.DEDUPLICATION_SET_KEY, answerId);
-
-                        redisTemplate.opsForStream()
-                            .acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
+                        redisTemplate.opsForSet().remove(AiFeedbackQueueService.DEDUPLICATION_SET_KEY, answerId);
+                        redisTemplate.opsForStream().acknowledge(RedisStreamConfig.STREAM_KEY, GROUP_NAME, message.getId());
                     }
                 }
             } catch (Exception e) {
