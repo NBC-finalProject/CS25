@@ -44,7 +44,13 @@ public class AiService {
 
         String feedback = aiChatClient.call(systemPrompt, userPrompt);
 
-        boolean isCorrect = feedback.startsWith("정답");
+        //boolean isCorrect = feedback.startsWith("정답");
+        boolean isCorrect = false;
+        int index = feedback.indexOf(':');
+        if (index != -1) {
+            String prefix = feedback.substring(0, index).trim();
+            isCorrect = prefix.contains("정답");
+        }
 
         User user = answer.getUser();
         if (user != null) {
