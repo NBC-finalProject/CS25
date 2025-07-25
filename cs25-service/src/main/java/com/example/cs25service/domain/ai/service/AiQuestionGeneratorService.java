@@ -30,10 +30,10 @@ public class AiQuestionGeneratorService {
     public Quiz generateQuestionFromContext() {
         // 1. LLM으로부터 CS 키워드 동적 생성
         String keyword = Objects.requireNonNull(chatClient.prompt()
-				.system(promptProvider.getKeywordSystem())
-				.user(promptProvider.getKeywordUser())
-				.call()
-				.content())
+                .system(promptProvider.getKeywordSystem())
+                .user(promptProvider.getKeywordUser())
+                .call()
+                .content())
             .trim();
 
         if (!StringUtils.hasText(keyword)) {
@@ -56,24 +56,26 @@ public class AiQuestionGeneratorService {
 
         // 3. 중심 토픽 추출
         String topic = Objects.requireNonNull(chatClient.prompt()
-				.system(promptProvider.getTopicSystem())
-				.user(promptProvider.getTopicUser(context))
-				.call()
-				.content())
+                .system(promptProvider.getTopicSystem())
+                .user(promptProvider.getTopicUser(context))
+                .call()
+                .content())
             .trim();
 
         // 4. 카테고리 분류 (BACKEND / FRONTEND)
         String categoryType = Objects.requireNonNull(chatClient.prompt()
-				.system(promptProvider.getCategorySystem())
-				.user(promptProvider.getCategoryUser(topic))
-				.call()
-				.content())
+                .system(promptProvider.getCategorySystem())
+                .user(promptProvider.getCategoryUser(topic))
+                .call()
+                .content())
             .trim()
             .toUpperCase();
 
-        if (!categoryType.equalsIgnoreCase("SoftwareDevelopment") && !categoryType.equalsIgnoreCase("SoftwareDesign")
-            && !categoryType.equalsIgnoreCase("Programming") && !categoryType.equalsIgnoreCase("Database")
-            && !categoryType.equalsIgnoreCase("InformationSystemManagement") ) {
+        if (!categoryType.equalsIgnoreCase("SoftwareDevelopment") && !categoryType.equalsIgnoreCase(
+            "SoftwareDesign")
+            && !categoryType.equalsIgnoreCase("Programming") && !categoryType.equalsIgnoreCase(
+            "Database")
+            && !categoryType.equalsIgnoreCase("InformationSystemManagement")) {
             throw new IllegalArgumentException("AI가 반환한 카테고리가 유효하지 않습니다: " + categoryType);
         }
 
@@ -81,10 +83,10 @@ public class AiQuestionGeneratorService {
 
         // 5. 문제 생성 (문제, 정답, 해설)
         String output = Objects.requireNonNull(chatClient.prompt()
-				.system(promptProvider.getGenerateSystem())
-				.user(promptProvider.getGenerateUser(context))
-				.call()
-				.content())
+                .system(promptProvider.getGenerateSystem())
+                .user(promptProvider.getGenerateUser(context))
+                .call()
+                .content())
             .trim();
 
         String[] lines = output.split("\n");
