@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.service;
 
+import com.example.cs25entity.domain.mail.repository.MailLogRepository;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
@@ -8,10 +9,8 @@ import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
-import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ public class TodayQuizService {
     private final QuizRepository quizRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
+    private final MailLogRepository mailLogRepository;
     private final SesMailService mailService;
 
     @Transactional
@@ -39,48 +39,43 @@ public class TodayQuizService {
         Long subscriptionId = subscription.getId();
 
         // 2. 유저 정답률 계산, 내가 푼 문제 아이디값
-        List<UserQuizAnswer> answerHistory = userQuizAnswerRepository.findBySubscriptionIdAndQuizCategoryId(
-            subscriptionId, parentCategoryId);
-        int quizCount = answerHistory.size(); // 사용자가 지금까지 푼 문제 수
-        int totalCorrect = 0;
-        Set<Long> solvedQuizIds = new HashSet<>();
+        Double accuracyResult = userQuizAnswerRepository.getCorrectRate(subscriptionId,
+            parentCategoryId);
+        double accuracy = accuracyResult != null ? accuracyResult : 100.0;
 
-        for (UserQuizAnswer answer : answerHistory) {
-            if (answer.getIsCorrect()) {
-                totalCorrect++;
-            }
-            solvedQuizIds.add(answer.getQuiz().getId());
-        }
+        Set<Long> sentQuizIds = mailLogRepository.findQuiz_IdBySubscription_Id(subscriptionId);
+        int quizCount = sentQuizIds.size(); // 사용자가 지금까지 푼 문제 수
 
-        double accuracy =
-            quizCount == 0 ? 100.0 : ((double) totalCorrect / quizCount) * 100.0;
         // 6. 서술형 주기 판단 (풀이 횟수 기반)
-        boolean isEssayDay = quizCount % 3 == 2; //일단 3배수일때 한번씩은 서술( 조정 필요하면 나중에 하는거롤)
+        boolean isEssayDay = quizCount % 4 == 3; //일단 3배수일때 한번씩은 서술(0,1,2 객관식 / 3서술형)
 
-        List<QuizFormatType> targetTypes = isEssayDay
-            ? List.of(QuizFormatType.SUBJECTIVE)
-            : List.of(QuizFormatType.MULTIPLE_CHOICE);
+        QuizFormatType targetType = isEssayDay
+            ? QuizFormatType.SUBJECTIVE
+            : QuizFormatType.MULTIPLE_CHOICE;
 
         // 3. 정답률 기반 난이도 바운더리 설정
         List<QuizLevel> allowedDifficulties = getAllowedDifficulties(accuracy);
 
-        // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
-        List<Quiz> candidateQuizzes = quizRepository.findAvailableQuizzesUnderParentCategory(
-            parentCategoryId,
-            allowedDifficulties,
-            solvedQuizIds,
-            //excludedCategoryIds,
-            targetTypes
-        ); //한개만뽑기(find first)
-
-        if (candidateQuizzes.isEmpty()) { // 뽀ㅃ을문제없을때
-            throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
-        }
-
         // 8. 오프셋 계산 (풀이 수 기준)
         long seed = LocalDate.now().toEpochDay() + subscriptionId;
-        int offset = (int) (seed % candidateQuizzes.size());
-        return candidateQuizzes.get(offset);
+        int offset = (int) (seed % 20);
+
+        // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
+
+        Quiz todayQuiz = quizRepository.findAvailableQuizzesUnderParentCategory(
+            parentCategoryId,
+            allowedDifficulties,
+            sentQuizIds,
+            //excludedCategoryIds,
+            targetType,
+            offset
+        );
+
+        if (todayQuiz == null) {
+            throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
+        }
+
+        return todayQuiz;
     }
 
 

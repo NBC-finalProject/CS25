@@ -5,6 +5,7 @@ import com.example.cs25entity.domain.mail.exception.CustomMailException;
 import com.example.cs25entity.domain.mail.exception.MailExceptionCode;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,4 +22,6 @@ public interface MailLogRepository extends JpaRepository<MailLog, Long>,
     }
 
     void deleteAllByIdIn(Collection<Long> ids);
+
+    Set<Long> findQuiz_IdBySubscription_Id(Long subscriptionId);
 }

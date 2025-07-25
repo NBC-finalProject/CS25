@@ -22,7 +22,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "userQuizAnswers")
 @NoArgsConstructor
-public class UserQuizAnswer extends BaseEntity {
+public class
+UserQuizAnswer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
