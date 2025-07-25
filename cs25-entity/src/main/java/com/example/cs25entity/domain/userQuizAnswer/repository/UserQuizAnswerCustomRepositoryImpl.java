@@ -76,10 +76,11 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
         NumberExpression<Long> totalCount = answer.id.count();
 
         // 정답률 계산식
-        NumberExpression<Double> correctRate = correctSum.doubleValue()
-            .divide(totalCount.doubleValue());
+        NumberExpression<Double> correctRate = new CaseBuilder()
+            .when(totalCount.eq(0L)).then(100.0)
+            .otherwise(correctSum.doubleValue().divide(totalCount.doubleValue()));
 
-        return queryFactory
+        Double result = queryFactory
             .select(correctRate)
             .from(answer)
             .join(answer.quiz, quiz)
@@ -89,6 +90,9 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
                 category.parent.id.eq(quizCategoryId)
             )
             .fetchOne();
+
+        // 답변이 없는 경우 기본값 반환
+        return result != null ? result : 100.0;
     }
 
     @Override
