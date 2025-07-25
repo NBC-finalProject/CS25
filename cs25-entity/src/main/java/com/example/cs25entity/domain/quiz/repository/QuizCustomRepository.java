@@ -8,9 +8,10 @@ import java.util.Set;
 
 public interface QuizCustomRepository {
 
-    List<Quiz> findAvailableQuizzesUnderParentCategory(Long parentCategoryId,
+    Quiz findAvailableQuizzesUnderParentCategory(Long parentCategoryId,
         List<QuizLevel> difficulties,
         Set<Long> solvedQuizIds,
-        List<QuizFormatType> targetTypes);
+        QuizFormatType targetType,
+        int offset);
 
 }

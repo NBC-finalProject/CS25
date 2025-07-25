@@ -1,19 +1,17 @@
 package com.example.cs25service.domain.quiz.service;
 
+import com.example.cs25entity.domain.mail.repository.MailLogRepository;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizAccuracy;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
-import com.example.cs25entity.domain.quiz.exception.QuizException;
-import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizAccuracyRedisRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
-import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -29,64 +27,44 @@ public class QuizAccuracyCalculateService {
     private final QuizRepository quizRepository;
     private final QuizAccuracyRedisRepository quizAccuracyRedisRepository;
     private final UserQuizAnswerRepository userQuizAnswerRepository;
-    private final SubscriptionRepository subscriptionRepository;
+    private final MailLogRepository mailLogRepository;
 
     @Transactional
-    public Quiz getTodayQuizBySubscription(Long subscriptionId) {
-        Subscription subscription = subscriptionRepository.findByIdOrElseThrow(subscriptionId);
-
+    public Quiz getTodayQuizBySubscription(Subscription subscription) {
         // 1. 구독자 정보 및 카테고리 조회
         Long parentCategoryId = subscription.getCategory().getId(); // 대분류 ID
+        Long subscriptionId = subscription.getId();
 
         // 2. 유저 정답률 계산, 내가 푼 문제 아이디값
-        List<UserQuizAnswer> answerHistory = userQuizAnswerRepository.findBySubscriptionIdAndQuizCategoryId(
-            subscriptionId, parentCategoryId);
-        int quizCount = answerHistory.size(); // 사용자가 지금까지 푼 문제 수
-        int totalCorrect = 0;
-        Set<Long> solvedQuizIds = new HashSet<>();
+        double accuracy = userQuizAnswerRepository.getCorrectRate(subscriptionId, parentCategoryId);
 
-        for (UserQuizAnswer answer : answerHistory) {
-            if (answer.getIsCorrect()) {
-                totalCorrect++;
-            }
-            solvedQuizIds.add(answer.getQuiz().getId());
-        }
+        Set<Long> sentQuizIds = mailLogRepository.findQuiz_IdBySubscription_Id(subscriptionId);
+        int quizCount = sentQuizIds.size(); // 사용자가 지금까지 푼 문제 수
 
-        double accuracy =
-            quizCount == 0 ? 100.0 : ((double) totalCorrect / quizCount) * 100.0;
         // 6. 서술형 주기 판단 (풀이 횟수 기반)
         boolean isEssayDay = quizCount % 3 == 2; //일단 3배수일때 한번씩은 서술( 조정 필요하면 나중에 하는거롤)
 
-        List<QuizFormatType> targetTypes = isEssayDay
-            ? List.of(QuizFormatType.SUBJECTIVE)
-            : List.of(QuizFormatType.MULTIPLE_CHOICE);
+        QuizFormatType targetType = isEssayDay
+            ? QuizFormatType.SUBJECTIVE
+            : QuizFormatType.MULTIPLE_CHOICE;
 
         // 3. 정답률 기반 난이도 바운더리 설정
         List<QuizLevel> allowedDifficulties = getAllowedDifficulties(accuracy);
 
-        System.out.println("Solved IDs: " + solvedQuizIds);
+        // 8. 오프셋 계산 (풀이 수 기준)
+        long seed = LocalDate.now().toEpochDay() + subscriptionId;
+        int offset = (int) (seed % 20);
 
         // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
-        List<Quiz> candidateQuizzes = quizRepository.findAvailableQuizzesUnderParentCategory(
+
+        return quizRepository.findAvailableQuizzesUnderParentCategory(
             parentCategoryId,
             allowedDifficulties,
-            solvedQuizIds,
+            sentQuizIds,
             //excludedCategoryIds,
-            targetTypes
-        ); //한개만뽑기(find first)
-
-        System.out.println("Candidate count: " + candidateQuizzes.size());
-        for (Quiz q : candidateQuizzes) {
-            System.out.println("Quiz ID: " + q.getId() + ", Content: " + q.getQuestion());
-        }
-
-        if (candidateQuizzes.isEmpty()) { // 뽀ㅃ을문제없을때
-            throw new QuizException(QuizExceptionCode.NO_QUIZ_EXISTS_ERROR);
-        }
-
-        // 8. 오프셋 계산 (풀이 수 기준)
-        long offset = quizCount % candidateQuizzes.size();
-        return candidateQuizzes.get((int) offset);
+            targetType,
+            offset
+        );
     }
 
 
@@ -102,19 +80,6 @@ public class QuizAccuracyCalculateService {
         }
     }
 
-    //    private double calculateAccuracy(List<UserQuizAnswer> answers) {
-//        if (answers.isEmpty()) {
-//            return 100.0;
-//        }
-//
-//        int totalCorrect = 0;
-//        for (UserQuizAnswer answer : answers) {
-//            if (answer.getIsCorrect()) {
-//                totalCorrect++;
-//            }
-//        }
-//        return ((double) totalCorrect / answers.size()) * 100.0;
-//    }
     public void calculateAndCacheAllQuizAccuracies() {
         List<Quiz> quizzes = quizRepository.findAll();
 
