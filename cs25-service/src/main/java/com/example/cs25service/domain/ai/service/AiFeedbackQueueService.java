@@ -2,6 +2,7 @@ package com.example.cs25service.domain.ai.service;
 
 import com.example.cs25service.domain.ai.config.RedisStreamConfig;
 import com.example.cs25service.domain.ai.queue.EmitterRegistry;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,8 @@ public class AiFeedbackQueueService {
                 completeWithError(emitter, new IllegalStateException("이미 처리중인 요청입니다."));
                 return;
             }
-
+            // 하루 TTL 부여
+            redisTemplate.expire(DEDUPLICATION_SET_KEY, Duration.ofDays(1));
             emitterRegistry.register(answerId, emitter);
 
             Map<String, Object> message = new HashMap<>();
