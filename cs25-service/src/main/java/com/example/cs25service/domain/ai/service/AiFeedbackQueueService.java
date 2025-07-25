@@ -3,6 +3,7 @@ package com.example.cs25service.domain.ai.service;
 import com.example.cs25service.domain.ai.config.RedisStreamConfig;
 import com.example.cs25service.domain.ai.queue.EmitterRegistry;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,22 @@ public class AiFeedbackQueueService {
             // Redis Set을 통한 중복 처리 방지
             Long added = redisTemplate.opsForSet()
                 .add(DEDUPLICATION_SET_KEY, String.valueOf(answerId));
+
             if (added == null || added == 0) {
                 log.info("Duplicate enqueue prevented for answerId {}", answerId);
                 completeWithError(emitter, new IllegalStateException("이미 처리중인 요청입니다."));
                 return;
             }
             // 하루 TTL 부여
-            redisTemplate.expire(DEDUPLICATION_SET_KEY, Duration.ofDays(1));
+            if (redisTemplate.opsForSet().size(DEDUPLICATION_SET_KEY) == 1) {
+                Duration ttl = getDurationUntilMidnight();
+                Boolean ttlSet = redisTemplate.expire(DEDUPLICATION_SET_KEY, ttl);
+                if (Boolean.FALSE.equals(ttlSet)) {
+                    log.warn("중복 방지 Set의 TTL 설정에 실패했습니다.");
+                } else {
+                    log.info("중복 방지 Set TTL이 자정까지 {}초로 설정되었습니다.", ttl.toSeconds());
+                }
+            }
             emitterRegistry.register(answerId, emitter);
 
             Map<String, Object> message = new HashMap<>();
@@ -57,5 +67,11 @@ public class AiFeedbackQueueService {
         } catch (Exception ignored) {
         }
         emitter.completeWithError(e);
+    }
+
+    private Duration getDurationUntilMidnight() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().plusDays(1).atStartOfDay();
+        return Duration.between(now, midnight);
     }
 }
