@@ -5,6 +5,8 @@ import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.entity.QuizAccuracy;
 import com.example.cs25entity.domain.quiz.enums.QuizFormatType;
 import com.example.cs25entity.domain.quiz.enums.QuizLevel;
+import com.example.cs25entity.domain.quiz.exception.QuizException;
+import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizAccuracyRedisRepository;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
@@ -36,13 +38,15 @@ public class QuizAccuracyCalculateService {
         Long subscriptionId = subscription.getId();
 
         // 2. 유저 정답률 계산, 내가 푼 문제 아이디값
-        double accuracy = userQuizAnswerRepository.getCorrectRate(subscriptionId, parentCategoryId);
+        Double accuracyResult = userQuizAnswerRepository.getCorrectRate(subscriptionId,
+            parentCategoryId);
+        double accuracy = accuracyResult != null ? accuracyResult : 100.0;
 
         Set<Long> sentQuizIds = mailLogRepository.findQuiz_IdBySubscription_Id(subscriptionId);
         int quizCount = sentQuizIds.size(); // 사용자가 지금까지 푼 문제 수
 
         // 6. 서술형 주기 판단 (풀이 횟수 기반)
-        boolean isEssayDay = quizCount % 3 == 2; //일단 3배수일때 한번씩은 서술( 조정 필요하면 나중에 하는거롤)
+        boolean isEssayDay = quizCount % 4 == 3; //일단 3배수일때 한번씩은 서술(0,1,2 객관식 / 3서술형)
 
         QuizFormatType targetType = isEssayDay
             ? QuizFormatType.SUBJECTIVE
@@ -57,7 +61,7 @@ public class QuizAccuracyCalculateService {
 
         // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
 
-        return quizRepository.findAvailableQuizzesUnderParentCategory(
+        Quiz todayQuiz = quizRepository.findAvailableQuizzesUnderParentCategory(
             parentCategoryId,
             allowedDifficulties,
             sentQuizIds,
@@ -65,6 +69,12 @@ public class QuizAccuracyCalculateService {
             targetType,
             offset
         );
+
+        if (todayQuiz == null) {
+            throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
+        }
+
+        return todayQuiz;
     }
 
 
