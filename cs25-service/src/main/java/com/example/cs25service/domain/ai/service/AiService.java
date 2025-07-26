@@ -45,12 +45,7 @@ public class AiService {
         String feedback = aiChatClient.call(systemPrompt, userPrompt);
 
         //boolean isCorrect = feedback.startsWith("정답");
-        boolean isCorrect = false;
-        int index = feedback.indexOf(':');
-        if (index != -1) {
-            String prefix = feedback.substring(0, index).trim();
-            isCorrect = prefix.contains("정답");
-        }
+        boolean isCorrect = isCorrect(feedback);
 
         User user = answer.getUser();
         if (user != null) {
@@ -79,5 +74,17 @@ public class AiService {
 
         feedbackQueueService.enqueue(answerId, emitter);
         return emitter;
+    }
+
+    public boolean isCorrect(String feedback){
+        if (feedback == null || feedback.isEmpty()) return false; //false 보다는 예외를 던지는게 더 나을 것 같음
+
+        String prefix = feedback.length() > 6
+            ? feedback.substring(0, 6)
+            : feedback;
+
+        prefix = prefix.replaceAll("^[\\s\\-:·]+", "");
+
+        return prefix.contains("정답");
     }
 }
