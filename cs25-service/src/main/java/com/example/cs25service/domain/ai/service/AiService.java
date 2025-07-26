@@ -83,8 +83,13 @@ public class AiService {
             ? feedback.substring(0, 6)
             : feedback;
 
-        prefix = prefix.replaceAll("^[\\s\\-:·]+", "");
+        int indexCorrect = prefix.indexOf("정답");
+        int indexWrong = prefix.indexOf("오답");
 
-        return prefix.contains("정답");
+        if (indexCorrect != -1 && (indexWrong == -1 || indexCorrect < indexWrong)) {
+            return true;
+        }
+
+        return false;
     }
 }
