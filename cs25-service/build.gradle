@@ -29,6 +29,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
 
+    // MCP
+    implementation "org.springframework.ai:spring-ai-starter-mcp-client-webflux:1.0.0"
+
     //JavaMailSender
     implementation 'jakarta.mail:jakarta.mail-api:2.1.0'
 
