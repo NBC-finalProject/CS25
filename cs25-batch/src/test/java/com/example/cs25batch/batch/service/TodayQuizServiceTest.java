@@ -1,7 +1,7 @@
 package com.example.cs25batch.batch.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
@@ -12,7 +12,6 @@ import com.example.cs25entity.domain.quiz.enums.QuizLevel;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.DayOfWeek;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
-import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import java.util.ArrayList;
@@ -33,9 +32,6 @@ class TodayQuizServiceTest {
 
     @InjectMocks
     private TodayQuizService quizService;
-
-    @Mock
-    private SubscriptionRepository subscriptionRepository;
 
     @Mock
     private UserQuizAnswerRepository userQuizAnswerRepository;
@@ -95,15 +91,9 @@ class TodayQuizServiceTest {
 
             Set<Long> solvedQuizIds = Set.of(1L, 2L);
 
-            List<Quiz> availableQuizzes = List.of(
-                createQuiz(3L, QuizFormatType.SUBJECTIVE, QuizLevel.HARD,
-                    subCategories.get(0)),
-                createQuiz(4L, QuizFormatType.SUBJECTIVE, QuizLevel.EASY,
-                    subCategories.get(1)),
+            Quiz availableQuiz =
                 createQuiz(5L, QuizFormatType.SUBJECTIVE, QuizLevel.NORMAL,
-                    subCategories.get(2)),
-                createQuiz(6L, QuizFormatType.SUBJECTIVE, QuizLevel.EASY, subCategories.get(3))
-            );
+                    subCategories.get(2));
 
             //given(subscriptionRepository.findByIdOrElseThrow(subscriptionId)).willReturn(
             //    subscription);
@@ -117,8 +107,9 @@ class TodayQuizServiceTest {
                 eq(1L),
                 eq(List.of(QuizLevel.EASY, QuizLevel.NORMAL, QuizLevel.HARD)),
                 eq(solvedQuizIds),
-                anyList()
-            )).willReturn(availableQuizzes);
+                any(QuizFormatType.class),
+                any(int.class)
+            )).willReturn(availableQuiz);
 
             //when
             Quiz todayQuiz = quizService.getTodayQuizBySubscription(subscription);

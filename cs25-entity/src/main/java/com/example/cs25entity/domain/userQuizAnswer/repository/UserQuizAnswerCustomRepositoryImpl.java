@@ -10,11 +10,10 @@ import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerException;
 import com.example.cs25entity.domain.userQuizAnswer.exception.UserQuizAnswerExceptionCode;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -52,41 +51,48 @@ public class UserQuizAnswerCustomRepositoryImpl implements UserQuizAnswerCustomR
     }
 
     @Override
-    public List<UserQuizAnswer> findBySubscriptionIdAndQuizCategoryId(Long subscriptionId,
-        Long quizCategoryId) {
+    public Double getCorrectRate(Long subscriptionId, Long quizCategoryId) {
+        /*  < 들어가는 쿼리 >
+        * SELECT SUM(CASE WHEN uqa.is_correct = true THEN 1 ELSE 0 END) / COUNT(*)
+            FROM user_quiz_answer uqa
+            JOIN quiz q ON uqa.quiz_id = q.id
+            JOIN quiz_category c ON q.quiz_category_id = c.id
+            WHERE
+                uqa.subscription_id = :subscriptionId
+                AND c.parent_id = :quizCategoryId
+        * */
+
         QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
         QQuiz quiz = QQuiz.quiz;
         QQuizCategory category = QQuizCategory.quizCategory;
 
-        return queryFactory
-            .selectFrom(answer)
+        // 정답 수
+        NumberExpression<Integer> correctSum = new CaseBuilder()
+            .when(answer.isCorrect.isTrue()).then(1)
+            .otherwise(0)
+            .sum();
+
+        // 전체 수
+        NumberExpression<Long> totalCount = answer.id.count();
+
+        // 정답률 계산식
+        NumberExpression<Double> correctRate = new CaseBuilder()
+            .when(totalCount.eq(0L)).then(100.0)
+            .otherwise(correctSum.doubleValue().divide(totalCount.doubleValue()));
+
+        Double result = queryFactory
+            .select(correctRate)
+            .from(answer)
             .join(answer.quiz, quiz)
             .join(quiz.category, category)
             .where(
                 answer.subscription.id.eq(subscriptionId),
                 category.parent.id.eq(quizCategoryId)
             )
-            .fetch();
-    }
+            .fetchOne();
 
-    @Override
-    public Set<Long> findRecentSolvedCategoryIds(Long userId, Long parentCategoryId,
-        LocalDate afterDate) {
-        QUserQuizAnswer answer = QUserQuizAnswer.userQuizAnswer;
-        QQuiz quiz = QQuiz.quiz;
-        QQuizCategory category = QQuizCategory.quizCategory;
-
-        return new HashSet<>(queryFactory
-            .select(category.id)
-            .from(answer)
-            .join(answer.quiz, quiz)
-            .join(quiz.category, category)
-            .where(
-                answer.user.id.eq(userId),
-                category.parent.id.eq(parentCategoryId),
-                answer.createdAt.goe(afterDate.atStartOfDay())
-            )
-            .fetch());
+        // 답변이 없는 경우 기본값 반환
+        return result != null ? result : 100.0;
     }
 
     @Override
