@@ -69,7 +69,11 @@ public class AiFeedbackStreamProcessor {
                         send(emitter, "[종료]");
 
                         String feedback = fullFeedbackBuffer.toString();
-                        boolean isCorrect = feedback.startsWith("정답");
+                        if (feedback == null || feedback.isEmpty()) {
+                            throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
+                        }
+
+                        boolean isCorrect = isCorrect(feedback);
 
                         transactionTemplate.executeWithoutResult(status -> {
                             if (user != null && userScore != null) {
@@ -95,6 +99,21 @@ public class AiFeedbackStreamProcessor {
         } catch (Exception e) {
             emitter.completeWithError(e);
         }
+    }
+
+    public boolean isCorrect(String feedback){
+        String prefix = feedback.length() > 6
+            ? feedback.substring(0, 6)
+            : feedback;
+
+        int indexCorrect = prefix.indexOf("정답");
+        int indexWrong = prefix.indexOf("오답");
+
+        if (indexCorrect != -1 && (indexWrong == -1 || indexCorrect < indexWrong)) {
+            return true;
+        }
+
+        return false;
     }
 
     private void send(SseEmitter emitter, String data) {
