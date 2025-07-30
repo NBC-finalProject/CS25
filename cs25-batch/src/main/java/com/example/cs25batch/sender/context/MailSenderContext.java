@@ -18,6 +18,11 @@ public class MailSenderContext {
         strategy.sendQuizMail(dto);
     }
 
+    public Bucket getBucket(String strategyKey) {
+        MailSenderStrategy strategy = getValidStrategy(strategyKey);
+        return strategy.getBucket();
+    }
+
     private MailSenderStrategy getValidStrategy(String strategyKey) {
         MailSenderStrategy strategy = strategyMap.get(strategyKey);
         if (strategy == null) {
