@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.component.reader;
 
+import com.example.cs25batch.sender.context.MailSenderContext;
 import io.github.bucket4j.Bucket;
 import java.time.Duration;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -18,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component("redisConsumeReader")
 public class RedisStreamReader implements ItemReader<Map<String, String>> {
 
@@ -25,20 +28,17 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
     private static final String GROUP = "mail-consumer-group";
     private static final String CONSUMER = "mail-worker";
 
-    private final StringRedisTemplate redisTemplate;
-    private final Bucket bucket;
+    @Value("${mail.strategy:javaBatchMailSender}")
+    private String strategyKey;
 
-    public RedisStreamReader(
-        StringRedisTemplate redisTemplate,
-        @Qualifier("bucketEmail") Bucket bucket
-    ) {
-        this.redisTemplate = redisTemplate;
-        this.bucket = bucket;
-    }
+    private final StringRedisTemplate redisTemplate;
+    private final MailSenderContext mailSenderContext;
 
     @Override
     public Map<String, String> read() throws InterruptedException {
         //long start = System.currentTimeMillis();
+        Bucket bucket = mailSenderContext.getBucket(strategyKey);
+
         while (!bucket.tryConsume(1)) {
             Thread.sleep(200); //토큰을 얻을 때까지 간격을 두고 재시도
         }
