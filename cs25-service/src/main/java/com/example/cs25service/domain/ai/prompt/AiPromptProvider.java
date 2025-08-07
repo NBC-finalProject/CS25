@@ -3,8 +3,11 @@ package com.example.cs25service.domain.ai.prompt;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.userQuizAnswer.entity.UserQuizAnswer;
 import com.example.cs25service.domain.ai.config.AiPromptProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Component;
@@ -29,15 +32,35 @@ public class AiPromptProvider {
         return props.getFeedback().getSystem();
     }
 
-    public String getFeedbackUser(Quiz quiz, UserQuizAnswer answer, List<Document> docs) {
+    public String getFeedbackUser(Quiz quiz, UserQuizAnswer answer, List<Document> docs,
+        Optional<JsonNode> braveResults) {
         String context = docs.stream()
             .map(doc -> "- 문서: " + doc.getText())
             .collect(Collectors.joining("\n"));
 
+        String searchResults = braveResults
+            .map(this::formatBraveResults)
+            .orElse("");
+
         return props.getFeedback().getUser()
             .replace("{context}", context)
             .replace("{question}", quiz.getQuestion())
-            .replace("{userAnswer}", answer.getUserAnswer());
+            .replace("{userAnswer}", answer.getUserAnswer())
+            .replace("{searchResults}", searchResults);
+    }
+
+    private String formatBraveResults(JsonNode root) {
+        JsonNode resultsNode = root.get("results");
+        if (resultsNode == null || !resultsNode.isArray()) {
+            return "";
+        }
+
+        return "[브레이브 검색 결과]\n" +
+            StreamSupport.stream(resultsNode.spliterator(), false)
+                .map(result -> "- " + result.path("title").asText() + ": "
+                    + result.path("url").asText())
+                .collect(Collectors.joining("\n"));
+
     }
 
     // === [Generation] ===
