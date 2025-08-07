@@ -15,10 +15,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.apache.commons.text.StringEscapeUtils;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class XssRequestWrapper extends HttpServletRequestWrapper {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final String sanitizedJsonBody;
+    private static final int MAX_DEPTH = 30;
 
     public XssRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
@@ -90,20 +94,27 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
         return new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
-    // 🔽 JSON 필드 값만 escape하는 메서드
+    // JSON 필드 값만 escape하는 메서드
     private String sanitizeJsonBody(String rawBody) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(rawBody);
+            JsonNode root = OBJECT_MAPPER.readTree(rawBody);
             sanitizeJsonNode(root);
-            return mapper.writeValueAsString(root);
+            return OBJECT_MAPPER.writeValueAsString(root);
         } catch (Exception e) {
             // 문제가 생기면 원본 반환 (fallback)
+            log.error("Failed to sanitize JSON body", e);
             return rawBody;
         }
     }
 
     private void sanitizeJsonNode(JsonNode node) {
+        sanitizeJsonNode(node, 0);
+    }
+
+    private void sanitizeJsonNode(JsonNode node, int depth) {
+        if (depth > MAX_DEPTH) {
+            throw new IllegalArgumentException("JSON 깊이가 30이상입니다. DoS 공격이 의심됩니다.");
+        }
         if (node.isObject()) {
             ObjectNode objNode = (ObjectNode) node;
             objNode.fieldNames().forEachRemaining(field -> {
@@ -112,12 +123,12 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
                     String sanitized = StringEscapeUtils.escapeHtml4(child.asText());
                     objNode.put(field, sanitized);
                 } else {
-                    sanitizeJsonNode(child);
+                    sanitizeJsonNode(child, depth + 1);
                 }
             });
         } else if (node.isArray()) {
             for (JsonNode item : node) {
-                sanitizeJsonNode(item);
+                sanitizeJsonNode(item, depth + 1);
             }
         }
     }
