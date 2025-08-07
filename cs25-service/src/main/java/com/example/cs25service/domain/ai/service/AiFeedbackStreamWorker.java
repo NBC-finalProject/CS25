@@ -56,8 +56,9 @@ public class AiFeedbackStreamWorker {
 
         // 초기 워커 실행
         for (int i = 0; i < CORE_WORKER; i++) {
+            int index = consumerCounter.getAndIncrement();
             final String consumerName = "consumer-" + consumerCounter.getAndIncrement();
-            executor.submit(() -> poll(consumerName));
+            executor.submit(() -> poll(consumerName, index));
         }
 
         // 스케일링 워커를 별도 스케줄러에서 실행
@@ -82,8 +83,9 @@ public class AiFeedbackStreamWorker {
                         queueSize);
                     executor.setCorePoolSize(targetThreads);
                     for (int i = currentThreads; i < targetThreads; i++) {
+                        int index = consumerCounter.getAndIncrement();
                         final String consumerName = "consumer-" + consumerCounter.getAndIncrement();
-                        executor.submit(() -> poll(consumerName));
+                        executor.submit(() -> poll(consumerName, index));
                     }
                 } else if (targetThreads < currentThreads) {
                     // 워커 축소 (setCorePoolSize 감소)
@@ -112,8 +114,13 @@ public class AiFeedbackStreamWorker {
         }
     }
 
-    private void poll(String consumerName) {
+    private void poll(String consumerName, int workerIndex) {
         while (running.get()) {
+            int currentTarget = executor.getCorePoolSize();
+            if (workerIndex >= currentTarget) {
+                log.info("워커 {} 종료: currentTarget = {}", consumerName, currentTarget);
+                break;
+            }
             try {
                 List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
                     .read(Consumer.from(GROUP_NAME, consumerName),
@@ -158,7 +165,7 @@ public class AiFeedbackStreamWorker {
                 executor.shutdownNow();
             }
             if (!scalingExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                scalingExecutor.shutdown();
+                scalingExecutor.shutdownNow();
             }
         } catch (InterruptedException e) {
             executor.shutdownNow();
