@@ -4,12 +4,15 @@ import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.ai.client.AiChatClient;
-import com.example.cs25service.domain.ai.exception.AiException;
-import com.example.cs25service.domain.ai.exception.AiExceptionCode;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,6 +29,8 @@ public class AiFeedbackStreamProcessor {
     private final UserRepository userRepository;
     private final AiChatClient aiChatClient;
     private final TransactionTemplate transactionTemplate;
+    private final BraveSearchRagService braveSearchRagService;
+    private final BraveSearchMcpService braveSearchMcpService;
 
     @Transactional
     public void stream(Long answerId, SseEmitter emitter) {
@@ -39,8 +44,16 @@ public class AiFeedbackStreamProcessor {
             }
 
             var quiz = answer.getQuiz();
-            var docs = ragService.searchRelevant(quiz.getQuestion(), 3, 0.3);
-            String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs);
+            var vectorDocs = ragService.searchRelevant(quiz.getQuestion(), 2, 0.5);
+            Optional<JsonNode> braveResults = Optional.ofNullable(
+                braveSearchMcpService.search(quiz.getQuestion(), 2, 0));
+            var webDocs = braveSearchRagService.toDocuments(braveResults);
+
+            List<Document> docs = new ArrayList<>();
+            docs.addAll(vectorDocs);
+            docs.addAll(webDocs);
+
+            String userPrompt = promptProvider.getFeedbackUser(quiz, answer, docs, braveResults);
             String systemPrompt = promptProvider.getFeedbackSystem();
 
             User user = answer.getUser();
@@ -74,7 +87,8 @@ public class AiFeedbackStreamProcessor {
                         transactionTemplate.executeWithoutResult(status -> {
                             if (user != null && userScore != null) {
                                 double score = isCorrect
-                                    ? userScore + (quiz.getType().getScore() * quiz.getLevel().getExp())
+                                    ? userScore + (quiz.getType().getScore() * quiz.getLevel()
+                                    .getExp())
                                     : userScore + 1;
                                 user.updateScore(score);
                                 userRepository.save(user);

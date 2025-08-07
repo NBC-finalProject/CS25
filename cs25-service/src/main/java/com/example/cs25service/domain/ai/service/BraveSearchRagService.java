@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
@@ -14,27 +15,54 @@ public class BraveSearchRagService {
 
     private final BraveSearchMcpService braveSearchMcpService;
 
-    public List<Document> searchRelevant(String query, int topK,
-        double similarityThresholdIgnored) {
-        JsonNode resultsNode = braveSearchMcpService.search(query, topK, 0);
-
+    public List<Document> toDocuments(Optional<JsonNode> resultsNodeOpt) {
         List<Document> documents = new ArrayList<>();
 
-        resultsNode.path("results").forEach(result -> {
-            String title = result.path("title").asText("");
-            String url = result.path("url").asText("");
-            String content = result.path("content").asText(""); // 내용 일부
+        resultsNodeOpt.ifPresent(resultsNode -> {
+            resultsNode.path("results").forEach(result -> {
+                String text = result.path("text").asText("");
+                if (text.isBlank()) {
+                    return;
+                }
 
-            if (!content.isBlank()) {
-                Document doc = new Document(
-                    title,
-                    content,
-                    Map.of("title", title, "url", url)
-                );
-                documents.add(doc);
-            }
+                // 여러 문서가 한 개의 텍스트에 포함되어 있으므로 줄 단위로 분리
+                String[] lines = text.split("\\n");
+
+                String title = null;
+                String url = null;
+                StringBuilder contentBuilder = new StringBuilder();
+
+                for (String line : lines) {
+                    if (line.startsWith("Title:")) {
+                        if (title != null && url != null && contentBuilder.length() > 0) {
+                            // 이전 문서를 저장
+                            documents.add(new Document(
+                                title,
+                                contentBuilder.toString().trim(),
+                                Map.of("title", title, "url", url)
+                            ));
+                            contentBuilder.setLength(0);
+                        }
+                        title = line.replaceFirst("Title:", "").trim();
+                    } else if (line.startsWith("URL:")) {
+                        url = line.replaceFirst("URL:", "").trim();
+                    } else {
+                        contentBuilder.append(line).append("\n");
+                    }
+                }
+
+                // 마지막 문서 저장
+                if (title != null && url != null && contentBuilder.length() > 0) {
+                    documents.add(new Document(
+                        title,
+                        contentBuilder.toString().trim(),
+                        Map.of("title", title, "url", url)
+                    ));
+                }
+            });
         });
 
         return documents;
     }
+
 }
