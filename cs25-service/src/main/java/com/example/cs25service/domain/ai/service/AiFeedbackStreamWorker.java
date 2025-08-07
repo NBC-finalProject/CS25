@@ -41,11 +41,11 @@ public class AiFeedbackStreamWorker {
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
         CORE_WORKER,
         MAX_WORKER,
-        30, TimeUnit.SECONDS,        // 30초간 작업 없으면 스레드 종료 가능
+        60, TimeUnit.SECONDS,        // 60초간 작업 없으면 스레드 종료 가능
         new LinkedBlockingQueue<>()
     );
 
-    private final ScheduledExecutorService scailingExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scalingExecutor = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final AtomicInteger consumerCounter = new AtomicInteger(0);
 
@@ -61,7 +61,7 @@ public class AiFeedbackStreamWorker {
         }
 
         // 스케일링 워커를 별도 스케줄러에서 실행
-        scailingExecutor.scheduleWithFixedDelay(this::autoScaleWorkers, 0, SCALING_CHECK_INTERVAL,
+        scalingExecutor.scheduleWithFixedDelay(this::autoScaleWorkers, 0, SCALING_CHECK_INTERVAL,
             TimeUnit.SECONDS);
     }
 
@@ -152,17 +152,17 @@ public class AiFeedbackStreamWorker {
     public void stop() {
         running.set(false);
         executor.shutdown();
-        scailingExecutor.shutdown();
+        scalingExecutor.shutdown();
         try {
             if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
             }
-            if (!scailingExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                scailingExecutor.shutdown();
+            if (!scalingExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                scalingExecutor.shutdown();
             }
         } catch (InterruptedException e) {
             executor.shutdownNow();
-            scailingExecutor.shutdown();
+            scalingExecutor.shutdown();
             Thread.currentThread().interrupt();
         }
     }
