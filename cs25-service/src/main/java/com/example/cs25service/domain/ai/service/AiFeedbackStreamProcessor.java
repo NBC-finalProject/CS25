@@ -4,6 +4,8 @@ import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.ai.client.AiChatClient;
+import com.example.cs25service.domain.ai.exception.AiException;
+import com.example.cs25service.domain.ai.exception.AiExceptionCode;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
