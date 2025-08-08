@@ -1,4 +1,3 @@
-
 # 워크 플로우 이름
 name: CD - Docker Build & Deploy to EC2
 
@@ -56,6 +55,7 @@ jobs:
           echo "CLAUDE_API_KEY=${{ secrets.CLAUDE_API_KEY }}" >> .env
           echo "AWS_SES_ACCESS_KEY=${{ secrets.AWS_SES_ACCESS_KEY }}" >> .env
           echo "AWS_SES_SECRET_KEY=${{ secrets.AWS_SES_SECRET_KEY }}" >> .env
+          echo "BRAVE_API_KEY=${{ secrets.BRAVE_API_KEY }}" >> .env
 
       # EC2 접속 후 .env 파일 업로드
       - name: Upload .env to EC2
@@ -79,7 +79,7 @@ jobs:
             
             echo "[1] 현재 nginx가 사용하는 포트 확인"
             CURRENT_PORT=$(grep -o 'proxy_pass http://localhost:[0-9]*;' /etc/nginx/conf.d/api.conf | grep -o '[0-9]*')
-      
+            
             if [ "$CURRENT_PORT" = "8080" ]; then
             NEW_PORT=8081
             OLD_CONTAINER=cs25-8080
@@ -87,7 +87,7 @@ jobs:
             NEW_PORT=8080
             OLD_CONTAINER=cs25-8081
             fi
-      
+            
             echo "[2] 새로운 포트($NEW_PORT)로 컨테이너 실행"
             docker pull baekjonghyun/cs25-service:latest
             docker run -d \
@@ -95,15 +95,15 @@ jobs:
             --env-file .env \
             -p $NEW_PORT:8080 \
             baekjonghyun/cs25-service:latest
-      
+            
             echo "[3] nginx 설정 포트 교체 및 reload"
             sudo sed -i "s/$CURRENT_PORT/$NEW_PORT/" /etc/nginx/conf.d/api.conf
             sudo nginx -t && sudo nginx -s reload
-      
+            
             echo "[4] 이전 컨테이너 종료 및 삭제"
             docker stop $OLD_CONTAINER || echo "No previous container"
             docker rm $OLD_CONTAINER || echo "No previous container"
-      
+            
             echo "[✔] 무중단 배포 완료! 현재 포트: $NEW_PORT"
 
 
