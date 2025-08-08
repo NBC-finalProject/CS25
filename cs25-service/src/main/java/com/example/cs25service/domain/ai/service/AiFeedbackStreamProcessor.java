@@ -45,9 +45,16 @@ public class AiFeedbackStreamProcessor {
 
             var quiz = answer.getQuiz();
             var vectorDocs = ragService.searchRelevant(quiz.getQuestion(), 2, 0.5);
-            Optional<JsonNode> braveResults = Optional.ofNullable(
-                braveSearchMcpService.search(quiz.getQuestion(), 2, 0));
-            var webDocs = braveSearchRagService.toDocuments(braveResults);
+            Optional<JsonNode> braveResults = Optional.empty();
+            List<Document> webDocs = new ArrayList<>();
+            try {
+                JsonNode searchResult = braveSearchMcpService.search(quiz.getQuestion(), 2, 0);
+                braveResults = Optional.ofNullable(searchResult);
+                webDocs = braveSearchRagService.toDocuments(braveResults);
+                log.debug(" Brave 검색 결과 문서 {}개를 성공적으로 가져왔습니다.", webDocs.size());
+            } catch (Exception e) {
+                log.warn("⚠ Brave 검색 실패 - 질문: [{}], 벡터 검색만 사용합니다.", quiz.getQuestion(), e);
+            }
 
             List<Document> docs = new ArrayList<>();
             docs.addAll(vectorDocs);
