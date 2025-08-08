@@ -49,7 +49,7 @@ public class QuizPageService {
             .filter(s -> !s.isBlank())
             .map(String::trim)
             .toList();
-        String answerNumber = quiz.getAnswer().split("\\.")[0];
+        //String answerNumber = quiz.getAnswer().split("\\.")[0];
 
         return TodayQuizResponseDto.builder()
             .question(AesEncryptor.encrypt(quiz.getQuestion()))
@@ -57,7 +57,7 @@ public class QuizPageService {
             .choice2(AesEncryptor.encrypt(choices.get(1)))
             .choice3(AesEncryptor.encrypt(choices.get(2)))
             .choice4(AesEncryptor.encrypt(choices.get(3)))
-            .answerNumber(AesEncryptor.encrypt(answerNumber))
+            //.answerNumber(AesEncryptor.encrypt(answerNumber))
             .commentary(AesEncryptor.encrypt(quiz.getCommentary()))
             .quizType(quiz.getType().name())
             .quizLevel(quiz.getLevel().name())
