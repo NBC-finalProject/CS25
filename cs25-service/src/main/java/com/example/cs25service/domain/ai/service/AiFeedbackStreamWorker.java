@@ -41,11 +41,11 @@ public class AiFeedbackStreamWorker {
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
         CORE_WORKER,
         MAX_WORKER,
-        30, TimeUnit.SECONDS,        // 30초간 작업 없으면 스레드 종료 가능
+        60, TimeUnit.SECONDS,        // 60초간 작업 없으면 스레드 종료 가능
         new LinkedBlockingQueue<>()
     );
 
-    private final ScheduledExecutorService scailingExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scalingExecutor = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean running = new AtomicBoolean(true);
     private final AtomicInteger consumerCounter = new AtomicInteger(0);
 
@@ -56,12 +56,13 @@ public class AiFeedbackStreamWorker {
 
         // 초기 워커 실행
         for (int i = 0; i < CORE_WORKER; i++) {
-            final String consumerName = "consumer-" + consumerCounter.getAndIncrement();
-            executor.submit(() -> poll(consumerName));
+            int index = consumerCounter.getAndIncrement();
+            final String consumerName = "consumer-" + index;
+            executor.submit(() -> poll(consumerName, index));
         }
 
         // 스케일링 워커를 별도 스케줄러에서 실행
-        scailingExecutor.scheduleWithFixedDelay(this::autoScaleWorkers, 0, SCALING_CHECK_INTERVAL,
+        scalingExecutor.scheduleWithFixedDelay(this::autoScaleWorkers, 0, SCALING_CHECK_INTERVAL,
             TimeUnit.SECONDS);
     }
 
@@ -82,8 +83,9 @@ public class AiFeedbackStreamWorker {
                         queueSize);
                     executor.setCorePoolSize(targetThreads);
                     for (int i = currentThreads; i < targetThreads; i++) {
-                        final String consumerName = "consumer-" + consumerCounter.getAndIncrement();
-                        executor.submit(() -> poll(consumerName));
+                        int index = consumerCounter.getAndIncrement();
+                        final String consumerName = "consumer-" + index;
+                        executor.submit(() -> poll(consumerName, index));
                     }
                 } else if (targetThreads < currentThreads) {
                     // 워커 축소 (setCorePoolSize 감소)
@@ -112,8 +114,13 @@ public class AiFeedbackStreamWorker {
         }
     }
 
-    private void poll(String consumerName) {
+    private void poll(String consumerName, int workerIndex) {
         while (running.get()) {
+            int currentTarget = executor.getCorePoolSize();
+            if (workerIndex >= currentTarget) {
+                log.info("워커 {} 종료: currentTarget = {}", consumerName, currentTarget);
+                break;
+            }
             try {
                 List<MapRecord<String, Object, Object>> messages = redisTemplate.opsForStream()
                     .read(Consumer.from(GROUP_NAME, consumerName),
@@ -152,17 +159,17 @@ public class AiFeedbackStreamWorker {
     public void stop() {
         running.set(false);
         executor.shutdown();
-        scailingExecutor.shutdown();
+        scalingExecutor.shutdown();
         try {
             if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
             }
-            if (!scailingExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                scailingExecutor.shutdown();
+            if (!scalingExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                scalingExecutor.shutdownNow();
             }
         } catch (InterruptedException e) {
             executor.shutdownNow();
-            scailingExecutor.shutdown();
+            scalingExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
     }
