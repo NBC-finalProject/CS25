@@ -4,7 +4,6 @@ import com.example.cs25common.global.dto.ApiResponse;
 import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25service.domain.ai.service.AiFeedbackQueueService;
 import com.example.cs25service.domain.ai.service.AiQuestionGeneratorService;
-import com.example.cs25service.domain.ai.service.AiService;
 import com.example.cs25service.domain.ai.service.FileLoaderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -19,7 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class AiController {
 
-    private final AiService aiService;
     private final AiQuestionGeneratorService aiQuestionGeneratorService;
     private final FileLoaderService fileLoaderService;
     private final AiFeedbackQueueService aiFeedbackQueueService;

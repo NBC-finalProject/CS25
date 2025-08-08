@@ -17,29 +17,45 @@ public class QuizCustomRepositoryImpl implements QuizCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Quiz> findAvailableQuizzesUnderParentCategory(Long parentCategoryId,
+    public Quiz findAvailableQuizzesUnderParentCategory(Long parentCategoryId,
         List<QuizLevel> difficulties,
         Set<Long> solvedQuizIds,
-        List<QuizFormatType> targetTypes) {
+        QuizFormatType targetType,
+        int offset) {
+
+        /* < 사용되는 쿼리문 >
+            SELECT q.*
+            FROM quiz q
+            JOIN quiz_category qc ON q.quiz_category_id = qc.id
+            WHERE qc.parent_id = ?
+              AND q.level IN (?, ?, ...)
+              AND q.type = ?
+              AND q.quiz_category_id IS NOT NULL
+              AND q.id NOT IN (?, ?, ...)
+            ORDER BY q.id ASC
+            LIMIT 1 OFFSET ?
+        * */
 
         QQuiz quiz = QQuiz.quiz;
         QQuizCategory category = QQuizCategory.quizCategory;
 
-        // 2. 퀴즈 조회
         BooleanBuilder builder = new BooleanBuilder()
-            .and(quiz.category.parent.id.eq(parentCategoryId)) //내가 정한 카테고리에
-            .and(quiz.level.in(difficulties)) //정해진 난이도 그룹안에있으면서
-            .and(quiz.type.in(targetTypes)) //퀴즈 타입은 이거야
+            .and(quiz.category.parent.id.eq(parentCategoryId))
+            .and(quiz.level.in(difficulties))
+            .and(quiz.type.eq(targetType))
             .and(quiz.category.id.isNotNull());
 
         if (!solvedQuizIds.isEmpty()) {
-            builder.and(quiz.id.notIn(solvedQuizIds)); //혹시라도 구독자가 문제를 푼 이력잉 ㅣㅆ으면 그것도 제외해야햄
+            builder.and(quiz.id.notIn(solvedQuizIds));
         }
+
         return queryFactory
             .selectFrom(quiz)
             .join(quiz.category, category)
             .where(builder)
-            .limit(20)
-            .fetch();
+            .orderBy(quiz.id.asc())
+            .offset(offset)
+            .limit(1)
+            .fetchOne();
     }
 }
