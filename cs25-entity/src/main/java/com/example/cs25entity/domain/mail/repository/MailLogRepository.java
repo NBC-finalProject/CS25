@@ -23,5 +23,5 @@ public interface MailLogRepository extends JpaRepository<MailLog, Long>,
 
     void deleteAllByIdIn(Collection<Long> ids);
 
-    Set<Long> findQuiz_IdBySubscription_Id(Long subscriptionId);
+    Set<Long> findDistinctQuiz_IdBySubscription_Id(Long subscriptionId);
 }
