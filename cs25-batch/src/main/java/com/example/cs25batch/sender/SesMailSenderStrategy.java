@@ -2,6 +2,7 @@ package com.example.cs25batch.sender;
 
 import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25batch.batch.service.SesMailService;
+import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,10 +15,11 @@ public class SesMailSenderStrategy implements MailSenderStrategy{
 
     private final SesMailService sesMailService;
     private final Bucket bucket = Bucket.builder()
-            .addLimit(limit ->
-                    limit
+            .addLimit(
+                    Bandwidth.builder()
                             .capacity(14)
-                            .refillIntervally(7, Duration.ofMillis(500))
+                            .refillGreedy(7, Duration.ofMillis(500))
+                            .build()
             )
             .build();
 
