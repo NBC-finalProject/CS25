@@ -4,6 +4,7 @@ import com.example.cs25entity.domain.quiz.entity.Quiz;
 import com.example.cs25entity.domain.quiz.exception.QuizException;
 import com.example.cs25entity.domain.quiz.exception.QuizExceptionCode;
 import com.example.cs25entity.domain.quiz.repository.QuizRepository;
+import com.example.cs25service.common.AesEncryptor;
 import com.example.cs25service.domain.quiz.dto.QuizCategoryResponseDto;
 import com.example.cs25service.domain.quiz.dto.TodayQuizResponseDto;
 import java.util.Arrays;
@@ -51,13 +52,13 @@ public class QuizPageService {
         String answerNumber = quiz.getAnswer().split("\\.")[0];
 
         return TodayQuizResponseDto.builder()
-            .question(quiz.getQuestion())
-            .choice1(choices.get(0))
-            .choice2(choices.get(1))
-            .choice3(choices.get(2))
-            .choice4(choices.get(3))
-            .answerNumber(answerNumber)
-            .commentary(quiz.getCommentary())
+            .question(AesEncryptor.encrypt(quiz.getQuestion()))
+            .choice1(AesEncryptor.encrypt(choices.get(0)))
+            .choice2(AesEncryptor.encrypt(choices.get(1)))
+            .choice3(AesEncryptor.encrypt(choices.get(2)))
+            .choice4(AesEncryptor.encrypt(choices.get(3)))
+            .answerNumber(AesEncryptor.encrypt(answerNumber))
+            .commentary(AesEncryptor.encrypt(quiz.getCommentary()))
             .quizType(quiz.getType().name())
             .quizLevel(quiz.getLevel().name())
             .category(getQuizCategory(quiz))
@@ -72,11 +73,10 @@ public class QuizPageService {
      */
     private TodayQuizResponseDto getDescriptiveQuiz(Quiz quiz) {
         return TodayQuizResponseDto.builder()
-            .question(quiz.getQuestion())
-            .quizType(quiz.getQuestion())
-            .answer(quiz.getAnswer())
-            .commentary(quiz.getCommentary())
-            .quizType(quiz.getType().name())
+            .question(AesEncryptor.encrypt(quiz.getQuestion()))
+            .answer(AesEncryptor.encrypt(quiz.getAnswer()))
+            .commentary(AesEncryptor.encrypt(quiz.getCommentary()))
+            .quizType(AesEncryptor.encrypt(quiz.getType().name()))
             .quizLevel(quiz.getLevel().name())
             .category(getQuizCategory(quiz))
             .build();
