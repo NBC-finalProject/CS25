@@ -9,7 +9,7 @@ import java.util.Base64;
 public class AesEncryptor {
 
     private static final String ALGORITHM = "AES";
-    private static final String AES_KEY = "cs25'sTodayQuiz";
+    private static final String AES_KEY = "cs25's_todayQuiz";
 
     public static String encrypt(String plainText) {
         try {
@@ -17,7 +17,7 @@ public class AesEncryptor {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             byte[] encrypted = cipher.doFinal(plainText.getBytes());
-            return Base64.getEncoder().encodeToString(encrypted); // 프론트로 넘기기 적합하게 인코딩
+            return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
             throw new RuntimeException("Encryption error", e);
         }
