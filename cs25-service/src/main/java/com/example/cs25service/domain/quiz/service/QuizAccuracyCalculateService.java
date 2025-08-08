@@ -42,7 +42,7 @@ public class QuizAccuracyCalculateService {
             parentCategoryId);
         double accuracy = accuracyResult != null ? accuracyResult : 100.0;
 
-        Set<Long> sentQuizIds = mailLogRepository.findQuiz_IdBySubscription_Id(subscriptionId);
+        Set<Long> sentQuizIds = mailLogRepository.findDistinctQuiz_IdBySubscription_Id(subscriptionId);
         int quizCount = sentQuizIds.size(); // 사용자가 지금까지 푼 문제 수
 
         // 6. 서술형 주기 판단 (풀이 횟수 기반)
