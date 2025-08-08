@@ -10,9 +10,11 @@ import com.example.cs25entity.domain.quiz.repository.QuizRepository;
 import com.example.cs25entity.domain.subscription.entity.Subscription;
 import com.example.cs25entity.domain.subscription.repository.SubscriptionRepository;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,7 @@ public class TodayQuizService {
 
         // 2. 유저 정답률 계산, 내가 푼 문제 아이디값
         Double accuracyResult = userQuizAnswerRepository.getCorrectRate(subscriptionId,
-            parentCategoryId);
+                parentCategoryId);
         double accuracy = accuracyResult != null ? accuracyResult : 100.0;
 
         Set<Long> sentQuizIds = mailLogRepository.findDistinctQuiz_IdBySubscription_Id(subscriptionId);
@@ -50,8 +52,8 @@ public class TodayQuizService {
         boolean isEssayDay = quizCount % 4 == 3; //일단 3배수일때 한번씩은 서술(0,1,2 객관식 / 3서술형)
 
         QuizFormatType targetType = isEssayDay
-            ? QuizFormatType.SUBJECTIVE
-            : QuizFormatType.MULTIPLE_CHOICE;
+                ? QuizFormatType.SUBJECTIVE
+                : QuizFormatType.MULTIPLE_CHOICE;
 
         // 3. 정답률 기반 난이도 바운더리 설정
         List<QuizLevel> allowedDifficulties = getAllowedDifficulties(accuracy);
@@ -63,14 +65,24 @@ public class TodayQuizService {
         // 7. 필터링 조건으로 문제 조회(대분류, 난이도, 내가푼문제 제외, 제외할 카테고리 제외하고, 문제 타입 전부 조건으로)
 
         Quiz todayQuiz = quizRepository.findAvailableQuizzesUnderParentCategory(
-            parentCategoryId,
-            allowedDifficulties,
-            sentQuizIds,
-            //excludedCategoryIds,
-            targetType,
-            offset
+                parentCategoryId,
+                allowedDifficulties,
+                sentQuizIds,
+                //excludedCategoryIds,
+                targetType,
+                offset
         );
 
+        // offset이 너무 커서 결과가 없을 수 있으므로, offset=0으로 한 번 더 조회
+        if (todayQuiz == null && offset > 0) {
+            todayQuiz = quizRepository.findAvailableQuizzesUnderParentCategory(
+                    parentCategoryId,
+                    allowedDifficulties,
+                    sentQuizIds,
+                    targetType,
+                    0
+            );
+        }
         if (todayQuiz == null) {
             throw new QuizException(QuizExceptionCode.QUIZ_VALIDATION_FAILED_ERROR);
         }
