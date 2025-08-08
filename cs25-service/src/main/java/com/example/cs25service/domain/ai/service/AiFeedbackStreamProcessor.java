@@ -4,8 +4,8 @@ import com.example.cs25entity.domain.user.entity.User;
 import com.example.cs25entity.domain.user.repository.UserRepository;
 import com.example.cs25entity.domain.userQuizAnswer.repository.UserQuizAnswerRepository;
 import com.example.cs25service.domain.ai.client.AiChatClient;
-//import com.example.cs25service.domain.ai.exception.AiException;
-//import com.example.cs25service.domain.ai.exception.AiExceptionCode;
+import com.example.cs25service.domain.ai.exception.AiException;
+import com.example.cs25service.domain.ai.exception.AiExceptionCode;
 import com.example.cs25service.domain.ai.prompt.AiPromptProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
@@ -91,10 +91,9 @@ public class AiFeedbackStreamProcessor {
                         send(emitter, "[종료]");
 
                         String feedback = fullFeedbackBuffer.toString();
-                        //서비스 흐름 상 예외를 던지는 유효성 검증이 옳은지 논의 필요
-//                        if (feedback == null || feedback.isEmpty()) {
-//                            throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
-//                        }
+                        if (feedback == null || feedback.isEmpty()) {
+                            throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
+                        }
 
                         boolean isCorrect = isCorrect(feedback);
 
