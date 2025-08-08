@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BraveSearchRagService {
 
-    private final BraveSearchMcpService braveSearchMcpService;
-
     public List<Document> toDocuments(Optional<JsonNode> resultsNodeOpt) {
         List<Document> documents = new ArrayList<>();
 
