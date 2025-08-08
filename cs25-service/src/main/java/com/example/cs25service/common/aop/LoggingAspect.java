@@ -20,10 +20,10 @@ public class LoggingAspect {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
 
-    @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+    @Pointcut("execution(* com.example.cs25service.domain.userQuizAnswer.controller.UserQuizAnswerController.submitAnswer(..))")
     public void submitAnswer() {}
 
-    @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+    @Pointcut("execution(* com.example.cs25service.domain.userQuizAnswer.controller.UserQuizAnswerController.evaluateAnswer(..))")
     public void evaluateAnswer() {}
 
     @Pointcut("submitAnswer() || evaluateAnswer()")
@@ -39,8 +39,8 @@ public class LoggingAspect {
         String username = (auth != null ? auth.getName() : "anonymous");
 
         // 3) 퀴즈 정보
-        Object firstArg = joinPoint.getArgs()[0];
-        String quizInfo = firstArg.toString();
+        Object[] args = joinPoint.getArgs();
+        String quizInfo = (args.length > 0 && args[0] != null) ? args[0].toString() : "no-args";
 
         log.info("[{}] user = {} quizInfo = {}", time, username, quizInfo);
 
