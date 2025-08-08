@@ -57,7 +57,7 @@ public class AiFeedbackStreamWorker {
         // 초기 워커 실행
         for (int i = 0; i < CORE_WORKER; i++) {
             int index = consumerCounter.getAndIncrement();
-            final String consumerName = "consumer-" + consumerCounter.getAndIncrement();
+            final String consumerName = "consumer-" + index;
             executor.submit(() -> poll(consumerName, index));
         }
 
@@ -84,7 +84,7 @@ public class AiFeedbackStreamWorker {
                     executor.setCorePoolSize(targetThreads);
                     for (int i = currentThreads; i < targetThreads; i++) {
                         int index = consumerCounter.getAndIncrement();
-                        final String consumerName = "consumer-" + consumerCounter.getAndIncrement();
+                        final String consumerName = "consumer-" + index;
                         executor.submit(() -> poll(consumerName, index));
                     }
                 } else if (targetThreads < currentThreads) {
@@ -169,7 +169,7 @@ public class AiFeedbackStreamWorker {
             }
         } catch (InterruptedException e) {
             executor.shutdownNow();
-            scalingExecutor.shutdown();
+            scalingExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
     }
