@@ -32,7 +32,6 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-
 # jar 복사
 COPY --from=builder /build/cs25-service/build/libs/*.jar app.jar
 
