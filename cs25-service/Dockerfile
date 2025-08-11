@@ -20,6 +20,14 @@ LABEL type="application" module="cs25-service"
 # 작업 디렉토리
 WORKDIR /apps
 
+# Node.js + npm 설치 후, MCP 서버 전역 설치
+RUN apt-get update && apt-get install -y curl ca-certificates gnupg \
+  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y nodejs \
+  && npm install -g @modelcontextprotocol/server-brave-search \
+  && node -v && npm -v && which server-brave-search \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # jar 복사
 COPY --from=builder /build/cs25-service/build/libs/*.jar app.jar
 
