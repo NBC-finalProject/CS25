@@ -18,7 +18,7 @@ public class SesMailSenderStrategy implements MailSenderStrategy{
             .addLimit(
                     Bandwidth.builder()
                             .capacity(14)
-                            .refillGreedy(7, Duration.ofMillis(500))
+                            .refillGreedy(14, Duration.ofMillis(1000))
                             .build()
             )
             .build();

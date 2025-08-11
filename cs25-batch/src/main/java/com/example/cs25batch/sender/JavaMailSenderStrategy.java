@@ -17,7 +17,7 @@ public class JavaMailSenderStrategy implements MailSenderStrategy{
             .addLimit(
                     Bandwidth.builder()
                             .capacity(4)
-                            .refillGreedy(2, Duration.ofMillis(500))
+                            .refillGreedy(4, Duration.ofMillis(1000))
                             .build()
             )
             .build();
