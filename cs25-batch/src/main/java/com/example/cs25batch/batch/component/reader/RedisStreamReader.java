@@ -37,9 +37,8 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
     @Override
     public Map<String, String> read() throws InterruptedException {
         //long start = System.currentTimeMillis();
-        Bucket bucket = mailSenderContext.getBucket(strategyKey);
 
-        while (!bucket.tryConsume(1)) {
+        while (!mailSenderContext.tryConsume(strategyKey, 1L)) {
             Thread.sleep(200); //토큰을 얻을 때까지 간격을 두고 재시도
         }
 
