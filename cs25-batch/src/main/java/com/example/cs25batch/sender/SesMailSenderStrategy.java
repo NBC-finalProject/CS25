@@ -29,7 +29,7 @@ public class SesMailSenderStrategy implements MailSenderStrategy{
     }
 
     @Override
-    public Bucket getBucket() {
-        return bucket;
+    public boolean tryConsume(Long num){
+        return bucket.tryConsume(num);
     }
 }
