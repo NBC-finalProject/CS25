@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -25,9 +26,10 @@ public interface MailLogRepository extends JpaRepository<MailLog, Long>,
     void deleteAllByIdIn(Collection<Long> ids);
 
     @Query("""
-        select distinct ml.quiz.id
-        from MailLog ml
-        where ml.subscription.id = :subscriptionId
-    """)
-    Set<Long> findDistinctQuiz_IdBySubscription_Id(Long subscriptionId);
+          select distinct ml.quiz.id
+          from MailLog ml
+          where ml.subscription.id = :subscriptionId
+            and ml.status = com.example.cs25entity.domain.mail.enums.MailStatus.SENT
+        """)
+    Set<Long> findDistinctQuiz_IdBySubscription_Id(@Param("subscriptionId") Long subscriptionId);
 }
