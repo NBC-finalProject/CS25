@@ -48,7 +48,7 @@ public class MailLogAspect {
             caused = e.getMessage();
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         } finally {
-            MailLog log = MailLog.builder()
+            MailLog mailLog = MailLog.builder()
                 .subscription(subscription)
                 .quiz(quiz)
                 .sendDate(LocalDateTime.now())
@@ -56,10 +56,11 @@ public class MailLogAspect {
                 .caused(caused)
                 .build();
 
-            mailLogRepository.save(log);
+            mailLogRepository.save(mailLog);
             mailLogRepository.flush();
 
             if (status == MailStatus.FAILED) {
+                log.info("메일 발송 실패 : subscriptionId - {}, cause - {}", subscription.getId(), caused);
                 Map<String, String> retryMessage = Map.of(
                     "email", subscription.getEmail(),
                     "subscriptionId", subscription.getId().toString(),
