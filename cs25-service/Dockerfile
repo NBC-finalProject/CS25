@@ -35,9 +35,13 @@ RUN apt-get update \
  && NPM_PREFIX="$(npm prefix -g)" \
  && SRCDIR="${NPM_PREFIX}/lib/node_modules/@brave/brave-search-mcp-server" \
  \
- # 실행 래퍼 스크립트 생성: server-brave-search (STDIO 고정)
- && printf '#!/usr/bin/env bash\nexec node "%s/dist/index.js" --transport stdio "$@"\n' "$SRCDIR" > /usr/local/bin/server-brave-search \
- && chmod +x /usr/local/bin/server-brave-search \
+# 실행 래퍼 (args는 전부 "$@"로 위임)
+&& { \
+  echo '#!/bin/sh'; \
+  echo 'NODE=$(command -v node || echo /usr/bin/node)'; \
+  echo 'exec "$NODE" "'"$SRCDIR"'/dist/index.js" "$@"'; \
+} > /usr/local/bin/server-brave-search \
+&& chmod 0755 /usr/local/bin/server-brave-search \
  \
  # 설치/실행 점검
  && echo "=== which server-brave-search ===" && which server-brave-search \
