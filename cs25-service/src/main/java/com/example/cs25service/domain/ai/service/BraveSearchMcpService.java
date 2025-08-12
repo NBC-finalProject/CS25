@@ -36,6 +36,7 @@ public class BraveSearchMcpService {
         JsonNode content = objectMapper.valueToTree(result.content());
         log.info("[Brave MCP Response Raw content]: {}", content.toPrettyString());
 
+
         if (content != null && content.isArray()) {
             var root = objectMapper.createObjectNode();
             root.set("results", content);
