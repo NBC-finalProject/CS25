@@ -22,31 +22,29 @@ LABEL type="application" module="cs25-service"
 # 작업 디렉토리
 WORKDIR /apps
 
-# Node.js + npm 설치 후, MCP 서버 전역 설치 + 심볼릭 링크 생성 + 빌드 타임 확인
+# Node.js 22 설치 + 공식 Brave MCP 서버 설치 + 래퍼 스크립트 생성
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg bash \
- && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
  && apt-get install -y --no-install-recommends nodejs \
  \
- # 1) 전역 설치
- && npm install -g @modelcontextprotocol/server-brave-search \
+ # 공식 패키지 설치 (deprecated 패키지 제거)
+ && npm install -g @brave/brave-search-mcp-server \
  \
- # 2) 전역 prefix/bin 경로 계산 (npm bin -g 대신 npm prefix -g 사용)
+ # 전역 모듈 경로 계산
  && NPM_PREFIX="$(npm prefix -g)" \
- && SRC_BIN="${NPM_PREFIX}/bin/server-brave-search" \
+ && SRCDIR="${NPM_PREFIX}/lib/node_modules/@brave/brave-search-mcp-server" \
  \
- # 3) 심볼릭 링크 생성 (/usr/local/bin 에 고정 경로 제공)
- && ln -sf "${SRC_BIN}" /usr/local/bin/server-brave-search \
+ # 실행 래퍼 스크립트 생성: server-brave-search (STDIO 고정)
+ && printf '#!/usr/bin/env bash\nexec node "%s/dist/index.js" --transport stdio "$@"\n' "$SRCDIR" > /usr/local/bin/server-brave-search \
+ && chmod +x /usr/local/bin/server-brave-search \
  \
- # ===== 실행 가능 여부 확인 =====
- && echo "=== npm prefix -g ===" && echo "${NPM_PREFIX}" \
- && echo "=== 실제 바이너리 위치 확인 ===" && ls -l "${SRC_BIN}" \
- && echo "=== 심볼릭 링크 확인 ===" && ls -l /usr/local/bin/server-brave-search \
- && echo "=== server-brave-search --help 실행 ===" \
- && /usr/local/bin/server-brave-search --help || (echo "[ERROR] server-brave-search 실행 실패" && exit 1) \
+ # 설치/실행 점검
+ && echo "=== which server-brave-search ===" && which server-brave-search \
+ && echo "=== server-brave-search --help ===" && server-brave-search --help || (echo "[ERROR] server-brave-search 실행 실패" && exit 1) \
  \
+ # 정리
  && npm cache clean --force \
- && apt-get purge -y gnupg \
  && apt-get autoremove -y --purge \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
