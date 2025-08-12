@@ -12,8 +12,6 @@ COPY cs25-common cs25-common/
 
 # 테스트 생략하여 빌드 안정화
 RUN ./gradlew :cs25-service:bootJar --stacktrace --no-daemon
-
-
 FROM eclipse-temurin:17-jre-jammy
 
 # 메타 정보
