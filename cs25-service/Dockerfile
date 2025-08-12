@@ -25,7 +25,10 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg bash \
  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get install -y --no-install-recommends nodejs \
- && npm install -g @modelcontextprotocol/server-brave-search \
+ && npm install -g @modelcontextprotocol/server-brave-search@0.2.1 \
+ && ln -sf "$(npm root -g)/.bin/server-brave-search" /usr/local/bin/server-brave-search \
+ && chmod +x /usr/local/bin/server-brave-search \
+ && /usr/local/bin/server-brave-search --help || true \
  && npm cache clean --force \
  && apt-get purge -y gnupg \
  && apt-get autoremove -y --purge \

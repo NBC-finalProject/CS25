@@ -24,31 +24,23 @@ public class BraveSearchMcpService {
     private final ObjectMapper objectMapper;
 
     public JsonNode search(String query, int count, int offset) {
-        try {
-            McpSyncClient braveClient = resolveBraveClient(); // 내부에서 초기화/툴 확인
+        McpSyncClient braveClient = resolveBraveClient();
 
-            // 실제 호출
-            CallToolRequest request = new CallToolRequest(
-                BRAVE_WEB_TOOL,
-                Map.of("query", query, "count", count, "offset", offset)
-            );
-            CallToolResult result = braveClient.callTool(request);
+        CallToolRequest request = new CallToolRequest(
+            BRAVE_WEB_TOOL,
+            Map.of("query", query, "count", count, "offset", offset)
+        );
 
-            JsonNode content = objectMapper.valueToTree(result.content());
-            log.info("[Brave MCP Response Raw content]: {}",
-                content != null ? content.toPrettyString() : "null");
+        CallToolResult result = braveClient.callTool(request);
 
-            if (content != null && content.isArray()) {
-                var root = objectMapper.createObjectNode();
-                root.set("results", content);
-                return root;
-            }
-            return content != null ? content : objectMapper.createObjectNode();
+        JsonNode content = objectMapper.valueToTree(result.content());
+        log.info("[Brave MCP Response Raw content]: {}", content.toPrettyString());
 
-        } catch (Exception e) {
-            // 폴백: 벡터 검색만 사용
-            log.warn("Brave MCP 호출 실패 - 질문: [{}], 벡터 검색만 사용합니다. 사유={}", query, e.toString());
-            return objectMapper.createObjectNode(); // 호출부에서 null 체크보다 빈 객체가 안전
+        if (content != null && content.isArray()) {
+            var root = objectMapper.createObjectNode();
+            root.set("results", content);
+            return root;
+
         }
     }
 
