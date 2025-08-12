@@ -23,7 +23,7 @@ LABEL type="application" module="cs25-service"
 WORKDIR /apps
 
 # Node.js + npm 설치 후, MCP 서버 전역 설치 + 심볼릭 링크 생성 + 빌드 타임 확인
-# Node.js + npm 설치 후, MCP 서버 전역 설치 + 심볼릭 링크 생성 + 빌드 타임 확인
+
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg bash \
  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
