@@ -12,6 +12,8 @@ COPY cs25-common cs25-common/
 
 # 테스트 생략하여 빌드 안정화
 RUN ./gradlew :cs25-service:bootJar --stacktrace --no-daemon
+
+
 FROM eclipse-temurin:17-jre-jammy
 
 # 메타 정보
@@ -25,15 +27,21 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates gnupg bash \
  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get install -y --no-install-recommends nodejs \
+ \
+ # 1) 전역 설치
  && npm install -g @modelcontextprotocol/server-brave-search \
- && ln -sf "$(npm bin -g)/server-brave-search" /usr/local/bin/server-brave-search \
+ \
+ # 2) 전역 prefix/bin 경로 계산 (npm bin -g 대신 npm prefix -g 사용)
+ && NPM_PREFIX="$(npm prefix -g)" \
+ && SRC_BIN="${NPM_PREFIX}/bin/server-brave-search" \
+ \
+ # 3) 심볼릭 링크 생성 (/usr/local/bin 에 고정 경로 제공)
+ && ln -sf "${SRC_BIN}" /usr/local/bin/server-brave-search \
  \
  # ===== 실행 가능 여부 확인 =====
- && echo "=== npm bin 경로 확인 ===" \
- && npm bin -g \
- && echo "=== server-brave-search 바이너리 확인 ===" \
- && ls -l "$(npm bin -g)/server-brave-search" \
- && ls -l /usr/local/bin/server-brave-search \
+ && echo "=== npm prefix -g ===" && echo "${NPM_PREFIX}" \
+ && echo "=== 실제 바이너리 위치 확인 ===" && ls -l "${SRC_BIN}" \
+ && echo "=== 심볼릭 링크 확인 ===" && ls -l /usr/local/bin/server-brave-search \
  && echo "=== server-brave-search --help 실행 ===" \
  && /usr/local/bin/server-brave-search --help || (echo "[ERROR] server-brave-search 실행 실패" && exit 1) \
  \
@@ -42,6 +50,7 @@ RUN apt-get update \
  && apt-get autoremove -y --purge \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
 
 # jar 복사
 COPY --from=builder /build/cs25-service/build/libs/*.jar app.jar
