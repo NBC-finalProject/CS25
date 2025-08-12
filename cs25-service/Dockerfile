@@ -11,12 +11,7 @@ COPY cs25-entity cs25-entity/
 COPY cs25-common cs25-common/
 
 # 테스트 생략하여 빌드 안정화
-# (빌드 시 MCP 비활성화 + gradlew 실행 권한 + 테스트 스킵)
-ENV SPRING_AI_MCP_CLIENT_ENABLED=false \
-    SPRING_AI_MCP_CLIENT_INITIALIZED=false
-RUN chmod +x ./gradlew
-RUN ./gradlew :cs25-service:bootJar --stacktrace --no-daemon -x test
-
+RUN ./gradlew :cs25-service:bootJar --stacktrace --no-daemon
 FROM eclipse-temurin:17-jre-jammy
 
 # 메타 정보
