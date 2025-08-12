@@ -44,7 +44,6 @@ RUN set -eux; \
     apt-get autoremove -y --purge; \
     rm -rf /var/lib/apt/lists/*
 
-
 # jar 복사
 COPY --from=builder /build/cs25-service/build/libs/*.jar app.jar
 
