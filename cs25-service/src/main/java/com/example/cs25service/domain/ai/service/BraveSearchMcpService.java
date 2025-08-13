@@ -89,7 +89,10 @@ public class BraveSearchMcpService {
                 }
             } catch (McpError e) {
                 String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase(Locale.ROOT);
-                if (msg.contains("initialized")) {
+                boolean likelyUninitialized = msg.contains("not initialized")
+                    || msg.contains("uninitialized")
+                    || (msg.contains("initialize") && msg.contains("required"));
+                if (likelyUninitialized) {
                     // 1회만 초기화 재시도
                     try {
                         log.warn("MCP 클라이언트 미초기화 감지 → initialize() 재시도");
@@ -180,6 +183,17 @@ public class BraveSearchMcpService {
                 }
             } else if (parsed.isObject()) {
                 ObjectNode obj = (ObjectNode) parsed;
+                // 루트에 results 배열이 있는 형태 처리
+                if (obj.has("results") && obj.get("results").isArray()) {
+                    for (JsonNode n : obj.get("results")) {
+                        if (n.isObject()) {
+                            addObjectToResults((ObjectNode) n, out);
+                        } else if (n.isTextual() && looksLikeJson(n.asText())) {
+                            parseJsonBlockIntoResults(n.asText(), out, depth + 1);
+                        }
+                    }
+                    return;
+                }
                 if (obj.has("text") && obj.get("text").isTextual() && looksLikeJson(
                     obj.get("text").asText())) {
                     // {text:"{...}"} 같은 한 번 더 감싼 케이스
@@ -230,7 +244,8 @@ public class BraveSearchMcpService {
         StringBuilder body = new StringBuilder();
 
         for (String line : lines) {
-            if (line.startsWith("Title:")) {
+            String trimmed = line.trim();
+            if (trimmed.regionMatches(true, 0, "Title:", 0, 6)) {
                 if (title != null && url != null && body.length() > 0) {
                     ObjectNode one = objectMapper.createObjectNode();
                     one.put("title", title);
@@ -239,15 +254,15 @@ public class BraveSearchMcpService {
                     out.add(one);
                     body.setLength(0);
                 }
-                title = line.replaceFirst("Title:", "").trim();
-            } else if (line.startsWith("URL:")) {
-                url = line.replaceFirst("URL:", "").trim();
+                title = trimmed.substring(6).trim();
+            } else if (trimmed.regionMatches(true, 0, "URL:", 0, 4)) {
+                url = trimmed.substring(4).trim();
             } else {
                 body.append(line).append('\n');
             }
         }
 
-        if (title != null && url != null && body.length() > 0) {
+        if (title != null && url != null) {
             ObjectNode one = objectMapper.createObjectNode();
             one.put("title", title);
             one.put("url", url);
