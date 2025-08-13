@@ -16,51 +16,71 @@ public class BraveSearchRagService {
     public List<Document> toDocuments(Optional<JsonNode> resultsNodeOpt) {
         List<Document> documents = new ArrayList<>();
 
-        resultsNodeOpt.ifPresent(resultsNode -> {
-            resultsNode.path("results").forEach(result -> {
-                String text = result.path("text").asText("");
-                if (text.isBlank()) {
-                    return;
+        resultsNodeOpt.ifPresent(root -> {
+            JsonNode results = root.path("results");
+            if (!results.isArray()) {
+                return;
+            }
+
+            for (JsonNode r : results) {
+                // 1) 구조화된 JSON 우선 처리
+                String url = r.path("url").asText(null);
+                String title = r.path("title").asText(null);
+                String description = r.path("description").asText(null);
+
+                if ((url != null && !url.isBlank()) ||
+                    (title != null && !title.isBlank()) ||
+                    (description != null && !description.isBlank())) {
+                    String docTitle = (title != null && !title.isBlank())
+                        ? title : (url != null ? url : "Web result");
+                    String body = (description != null) ? description : "";
+                    documents.add(new Document(
+                        docTitle,
+                        body,
+                        Map.of("title", docTitle, "url", url == null ? "" : url)
+                    ));
+                    continue;
                 }
 
-                // 여러 문서가 한 개의 텍스트에 포함되어 있으므로 줄 단위로 분리
-                String[] lines = text.split("\\n");
+                // 2) Fallback: "Title:/URL:" 텍스트 포맷
+                String text = r.path("text").asText("");
+                if (text.isBlank()) {
+                    continue;
+                }
 
-                String title = null;
-                String url = null;
+                String[] lines = text.split("\\n");
+                String curTitle = null;
+                String curUrl = null;
                 StringBuilder contentBuilder = new StringBuilder();
 
                 for (String line : lines) {
                     if (line.startsWith("Title:")) {
-                        if (title != null && url != null && contentBuilder.length() > 0) {
-                            // 이전 문서를 저장
+                        if (curTitle != null && curUrl != null && contentBuilder.length() > 0) {
                             documents.add(new Document(
-                                title,
+                                curTitle,
                                 contentBuilder.toString().trim(),
-                                Map.of("title", title, "url", url)
+                                Map.of("title", curTitle, "url", curUrl)
                             ));
                             contentBuilder.setLength(0);
                         }
-                        title = line.replaceFirst("Title:", "").trim();
+                        curTitle = line.replaceFirst("Title:", "").trim();
                     } else if (line.startsWith("URL:")) {
-                        url = line.replaceFirst("URL:", "").trim();
+                        curUrl = line.replaceFirst("URL:", "").trim();
                     } else {
                         contentBuilder.append(line).append("\n");
                     }
                 }
 
-                // 마지막 문서 저장
-                if (title != null && url != null && contentBuilder.length() > 0) {
+                if (curTitle != null && curUrl != null && contentBuilder.length() > 0) {
                     documents.add(new Document(
-                        title,
+                        curTitle,
                         contentBuilder.toString().trim(),
-                        Map.of("title", title, "url", url)
+                        Map.of("title", curTitle, "url", curUrl)
                     ));
                 }
-            });
+            }
         });
 
         return documents;
     }
-
 }
