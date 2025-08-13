@@ -18,66 +18,31 @@ public class BraveSearchRagService {
 
         resultsNodeOpt.ifPresent(root -> {
             JsonNode results = root.path("results");
-            if (!results.isArray()) {
-                return;
-            }
+            if (results != null && results.isArray()) {
+                results.forEach(r -> {
+                    // 정규화된 필드 사용
+                    String title = r.path("title").asText("");
+                    String url = r.path("url").asText("");
+                    String description = r.path("description").asText("");
 
-            for (JsonNode r : results) {
-                // 1) 구조화된 JSON 우선 처리
-                String url = r.path("url").asText(null);
-                String title = r.path("title").asText(null);
-                String description = r.path("description").asText(null);
-
-                if ((url != null && !url.isBlank()) ||
-                    (title != null && !title.isBlank()) ||
-                    (description != null && !description.isBlank())) {
-                    String docTitle = (title != null && !title.isBlank())
-                        ? title : (url != null ? url : "Web result");
-                    String body = (description != null) ? description : "";
-                    documents.add(new Document(
-                        docTitle,
-                        body,
-                        Map.of("title", docTitle, "url", url == null ? "" : url)
-                    ));
-                    continue;
-                }
-
-                // 2) Fallback: "Title:/URL:" 텍스트 포맷
-                String text = r.path("text").asText("");
-                if (text.isBlank()) {
-                    continue;
-                }
-
-                String[] lines = text.split("\\n");
-                String curTitle = null;
-                String curUrl = null;
-                StringBuilder contentBuilder = new StringBuilder();
-
-                for (String line : lines) {
-                    if (line.startsWith("Title:")) {
-                        if (curTitle != null && curUrl != null && contentBuilder.length() > 0) {
-                            documents.add(new Document(
-                                curTitle,
-                                contentBuilder.toString().trim(),
-                                Map.of("title", curTitle, "url", curUrl)
-                            ));
-                            contentBuilder.setLength(0);
-                        }
-                        curTitle = line.replaceFirst("Title:", "").trim();
-                    } else if (line.startsWith("URL:")) {
-                        curUrl = line.replaceFirst("URL:", "").trim();
-                    } else {
-                        contentBuilder.append(line).append("\n");
+                    // 예비: 만약 위 값이 비었고 text만 온다면(이중포장 누락 케이스), 텍스트를 본문으로 사용
+                    if (title.isBlank() && description.isBlank() && r.hasNonNull("text")) {
+                        description = r.path("text").asText("");
                     }
-                }
 
-                if (curTitle != null && curUrl != null && contentBuilder.length() > 0) {
-                    documents.add(new Document(
-                        curTitle,
-                        contentBuilder.toString().trim(),
-                        Map.of("title", curTitle, "url", curUrl)
-                    ));
-                }
+                    // 간단한 HTML 제거
+                    if (!description.isBlank()) {
+                        description = description.replaceAll("<[^>]+>", "");
+                    }
+
+                    if (!title.isBlank() || !description.isBlank()) {
+                        documents.add(new Document(
+                            title.isBlank() ? url : title,
+                            description.isBlank() ? (title.isBlank() ? "" : title) : description,
+                            Map.of("title", title, "url", url)
+                        ));
+                    }
+                });
             }
         });
 

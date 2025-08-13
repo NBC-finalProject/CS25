@@ -22,9 +22,37 @@ import org.springframework.stereotype.Service;
 public class BraveSearchMcpService {
 
     private static final String BRAVE_WEB_TOOL = "brave_web_search";
+    private static final int MAX_JSON_RECURSION_DEPTH = 3;
 
     private final List<McpSyncClient> mcpClients;
     private final ObjectMapper objectMapper;
+
+    private static boolean looksLikeJson(String s) {
+        if (s == null) {
+            return false;
+        }
+        String t = s.trim();
+        return (!t.isEmpty()) && (t.charAt(0) == '{' || t.charAt(0) == '[');
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null) {
+            return null;
+        }
+        return s.length() > max ? s.substring(0, max) + "…" : s;
+    }
+
+    private static String getTrimmed(JsonNode obj, String field) {
+        if (obj == null) {
+            return null;
+        }
+        JsonNode n = obj.get(field);
+        if (n == null || n.isNull()) {
+            return null;
+        }
+        String v = n.asText();
+        return v == null ? null : v.trim();
+    }
 
     public JsonNode search(String query, int count, int offset) {
         McpSyncClient braveClient = resolveBraveClient();
@@ -36,118 +64,147 @@ public class BraveSearchMcpService {
 
         CallToolResult result = braveClient.callTool(request);
 
-        // 원본 로그 (디버그용)
         JsonNode raw = objectMapper.valueToTree(result.content());
-        log.info("[Brave MCP Response Raw content]: {}", raw.toPrettyString());
+        log.info("[Brave MCP Response Raw content]: {}", raw);
 
-        // 결과 정규화: results 배열에 {url,title,description}
-        ArrayNode results = objectMapper.createArrayNode();
-
-        if (raw != null && raw.isArray()) {
-            for (JsonNode item : raw) {
-                // MCP content 중 text 타입만 처리
-                if ("text".equalsIgnoreCase(item.path("type").asText())) {
-                    String text = item.path("text").asText("").trim();
-                    if (text.isEmpty()) {
-                        continue;
-                    }
-
-                    // 1) 우선 JSON으로 파싱 시도 (대부분 여기서 해결)
-                    if (looksLikeJson(text)) {
-                        parseJsonBlockIntoResults(text, results);
-                        continue;
-                    }
-
-                    // 2) 혹시 text가 "{"url":...}" 같은 JSON 문자열 리터럴로 들어온 경우
-                    //    readTree하면 TextNode가 나오니 한 번 더 벗겨서 재파싱
-                    try {
-                        JsonNode maybeString = objectMapper.readTree(text);
-                        if (maybeString.isTextual() && looksLikeJson(maybeString.asText())) {
-                            parseJsonBlockIntoResults(maybeString.asText(), results);
-                            continue;
-                        }
-                    } catch (Exception ignored) {
-                        // 그냥 패스하고 fallback로
-                    }
-
-                    // 3) Fallback: "Title:..., URL:..., (내용...)" 포맷 처리
-                    addFromTitleUrlBlock(text, results);
-                }
-            }
-        }
+        ArrayNode normalized = objectMapper.createArrayNode();
+        normalizeContent(raw, normalized);
 
         ObjectNode root = objectMapper.createObjectNode();
-        root.set("results", results);
-        log.info("Brave 검색 결과 {}건 추출", results.size());
+        root.set("results", normalized);
+
+        log.info("Brave 검색 결과 정규화 완료: {}건", normalized.size());
         return root;
     }
 
+    /**
+     * MCP 클라이언트들 중 brave_web_search 툴을 가진 클라이언트 선택. 초기화되지 않은 경우 1회 initialize() 후 재시도.
+     */
     private McpSyncClient resolveBraveClient() {
         for (McpSyncClient client : mcpClients) {
-            ListToolsResult tools;
             try {
-                tools = client.listTools();
-            } catch (McpError e) {
-                // 초기화 안 된 클라이언트 방어
-                if (e.getMessage() != null &&
-                    e.getMessage().toLowerCase(Locale.ROOT).contains("initialized")) {
-                    client.initialize();
-                    tools = client.listTools();
-                } else {
-                    throw e;
-                }
-            }
-
-            if (tools != null && tools.tools() != null) {
-                boolean found = tools.tools().stream()
-                    .anyMatch(tool -> BRAVE_WEB_TOOL.equalsIgnoreCase(tool.name()));
-                if (found) {
+                ListToolsResult tools = client.listTools();
+                if (hasBraveTool(tools)) {
                     return client;
                 }
+            } catch (McpError e) {
+                String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase(Locale.ROOT);
+                if (msg.contains("initialized")) {
+                    // 1회만 초기화 재시도
+                    try {
+                        log.warn("MCP 클라이언트 미초기화 감지 → initialize() 재시도");
+                        client.initialize();
+                        ListToolsResult tools = client.listTools();
+                        if (hasBraveTool(tools)) {
+                            return client;
+                        }
+                    } catch (Exception initError) {
+                        log.error("MCP 클라이언트 초기화 실패: {}", initError.getMessage());
+                    }
+                } else {
+                    log.debug("listTools() 예외: {}", e.getMessage());
+                }
+            } catch (Exception e) {
+                log.debug("listTools() 일반 예외: {}", e.getMessage());
             }
         }
-        throw new IllegalStateException("Brave MCP 서버에서 " + BRAVE_WEB_TOOL + " 툴을 찾을 수 없습니다.");
+        throw new IllegalStateException("Brave MCP 서버에서 brave_web_search 툴을 찾을 수 없습니다.");
     }
 
-    /* ------------------ helpers ------------------ */
-
-    private boolean looksLikeJson(String s) {
-        String t = s.trim();
-        return (t.startsWith("{") && t.endsWith("}")) || (t.startsWith("[") && t.endsWith("]"));
+    private boolean hasBraveTool(ListToolsResult tools) {
+        return tools != null && tools.tools() != null &&
+            tools.tools().stream().anyMatch(t -> BRAVE_WEB_TOOL.equalsIgnoreCase(t.name()));
     }
 
-    private void parseJsonBlockIntoResults(String json, ArrayNode out) {
+    /**
+     * raw JSON(any shape) → results[{url,title,description}]
+     */
+    private void normalizeContent(JsonNode raw, ArrayNode out) {
+        if (raw == null || raw.isNull()) {
+            return;
+        }
+
+        if (raw.isArray()) {
+            for (JsonNode n : raw) {
+                normalizeOne(n, out);
+            }
+        } else {
+            normalizeOne(raw, out);
+        }
+    }
+
+    private void normalizeOne(JsonNode node, ArrayNode out) {
+        if (node == null || node.isNull()) {
+            return;
+        }
+
+        // 이미 {url,title,description} 형태
+        if (node.isObject() && (node.has("url") || node.has("title") || node.has("description"))) {
+            addObjectToResults((ObjectNode) node, out);
+            return;
+        }
+
+        // MCP가 주는 content item: { "type":"text", "text":"{...json...}" } 같은 형태를 방어
+        if (node.isObject() && node.has("text")) {
+            String text = node.path("text").asText("");
+            if (looksLikeJson(text)) {
+                parseJsonBlockIntoResults(text, out, 0);
+            } else {
+                // "Title: ..." 라인 포맷 등 레거시 텍스트 포맷 처리(옵션)
+                parseLegacyBlock(text, out);
+            }
+            return;
+        }
+
+        // 순수 문자열이지만 안에 JSON이 들어 있는 경우
+        if (node.isTextual() && looksLikeJson(node.asText())) {
+            parseJsonBlockIntoResults(node.asText(), out, 0);
+        }
+    }
+
+    private void parseJsonBlockIntoResults(String json, ArrayNode out, int depth) {
+        if (depth > MAX_JSON_RECURSION_DEPTH) {
+            log.warn("JSON 파싱 재귀 깊이 초과: {}", truncate(json, 100));
+            return;
+        }
         try {
-            JsonNode node = objectMapper.readTree(json);
-            if (node.isArray()) {
-                for (JsonNode obj : node) {
-                    addObjToResults(obj, out);
+            JsonNode parsed = objectMapper.readTree(json);
+
+            if (parsed.isArray()) {
+                for (JsonNode n : parsed) {
+                    if (n.isObject()) {
+                        addObjectToResults((ObjectNode) n, out);
+                    } else if (n.isTextual() && looksLikeJson(n.asText())) {
+                        parseJsonBlockIntoResults(n.asText(), out, depth + 1);
+                    }
                 }
-            } else if (node.isObject()) {
-                addObjToResults(node, out);
-            } else if (node.isTextual() && looksLikeJson(node.asText())) {
-                // 이중 문자열화된 JSON 방어
-                parseJsonBlockIntoResults(node.asText(), out);
+            } else if (parsed.isObject()) {
+                ObjectNode obj = (ObjectNode) parsed;
+                if (obj.has("text") && obj.get("text").isTextual() && looksLikeJson(
+                    obj.get("text").asText())) {
+                    // {text:"{...}"} 같은 한 번 더 감싼 케이스
+                    parseJsonBlockIntoResults(obj.get("text").asText(), out, depth + 1);
+                } else {
+                    addObjectToResults(obj, out);
+                }
+            } else if (parsed.isTextual() && looksLikeJson(parsed.asText())) {
+                parseJsonBlockIntoResults(parsed.asText(), out, depth + 1);
             }
         } catch (Exception e) {
-            log.warn("Brave MCP JSON 파싱 실패: {}", truncate(json, 400), e);
+            log.warn("Brave MCP JSON 파싱 실패: {}\n원인: {}", truncate(json, 400), e.getMessage());
         }
     }
 
-    private void addObjToResults(JsonNode obj, ArrayNode out) {
-        String url = asStr(obj.get("url"));
-        String title = asStr(obj.get("title"));
-        String description = asStr(firstNonNull(
-            obj.get("description"),
-            obj.get("snippet"),
-            obj.get("summary"),
-            obj.get("content")
-        ));
+    private void addObjectToResults(ObjectNode obj, ArrayNode out) {
+        String url = getTrimmed(obj, "url");
+        String title = getTrimmed(obj, "title");
+        String desc = getTrimmed(obj, "description");
 
-        // 최소 하나는 있어야 추가
+        // 세 필드 중 하나라도 있으면 결과로 채택
         if ((url != null && !url.isBlank()) ||
             (title != null && !title.isBlank()) ||
-            (description != null && !description.isBlank())) {
+            (desc != null && !desc.isBlank())) {
+
             ObjectNode one = objectMapper.createObjectNode();
             if (url != null) {
                 one.put("url", url);
@@ -155,49 +212,41 @@ public class BraveSearchMcpService {
             if (title != null) {
                 one.put("title", title);
             }
-            if (description != null) {
-                one.put("description", description);
+            if (desc != null) {
+                one.put("description", desc);
             }
             out.add(one);
         }
     }
 
-    private JsonNode firstNonNull(JsonNode... nodes) {
-        for (JsonNode n : nodes) {
-            if (n != null && !n.isNull()) {
-                return n;
-            }
+    // 레거시 "Title:..., URL:..., 본문..." 형태의 텍스트 파서(있으면 도움, 없어도 무방)
+    private void parseLegacyBlock(String text, ArrayNode out) {
+        if (text == null || text.isBlank()) {
+            return;
         }
-        return null;
-    }
 
-    private String asStr(JsonNode n) {
-        return (n == null || n.isNull()) ? null : n.asText(null);
-    }
-
-    private void addFromTitleUrlBlock(String text, ArrayNode out) {
         String[] lines = text.split("\\r?\\n");
-        String title = null;
-        String url = null;
+        String title = null, url = null;
         StringBuilder body = new StringBuilder();
 
         for (String line : lines) {
             if (line.startsWith("Title:")) {
-                // 이전 블럭 flush
-                flushOne(out, title, url, body);
+                if (title != null && url != null && body.length() > 0) {
+                    ObjectNode one = objectMapper.createObjectNode();
+                    one.put("title", title);
+                    one.put("url", url);
+                    one.put("description", body.toString().trim());
+                    out.add(one);
+                    body.setLength(0);
+                }
                 title = line.replaceFirst("Title:", "").trim();
-                url = null;
-                body.setLength(0);
             } else if (line.startsWith("URL:")) {
                 url = line.replaceFirst("URL:", "").trim();
             } else {
                 body.append(line).append('\n');
             }
         }
-        flushOne(out, title, url, body);
-    }
 
-    private void flushOne(ArrayNode out, String title, String url, StringBuilder body) {
         if (title != null && url != null && body.length() > 0) {
             ObjectNode one = objectMapper.createObjectNode();
             one.put("title", title);
@@ -205,12 +254,5 @@ public class BraveSearchMcpService {
             one.put("description", body.toString().trim());
             out.add(one);
         }
-    }
-
-    private String truncate(String s, int max) {
-        if (s == null || s.length() <= max) {
-            return s;
-        }
-        return s.substring(0, max) + "...";
     }
 }
