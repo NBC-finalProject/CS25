@@ -31,4 +31,17 @@ public class MailLogBatchService {
             .build();
         mailLogRepository.save(log);
     }
+
+    @Transactional
+    public void saveSuccessLog(Subscription subscription,
+        Quiz quiz,
+        LocalDateTime sendDateTime) {
+        mailLogRepository.save(MailLog.builder()
+            .subscription(subscription)
+            .quiz(quiz)
+            .sendDate(sendDateTime)
+            .status(MailStatus.SENT)
+            .caused(null)
+            .build());
+    }
 }
