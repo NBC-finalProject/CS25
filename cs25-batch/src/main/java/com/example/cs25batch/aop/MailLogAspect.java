@@ -1,6 +1,7 @@
 package com.example.cs25batch.aop;
 
 import com.example.cs25batch.batch.dto.MailDto;
+import com.example.cs25batch.batch.service.MailLogBatchService;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.enums.MailStatus;
 import com.example.cs25entity.domain.mail.exception.CustomMailException;
@@ -25,6 +26,7 @@ import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 @RequiredArgsConstructor
 public class MailLogAspect {
 
+    private final MailLogBatchService mailLogBatchService;
     private final MailLogRepository mailLogRepository;
     private final StringRedisTemplate redisTemplate;
 
@@ -46,19 +48,19 @@ public class MailLogAspect {
         } catch (Exception e){
             status = MailStatus.FAILED;
             caused = e.getMessage();
+            mailLogBatchService.saveFailLog(subscription, quiz, LocalDateTime.now(), caused);
             throw new CustomMailException(MailExceptionCode.EMAIL_SEND_FAILED_ERROR);
         } finally {
-            MailLog mailLog = MailLog.builder()
-                .subscription(subscription)
-                .quiz(quiz)
-                .sendDate(LocalDateTime.now())
-                .status(status)
-                .caused(caused)
-                .build();
-
-            mailLogRepository.save(mailLog);
-            mailLogRepository.flush();
-
+//            MailLog mailLog = MailLog.builder()
+//                .subscription(subscription)
+//                .quiz(quiz)
+//                .sendDate(LocalDateTime.now())
+//                .status(status)
+//                .caused(caused)
+//                .build();
+//
+//            mailLogRepository.save(mailLog);
+//            mailLogRepository.flush();
             if (status == MailStatus.FAILED) {
                 log.info("메일 발송 실패 : subscriptionId - {}, cause - {}", subscription.getId(), caused);
                 Map<String, String> retryMessage = Map.of(
