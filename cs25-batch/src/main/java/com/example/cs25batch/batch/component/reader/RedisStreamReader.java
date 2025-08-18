@@ -53,7 +53,7 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
         }
 
         MapRecord<String, Object, Object> msg = records.get(0);
-        redisTemplate.opsForStream().acknowledge(STREAM, GROUP, msg.getId());
+        //redisTemplate.opsForStream().acknowledge(STREAM, GROUP, msg.getId());
 
         Map<String, String> data = new HashMap<>();
         Object subscriptionId = msg.getValue().get("subscriptionId");
