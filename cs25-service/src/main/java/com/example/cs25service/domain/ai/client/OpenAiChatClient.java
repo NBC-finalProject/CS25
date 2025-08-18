@@ -46,9 +46,6 @@ public class OpenAiChatClient implements AiChatClient {
                 .user(userPrompt)
                 .stream()
                 .content()
-                .onErrorResume(error -> {
-                    throw new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR);
-                })
-        );
+        ).onErrorMap(e -> new AiException(AiExceptionCode.INTERNAL_SERVER_ERROR));
     }
 }
