@@ -49,4 +49,7 @@ public class RedisStreamsClient {
         redisTemplate.opsForStream().delete(stream, id);
     }
 
+    public void addDlq(String dlqStream, Map<String, String> message){
+        redisTemplate.opsForStream().add(dlqStream, message);
+    }
 }

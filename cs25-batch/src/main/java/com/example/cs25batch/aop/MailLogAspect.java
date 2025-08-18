@@ -1,5 +1,6 @@
 package com.example.cs25batch.aop;
 
+import com.example.cs25batch.adapter.RedisStreamsClient;
 import com.example.cs25batch.batch.dto.MailDto;
 import com.example.cs25entity.domain.mail.entity.MailLog;
 import com.example.cs25entity.domain.mail.enums.MailStatus;
@@ -26,7 +27,7 @@ import software.amazon.awssdk.services.sesv2.model.SesV2Exception;
 public class MailLogAspect {
 
     private final MailLogRepository mailLogRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final RedisStreamsClient redisClient;
 
     @Around("execution(* com.example.cs25batch.sender.context.MailSenderContext.send(..))")
     public Object logMailSend(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -66,7 +67,7 @@ public class MailLogAspect {
                     "subscriptionId", subscription.getId().toString(),
                     "quizId", quiz.getId().toString()
                 );
-                redisTemplate.opsForStream().add("quiz-email-retry-stream", retryMessage);
+                redisClient.addDlq("quiz-email-retry-stream", retryMessage);
             }
         }
     }

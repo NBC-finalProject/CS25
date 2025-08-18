@@ -1,5 +1,6 @@
 package com.example.cs25batch.batch.component.reader;
 
+import com.example.cs25batch.adapter.RedisStreamsClient;
 import com.example.cs25batch.sender.context.MailSenderContext;
 import io.github.bucket4j.Bucket;
 import java.time.Duration;
@@ -24,14 +25,10 @@ import org.springframework.stereotype.Component;
 @Component("redisConsumeReader")
 public class RedisStreamReader implements ItemReader<Map<String, String>> {
 
-    private static final String STREAM = "quiz-email-stream";
-    private static final String GROUP = "mail-consumer-group";
-    private static final String CONSUMER = "mail-worker";
-
     @Value("${mail.strategy:javaBatchMailSender}")
     private String strategyKey;
 
-    private final StringRedisTemplate redisTemplate;
+    private final RedisStreamsClient redisClient;
     private final MailSenderContext mailSenderContext;
 
     @Override
@@ -42,17 +39,7 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
             Thread.sleep(200); //토큰을 얻을 때까지 간격을 두고 재시도
         }
 
-        List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
-            Consumer.from(GROUP, CONSUMER),
-            StreamReadOptions.empty().count(1).block(Duration.ofMillis(500)),
-            StreamOffset.create(STREAM, ReadOffset.lastConsumed())
-        );
-
-        if (records == null || records.isEmpty()) {
-            return null;
-        }
-
-        MapRecord<String, Object, Object> msg = records.get(0);
+        MapRecord<String, Object, Object> msg = redisClient.readWithConsumerGroup(Duration.ofMillis(500));
         //redisTemplate.opsForStream().acknowledge(STREAM, GROUP, msg.getId());
 
         Map<String, String> data = new HashMap<>();
