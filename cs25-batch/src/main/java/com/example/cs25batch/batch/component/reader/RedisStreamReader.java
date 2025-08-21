@@ -42,6 +42,8 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
         MapRecord<String, Object, Object> msg = redisClient.readWithConsumerGroup(Duration.ofMillis(500));
         //redisTemplate.opsForStream().acknowledge(STREAM, GROUP, msg.getId());
 
+        if(msg == null || msg.getValue().isEmpty()) return null;
+
         Map<String, String> data = new HashMap<>();
         Object subscriptionId = msg.getValue().get("subscriptionId");
         if (subscriptionId != null) {
@@ -51,7 +53,6 @@ public class RedisStreamReader implements ItemReader<Map<String, String>> {
 
         //long end = System.currentTimeMillis();
         //log.info("[3. Queue에서 꺼내기] {}ms", end - start);
-
         return data;
     }
 }
