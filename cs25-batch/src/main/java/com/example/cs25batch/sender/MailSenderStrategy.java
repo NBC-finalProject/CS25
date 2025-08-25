@@ -6,4 +6,6 @@ public interface MailSenderStrategy {
     void sendQuizMail(MailDto mailDto);
 
     boolean tryConsume(Long num);
+
+    void acquirePermitOrWait();
 }
